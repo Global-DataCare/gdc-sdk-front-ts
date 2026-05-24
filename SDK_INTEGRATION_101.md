@@ -244,6 +244,14 @@ Those examples cover reusable combinations of:
 - expected FHIR resource types after access
 - expected allow/deny outcome for the token request depending on current active consent state
 
+The shared consent-access helpers are re-exported by the SDK packages and cover:
+
+- grouping all active subject consents for controller inspection
+- evaluation precedence: explicit deny for a concrete email, explicit permit for a concrete email, organization, jurisdiction, default deny
+- missing coverage extraction for a concrete SMART request
+- canonical permission-request `Communication` payload creation
+- canonical lookup query creation by `Communication.identifier`, `thid`, or `DocumentReference.contenthash`
+
 Source payload reference:
 
 - `gdc-common-utils-ts/examples/frontend-session`

@@ -7,6 +7,7 @@ Key docs:
 - [CHANGELOG.md](CHANGELOG.md)
 - [SECURITY.md](SECURITY.md)
 - [SDK_INTEGRATION_101.md](SDK_INTEGRATION_101.md)
+- [../gdc-common-utils-ts/docs/CONSENT_ACCESS_101.md](../gdc-common-utils-ts/docs/CONSENT_ACCESS_101.md)
 
 Current status:
 
@@ -81,6 +82,29 @@ The canonical API contract should live in JSDoc on exported code. The README is 
 - [`createHeartRateObservation(...)`](../gdc-sdk-core-ts/src/vital-signs.ts)
 - [`createBodyTemperatureObservation(...)`](../gdc-sdk-core-ts/src/vital-signs.ts)
 - [`createBloodPressureObservation(...)`](../gdc-sdk-core-ts/src/vital-signs.ts)
+
+### Consent access helpers re-exported from `gdc-sdk-core-ts`
+
+- [`groupConsentsForControllerView(...)`](../gdc-sdk-core-ts/src/consent-access.ts)
+- [`evaluateRequestedAccess(...)`](../gdc-sdk-core-ts/src/consent-access.ts)
+- [`getMissingPermissions(...)`](../gdc-sdk-core-ts/src/consent-access.ts)
+- [`buildPermissionRequestCommunication(...)`](../gdc-sdk-core-ts/src/consent-access.ts)
+- [`buildPermissionRequestCommunicationLookupQuery(...)`](../gdc-sdk-core-ts/src/consent-access.ts)
+
+Use these helpers when the frontend needs to:
+
+- show the controller which active permissions exist by target
+- detect whether a SMART request is fully covered
+- prepare the canonical permission-request `Communication`
+- recover that request by identifier, thread id, or linked CID
+
+Consent precedence in the shared model is documented as:
+
+1. explicit deny for a concrete email
+2. explicit permit for a concrete email
+3. organization decision
+4. jurisdiction decision
+5. default deny
 
 ### Runtime configuration
 
