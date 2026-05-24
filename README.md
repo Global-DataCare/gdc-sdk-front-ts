@@ -1,118 +1,235 @@
 # gdc-sdk-front-ts
 
-Target frontend runtime package for the converged GDC SDK family.
+Frontend runtime package for consuming the shared GDC SDK contracts in web or
+mobile apps.
 
-Key docs:
+Use this package when your frontend needs to:
 
-- [CHANGELOG.md](CHANGELOG.md)
-- [SECURITY.md](SECURITY.md)
-- [SDK_INTEGRATION_101.md](SDK_INTEGRATION_101.md)
+- build UI flows on top of GDC shared contracts
+- manage session/profile state
+- prepare consent-aware requests
+- consume the shared invitation, OTP, and relationship-PIN flows
+- work with communication drafts and local outbox patterns
+
+This package is frontend-facing. It should explain app flows, not gateway route
+details.
+
+## Actor Split And UI Scope
+
+The frontend package must also start from actor families, because screens and
+permissions differ:
+
+- organization controller
+- organization employee / professional member
+- individual controller
+- individual member / self
+- related person
+- professional with consented access
+
+Frontend concerns include:
+
+- actor/session bootstrap
+- invitation and acceptance UX
+- permission management UX
+- notification / permission-request UX
+- communication draft and submission UX
+- clinical read/write UX constrained by evaluated permissions
+
+## Flow Families
+
+- organization onboarding and employee invitation screens
+- individual onboarding and order/offer confirmation screens
+- permission creation, edit, deactivation, and grouped views
+- invitation acceptance and relationship activation
+- permission-request notification review
+- document/resource import into the subject index
+- subject-scoped communication and search flows
+
+## Main Flows
+
+### 1. Controller invites another actor to connect with a subject
+
+Typical frontend sequence:
+
+1. collect invitee data
+2. build invitation payload using shared helpers
+3. send it through your frontend/backend integration
+4. show invitation state to the user
+
+The frontend should only care about the shared contract:
+
+- actor kind
+- delivery channel
+- delivery target
+- subject id
+- purpose
+
+It should not care about gateway path families.
+
+### 2. Invitee accepts the invitation
+
+Typical frontend sequence:
+
+1. enter invitation or activation details
+2. start OTP challenge
+3. confirm OTP
+4. set relationship PIN if required
+5. activate the relationship locally in UI/session state
+
+Shared builders for this flow come from `gdc-sdk-core-ts`.
+
+### 3. Consent-aware communication UI
+
+Use this package when the frontend needs to:
+
+- evaluate whether access is already covered
+- show missing permissions
+- prepare a permission-request `Communication`
+- build local communication drafts before sending
+
+## What This Package Owns
+
+- frontend runtime config
+- session/profile-facing helpers
+- app-facing composition over shared SDK contracts
+
+## What This Package Does Not Own
+
+- canonical shared invitation/consent contract definitions
+- Node GW runtime execution
+- UNID-specific reminder/task runtime
+
+Those belong to:
+
+- `gdc-sdk-core-ts`
+- `gdc-sdk-node-ts`
+- product/runtime extension layers
+
+## Minimal Examples
+
+### Build invitation and OTP payloads in frontend code
+
+```ts
+import {
+  createRelationshipChannelInvitationInput,
+  createRelationshipChannelOtpStartInput,
+} from 'gdc-sdk-core-ts';
+import {
+  EXAMPLE_RELATIONSHIP_CHANNEL_INVITATION_INPUT,
+  EXAMPLE_RELATIONSHIP_CHANNEL_OTP_START_INPUT,
+} from 'gdc-common-utils-ts/examples/relationship-access';
+
+const invitation = createRelationshipChannelInvitationInput(
+  EXAMPLE_RELATIONSHIP_CHANNEL_INVITATION_INPUT,
+);
+
+const otpStart = createRelationshipChannelOtpStartInput(
+  EXAMPLE_RELATIONSHIP_CHANNEL_OTP_START_INPUT,
+);
+```
+
+### Build permission-request communication
+
+```ts
+import {
+  buildPermissionRequestCommunication,
+  getMissingPermissions,
+} from 'gdc-sdk-core-ts';
+import {
+  EXAMPLE_CONSENT_ACCESS_PROVIDER_EMAIL,
+  EXAMPLE_CONSENT_ACCESS_SUBJECT,
+} from 'gdc-common-utils-ts/examples/consent-access';
+import { HealthcareActorRoles } from 'gdc-common-utils-ts/constants/healthcare';
+
+const missing = getMissingPermissions(evaluation);
+
+const communication = buildPermissionRequestCommunication({
+  subject: EXAMPLE_CONSENT_ACCESS_SUBJECT,
+  requester: { actorKind: 'professional', email: EXAMPLE_CONSENT_ACCESS_PROVIDER_EMAIL },
+  requesterRole: HealthcareActorRoles.Physician,
+  missing,
+});
+```
+
+## Shared Contract Sources
+
+- [../gdc-sdk-core-ts/README.md](../gdc-sdk-core-ts/README.md)
 - [../gdc-common-utils-ts/docs/CONSENT_ACCESS_101.md](../gdc-common-utils-ts/docs/CONSENT_ACCESS_101.md)
 
-Current status:
-
-- package created
-- build/test baseline created
-- migration target from `gdc-sdk-client-ts` declared
-- frontend runtime contract skeleton declared
-- shared core identity/discovery/bootstrap contracts are now available for frontend wiring
-
-Why `front` and not `expo`:
-
-- the SDK architecture is frontend-agnostic
-- Expo is one runtime, not the product boundary
-- the same package family should later support web portal and Expo/mobile adapters
-
-Not migrated yet:
-
-- `ClientSDK`
-- `ProfileManager`
-- `roleRegistry`
-- `capabilityMapper`
-- app-facing session bootstrap
-- Expo/web adapter implementations
-- provider/operator/ICA discovery facade wiring
-- explicit device/actor/provider identity store wiring
-- controller bootstrap helper for `_activate` with `vp_token + controller.*`
-
-Role in the transition:
-
-- `gdc-sdk-core-ts` will own shared actor/capability contracts
-- `gdc-sdk-front-ts` will own frontend-facing runtime adapters and session/profile orchestration
-- `gdc-sdk-client-ts` is now the legacy source repo for migration, not the final name
-
-Reusable payload source of truth:
+Reusable payload examples:
 
 - `gdc-common-utils-ts/examples/frontend-session`
-  - session/profile bootstrap examples
 - `gdc-common-utils-ts/examples/professional`
-  - lightweight communication/search request examples reused by frontend services
-  - reusable professional role/permission scenarios by section and expected FHIR types
-  - reusable consent-vs-smart matrices for actor targeting by email, organization, or jurisdiction
 - `gdc-common-utils-ts/examples/api-flow-examples`
-  - preferred compatibility aggregator when one import surface is needed without using the overloaded term `contract`
-
-CORE vs extension note:
-
-- CORE shared examples model provider and actor identities with DID/email-first semantics
-- phone-only subject/controller fields are compatibility or product-extension concerns, not required CORE GW inputs
-- individual/family bootstrap uses `org.schema.Organization.owner.*` claims for the owner/controller of the subject index
-- legal organization activation uses `Person` representative semantics plus VC `memberOf` / `hasOccupation`
 
 ## API Index
 
-The canonical API contract should live in JSDoc on exported code. The README is the linked index.
+## Full Public Surface
 
-### Core draft/document helpers re-exported from `gdc-sdk-core-ts`
+This package exports the full `gdc-sdk-core-ts` surface plus the frontend
+runtime modules below.
 
-- [`createCommunicationDraft(...)`](../gdc-sdk-core-ts/src/communication-draft.ts)
-  - Starts an in-memory communication draft.
-- [`addFhirResourceToDraft(...)`](../gdc-sdk-core-ts/src/communication-draft.ts)
-  - Appends a concrete FHIR resource or document.
-- [`addClaimsResourceToDraft(...)`](../gdc-sdk-core-ts/src/communication-draft.ts)
-  - Appends a claims-only pseudo-resource.
-- [`createOutboxJobFromDraft(...)`](../gdc-sdk-core-ts/src/communication-draft.ts)
-  - Freezes the draft into a transport-oriented outbox job.
-- [`updateOutboxJobStatus(...)`](../gdc-sdk-core-ts/src/communication-draft.ts)
-  - Updates the outbox job status in memory.
-- [`IOutboxRepository`](../gdc-sdk-core-ts/src/communication-outbox.ts)
-- [`OutboxRepositoryMemory`](../gdc-sdk-core-ts/src/communication-outbox.ts)
-- [`createCommunicationFacade()`](../gdc-sdk-core-ts/src/communication-document-facade.ts)
-  - Resolves documents from FHIR `Communication`.
-- [`createHeartRateObservation(...)`](../gdc-sdk-core-ts/src/vital-signs.ts)
-- [`createBodyTemperatureObservation(...)`](../gdc-sdk-core-ts/src/vital-signs.ts)
-- [`createBloodPressureObservation(...)`](../gdc-sdk-core-ts/src/vital-signs.ts)
+- [`src/runtime-contracts.ts`](src/runtime-contracts.ts)
+  - types/constants: `LegacyFrontSourcePackage`, `FrontRuntimeKind`, `FrontFetchLike`, `FrontRuntimeConfig`, `FrontPackageStatus`, `GDC_SDK_FRONT_STATUS`
+- [`src/actor-session.ts`](src/actor-session.ts)
+  - re-exports actor-session descriptor helpers for frontend consumption
+- [`src/session-descriptor.ts`](src/session-descriptor.ts)
+  - types: `FrontActorFlags`, `FrontSessionDescriptorInput`
+  - functions: `describeFrontActorSession(...)`, `describeFrontActorFacades(...)`
+- [`src/types.ts`](src/types.ts)
+  - types: `SdkConfig`, `FrontDateRange`, `FrontBundleSearchQuery`, `FrontCommunicationInput`
+  - re-exported shared types: `AppInfo`, `InitializeSessionParams`, `Profile`, `ProfileRegistryEntry`, `VaultQueryCondition`, `VaultQuery`, `IVaultRepository`, `IApiConfig`, `INetwork`, `IVerifier`
+- [`src/services.ts`](src/services.ts)
+  - classes: `CommonAuthService`, `OrgAdminService`, `FamilyAdminService`, `IndividualService`, `PhysicianService`, `ParamedicService`
+- [`src/roleRegistry.ts`](src/roleRegistry.ts)
+  - interfaces: `OrgAdminServices`, `FamilyAdminServices`, `IndividualServices`, `ProfessionalServices`, `CommonServices`
+- [`src/capabilityMapper.ts`](src/capabilityMapper.ts)
+  - function: `mapCapabilitiesToServices(...)`
+- [`src/VerifierService.ts`](src/VerifierService.ts)
+  - class: `VerifierService`
+- [`src/ProfileManager.ts`](src/ProfileManager.ts)
+  - class: `ProfileManager`
+  - compatibility export: `ActorSession`
+- [`src/ProfileRegistry.ts`](src/ProfileRegistry.ts)
+  - class: `ProfileRegistry`
+- [`src/ClientSDK.ts`](src/ClientSDK.ts)
+  - class: `ClientSDK`
+  - re-exported session/profile types from shared contracts
 
-### Consent access helpers re-exported from `gdc-sdk-core-ts`
+The runtime-facing meaning of these exports is:
 
-- [`groupConsentsForControllerView(...)`](../gdc-sdk-core-ts/src/consent-access.ts)
-- [`evaluateRequestedAccess(...)`](../gdc-sdk-core-ts/src/consent-access.ts)
-- [`getMissingPermissions(...)`](../gdc-sdk-core-ts/src/consent-access.ts)
-- [`buildPermissionRequestCommunication(...)`](../gdc-sdk-core-ts/src/consent-access.ts)
-- [`buildPermissionRequestCommunicationLookupQuery(...)`](../gdc-sdk-core-ts/src/consent-access.ts)
+- `ClientSDK`, `ProfileManager`, `ProfileRegistry`, `VerifierService`
+  - app/session orchestration
+- `services.ts`
+  - app-facing domain services
+- `session-descriptor.ts` and `actor-session.ts`
+  - actor-role expansion for frontend use
+- `capabilityMapper.ts` and `roleRegistry.ts`
+  - capability-to-service wiring
 
-Use these helpers when the frontend needs to:
+### Re-exported shared helpers from `gdc-sdk-core-ts`
 
-- show the controller which active permissions exist by target
-- detect whether a SMART request is fully covered
-- prepare the canonical permission-request `Communication`
-- recover that request by identifier, thread id, or linked CID
+- consent access helpers
+- relationship invitation/acceptance builders
+- communication draft helpers
+- document facade helpers
+- vital-sign helpers
 
-Consent precedence in the shared model is documented as:
-
-1. explicit deny for a concrete email
-2. explicit permit for a concrete email
-3. organization decision
-4. jurisdiction decision
-5. default deny
-
-### Runtime configuration
+### Frontend runtime configuration
 
 - [`FrontRuntimeConfig`](src/runtime-contracts.ts)
-  - Includes `persistencePolicy?` and `outboxRepositoryFactory?` so frontend runtimes can disable local persistence on shared devices or use secure local storage on confidential devices.
 
-### Documentation rule
+### Frontend runtime services
 
-- JSDoc on exported code is canonical.
-- README entries should link to source and summarize the main parameters.
-- If a payload shape is shown in docs or validated by tests, keep its reusable source in the relevant module under `gdc-common-utils-ts/examples`.
+- [`ClientSDK`](src/ClientSDK.ts)
+- [`ProfileManager`](src/ProfileManager.ts)
+- [`ProfileRegistry`](src/ProfileRegistry.ts)
+- [`VerifierService`](src/VerifierService.ts)
+- [`describeFrontActorSession(...)`](src/actor-session.ts)
+- [`describeFrontActorFacades(...)`](src/actor-session.ts)
+
+## Documentation Rule
+
+- README should explain app flows first.
+- Shared contract definitions should stay in `gdc-sdk-core-ts`.
+- Frontend consumers should not need UNID runtime knowledge to understand this package.
