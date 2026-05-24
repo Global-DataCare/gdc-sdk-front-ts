@@ -1,6 +1,6 @@
 {
   "name": "gdc-sdk-front-ts",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Next-generation frontend runtime package for the GDC SDK family",
   "license": "Apache-2.0",
   "author": "Antifraud Services Inc.",
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.28.4",
-    "gdc-common-utils-ts": "^1.4.22"
+    "gdc-common-utils-ts": "^1.5.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.0 - 2026-05-23
+
+### Added
+- Promoted the frontend runtime alignment with shared bootstrap/discovery/examples to the first minor release line.
+
+### Changed
+- Aligned the shared dependency to `gdc-common-utils-ts@^1.5.0`.
+- Updated README and `SDK_INTEGRATION_101.md` to describe the canonical shared examples and owner-vs-legal-representative semantics.
+
+### Testing
+- `npm test` passes against the packaged `gdc-common-utils-ts` artifact.
+
 ## 0.1.2 - 2026-05-21
 
 ### Changed
