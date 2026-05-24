@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.2.1] - 2026-05-24
 
 ### Changed
 - Updated README and `SDK_INTEGRATION_101.md` to document the shared consent-access model, controller permission inspection, missing-permission detection, and canonical permission-request `Communication` flow.
