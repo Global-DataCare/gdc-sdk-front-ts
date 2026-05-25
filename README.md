@@ -150,15 +150,28 @@ Those belong to:
 import {
   createRelationshipChannelInvitationInput,
   createRelationshipChannelOtpStartInput,
+  RelationshipAccessActorKinds,
+  RelationshipEnrollmentChannels,
+  RelationshipOtpDeliveryChannels,
+  RelationshipSubjectKinds,
   type RelationshipChannelInvitationInput,
   type RelationshipChannelOtpStartInput,
 } from 'gdc-sdk-core-ts';
+import {
+  buildIndividualDidWeb,
+  HealthcareConsentPurposes,
+} from 'gdc-common-utils-ts';
 
 const tenantId = 'acme-id';
 const jurisdiction = 'ES';
 const sector = 'health-care';
-const subjectId = 'did:web:provider.example.org:individual:subject-001';
-const actorIdentifier = 'daughter@example.org';
+const providerOrganizationDid = activeSubjectProfile.organizationDid;
+const subjectLocalId = activeSubjectProfile.subjectId;
+const subjectId = buildIndividualDidWeb({
+  organizationDidWeb: providerOrganizationDid,
+  subjectId: subjectLocalId,
+});
+const actorIdentifier = relatedPersonForm.email;
 const deliveryTarget = actorIdentifier;
 
 const invitationInput: RelationshipChannelInvitationInput = {
@@ -166,13 +179,13 @@ const invitationInput: RelationshipChannelInvitationInput = {
   jurisdiction,
   sector,
   subjectId,
-  subjectKind: 'person',
-  actorKind: 'related-person',
+  subjectKind: RelationshipSubjectKinds.Person,
+  actorKind: RelationshipAccessActorKinds.RelatedPerson,
   actorIdentifier,
   relationshipLabel: 'daughter',
-  deliveryChannel: 'email',
+  deliveryChannel: RelationshipEnrollmentChannels.Email,
   deliveryTarget,
-  purpose: 'CARE',
+  purpose: HealthcareConsentPurposes.CareManagement,
   phonePinOptional: true,
 };
 
@@ -182,7 +195,7 @@ const invitationId = 'rel-invite-001';
 
 const otpStartInput: RelationshipChannelOtpStartInput = {
   invitationId,
-  deliveryChannel: 'email',
+  deliveryChannel: RelationshipOtpDeliveryChannels.Email,
   locale: 'es-ES',
 };
 
