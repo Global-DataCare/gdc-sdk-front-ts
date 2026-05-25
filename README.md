@@ -210,16 +210,18 @@ import {
   getMissingPermissions,
 } from 'gdc-sdk-core-ts';
 import {
-  EXAMPLE_CONSENT_ACCESS_PROVIDER_EMAIL,
-  EXAMPLE_CONSENT_ACCESS_SUBJECT,
+  EXAMPLE_EMAIL_PROFESSIONAL,
+  EXAMPLE_INDIVIDUAL_DID_WEB,
 } from 'gdc-common-utils-ts/examples/consent-access';
 import { HealthcareActorRoles } from 'gdc-common-utils-ts/constants/healthcare';
 
+const individualDidWeb = EXAMPLE_INDIVIDUAL_DID_WEB;
+const emailProfessional = EXAMPLE_EMAIL_PROFESSIONAL;
 const missing = getMissingPermissions(evaluation);
 
 const communication = buildPermissionRequestCommunication({
-  subject: EXAMPLE_CONSENT_ACCESS_SUBJECT,
-  requester: { actorKind: 'professional', email: EXAMPLE_CONSENT_ACCESS_PROVIDER_EMAIL },
+  subject: individualDidWeb,
+  requester: { actorKind: 'professional', email: emailProfessional },
   requesterRole: HealthcareActorRoles.Physician,
   missing,
 });
