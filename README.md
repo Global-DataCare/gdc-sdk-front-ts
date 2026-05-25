@@ -14,6 +14,43 @@ Use this package when your frontend needs to:
 This package is frontend-facing. It should explain app flows, not gateway route
 details.
 
+## Start Here
+
+If you are integrating this package for the first time, open these in order:
+
+1. [SDK_INTEGRATION_101.md](./SDK_INTEGRATION_101.md)
+   Real frontend/native setup, imports, `new ClientSDK(...)`,
+   `initializeCommunicationIdentityFromSeed(...)`, provider discovery, and
+   `initializeSession(...)`.
+2. [../gdc-sdk-core-ts/docs/SDK_FLOWS_101.md](../gdc-sdk-core-ts/docs/SDK_FLOWS_101.md)
+   Shared business-flow map by actor family.
+3. [../gdc-common-utils-ts/src/examples/frontend-session.ts](../gdc-common-utils-ts/src/examples/frontend-session.ts)
+   Shared profile/session payload source of truth.
+
+If you need the shortest path:
+
+- frontend technical identity:
+  [`initializeCommunicationIdentityFromSeed(...)`](./SDK_INTEGRATION_101.md)
+- main runtime class:
+  [`ClientSDK`](src/ClientSDK.ts)
+- profile/session bootstrap:
+  [`initializeSession(...)`](./SDK_INTEGRATION_101.md)
+
+## Executable Usage Examples
+
+Open these tests when you want to see exact frontend calls and exact inputs:
+
+- [tests/client-sdk.test.mjs](tests/client-sdk.test.mjs)
+  `ClientSDK` bootstrap, provider metadata, and session-facing behavior.
+- [tests/actor-session.test.mjs](tests/actor-session.test.mjs)
+  Actor-session descriptors and facade expansion.
+- [tests/individual-service.test.mjs](tests/individual-service.test.mjs)
+  Individual-facing service composition.
+- [tests/profile-registry.test.mjs](tests/profile-registry.test.mjs)
+  Profile registry and persistence behavior.
+- [tests/session-descriptor.test.mjs](tests/session-descriptor.test.mjs)
+  Session descriptor shaping for UI/runtime code.
+
 ## Actor Split And UI Scope
 
 The frontend package must also start from actor families, because screens and
