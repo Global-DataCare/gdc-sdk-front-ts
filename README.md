@@ -150,19 +150,43 @@ Those belong to:
 import {
   createRelationshipChannelInvitationInput,
   createRelationshipChannelOtpStartInput,
+  type RelationshipChannelInvitationInput,
+  type RelationshipChannelOtpStartInput,
 } from 'gdc-sdk-core-ts';
-import {
-  EXAMPLE_RELATIONSHIP_CHANNEL_INVITATION_INPUT,
-  EXAMPLE_RELATIONSHIP_CHANNEL_OTP_START_INPUT,
-} from 'gdc-common-utils-ts/examples/relationship-access';
 
-const invitation = createRelationshipChannelInvitationInput(
-  EXAMPLE_RELATIONSHIP_CHANNEL_INVITATION_INPUT,
-);
+const tenantId = 'acme-id';
+const jurisdiction = 'ES';
+const sector = 'health-care';
+const subjectId = 'did:web:provider.example.org:individual:subject-001';
+const actorIdentifier = 'daughter@example.org';
+const deliveryTarget = actorIdentifier;
 
-const otpStart = createRelationshipChannelOtpStartInput(
-  EXAMPLE_RELATIONSHIP_CHANNEL_OTP_START_INPUT,
-);
+const invitationInput: RelationshipChannelInvitationInput = {
+  tenantId,
+  jurisdiction,
+  sector,
+  subjectId,
+  subjectKind: 'person',
+  actorKind: 'related-person',
+  actorIdentifier,
+  relationshipLabel: 'daughter',
+  deliveryChannel: 'email',
+  deliveryTarget,
+  purpose: 'CARE',
+  phonePinOptional: true,
+};
+
+const invitation = createRelationshipChannelInvitationInput(invitationInput);
+
+const invitationId = 'rel-invite-001';
+
+const otpStartInput: RelationshipChannelOtpStartInput = {
+  invitationId,
+  deliveryChannel: 'email',
+  locale: 'es-ES',
+};
+
+const otpStart = createRelationshipChannelOtpStartInput(otpStartInput);
 ```
 
 ### Build permission-request communication
