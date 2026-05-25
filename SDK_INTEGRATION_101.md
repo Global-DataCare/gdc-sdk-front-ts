@@ -8,6 +8,29 @@ This guide is for a developer integrating `gdc-sdk-front-ts` into:
 
 It explains the current bootstrap/session/document API in simple terms and shows the recommended patterns while the convergence work is still in progress.
 
+## Documentation Rules For This 101
+
+When adding or updating examples in this file:
+
+- start from semantic variables already present in app state or UI forms
+- prefer shared builders/helpers over transport-shaped nested objects
+- use shared constants/types instead of raw role/purpose/channel literals
+- use canonical names such as:
+  - `individualDidWeb`
+  - `emailProfessional`
+  - `emailControllerOrg`
+  - `emailControllerIndividual`
+  - `emailRelatedPerson`
+
+The goal is that a frontend developer or AI agent can answer:
+
+1. which value do I already have
+2. which helper do I call with that value
+3. which SDK method do I call next
+4. which result do I store or display
+
+without reverse-engineering a GW payload body first.
+
 Current convergence status:
 
 - `gdc-sdk-core-ts` now defines runtime-neutral contracts for identity stores, discovery facades, canonical activation payloads, and provider DID to endpoint resolution.
