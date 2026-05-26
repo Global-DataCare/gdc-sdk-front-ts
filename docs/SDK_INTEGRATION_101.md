@@ -111,7 +111,18 @@ Use:
 
 - `initializeCommunicationIdentity(...)` from `gdc-common-utils-ts`
 
-This is device/app technical identity, not the human controller identity.
+This is device/app/channel technical identity, not the human controller
+identity and not the organization identity.
+
+Conceptual split:
+
+- `appId`
+  identifies the frontend app towards GW CORE
+- `entityId`
+  identifies the local technical communication profile/device/channel that owns
+  the transport keys
+- actor DIDs
+  identify the human/domain actor
 
 ### Session bootstrap
 
@@ -120,6 +131,20 @@ Use:
 - `new ClientSDK(...)`
 - `initializeSession(...)`
 - `initializeProfileRegistry(...)`
+
+### Deployment modes
+
+Simple / compatibility mode:
+
+- frontend may start with provider bootstrap and session state only
+- useful for demos, legacy JSON flows, or non-encrypted compatibility paths
+
+Secure mode:
+
+- frontend still starts with `appId`
+- then initializes the technical communication identity
+- then keeps actor identity separate from technical transport identity
+- encrypted DIDComm and FAPI live in this layer, not in the human actor naming
 
 ### Legal organization activation
 
@@ -181,7 +206,7 @@ What is still converging:
 - first-class ICA discovery
 - first-class operator discovery
 - first-class DCAT3 frontend discovery helpers
-- a single beginner-friendly activation helper that hides all onboarding assembly
+- a single activation helper that hides most onboarding assembly
 
 ## Use This File For
 

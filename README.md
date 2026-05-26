@@ -35,6 +35,7 @@ If you need the shortest path:
   `appId` mandatory, `appVersion` optional with default `v1.0`
 - frontend technical identity:
   [`initializeCommunicationIdentity(...)`](./docs/SDK_INTEGRATION_101.md)
+  for the technical device/channel profile identity, not the legal organization id
 - main runtime class:
   [`ClientSDK`](src/ClientSDK.ts)
 - profile/session bootstrap:
