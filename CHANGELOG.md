@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2026-05-26
+
+### Changed
+- Updated frontend-facing onboarding docs to keep legal-organization activation aligned with the canonical capability model from the shared/core SDKs.
+- Updated dependency targets to `gdc-common-utils-ts@^1.7.0` and `gdc-sdk-core-ts@^0.3.2`.
+
+### Testing
+- `npm run build`
+
 ## [0.3.0] - 2026-05-25
 
 ### Changed
