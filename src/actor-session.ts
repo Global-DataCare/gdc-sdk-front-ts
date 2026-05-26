@@ -5,9 +5,9 @@ export type {
   ActorKind,
   ActorSessionDescriptor,
   Capability,
-} from '../../gdc-sdk-core-ts/dist/index.js';
+} from 'gdc-sdk-core-ts';
 
 export {
   expandActorSessionDescriptorToFacades,
   filterCapabilitiesForActor,
-} from '../../gdc-sdk-core-ts/dist/index.js';
+} from 'gdc-sdk-core-ts';

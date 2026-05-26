@@ -47,7 +47,7 @@ Current convergence status:
 
 Reference for CORE GW trust/VC semantics used by the examples below:
 
-- [gwtemplate-node-ts/docs/API_CORE_INTEGRATION.md](../gwtemplate-node-ts/docs/API_CORE_INTEGRATION.md)
+- [gwtemplate-node-ts/docs/API_CORE_INTEGRATION.md](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/docs/API_CORE_INTEGRATION.md)
   - activation trust rules
   - `credentialSubject.memberOf.taxID`
   - `credentialSubject.hasOccupation.identifier.value`
@@ -125,7 +125,7 @@ import { CryptographyService } from 'gdc-common-utils-ts';
 import {
   ClaimsPersonSchemaorg,
   DataspaceSectors,
-  initializeCommunicationIdentityFromSeed,
+  initializeCommunicationIdentity,
   buildOrganizationDidWeb,
   buildProfessionalDidWeb,
   buildIndividualDidWeb,
@@ -137,6 +137,77 @@ import {
   DeviceAppTypes,
   ResourceTypesFhirR4,
 } from 'gdc-common-utils-ts';
+```
+
+## 3.1 AppId and AppVersion: the simple rule
+
+If you only remember one thing, remember this:
+
+- `appId` is mandatory
+- `appVersion` is optional
+- if you omit `appVersion`, the SDK sends `v1.0`
+- if you pass a URL or domain in `appId`, the SDK converts it to reverse-DNS
+
+Copy/paste example:
+
+```ts
+const sdk = new ClientSDK(
+  {
+    network,
+    api,
+    fetcher: fetch,
+  },
+  {
+    appId: 'https://globaldatacare.es/portal',
+    appType: 'Family',
+    sector: 'health-care',
+  },
+  wallet,
+  verifier,
+);
+
+console.log(sdk.getResolvedAppInfo());
+// {
+//   appId: 'es.globaldatacare',
+//   appVersion: 'v1.0',
+//   appType: 'Family',
+//   sector: 'health-care'
+// }
+```
+
+More copy/paste examples:
+
+```ts
+const sdkA = new ClientSDK(
+  { network, api, fetcher: fetch },
+  {
+    appId: 'globaldatacare.es',
+    appType: 'Family',
+    sector: 'health-care',
+  },
+  wallet,
+  verifier,
+);
+
+console.log(sdkA.getAppHeaders());
+// { AppId: 'es.globaldatacare', AppVersion: 'v1.0' }
+```
+
+```ts
+const sdkB = new ClientSDK(
+  { network, api, fetcher: fetch },
+  {
+    appId: 'portal.globaldatacare.es',
+    appVersion: 'v2.4.0',
+    appType: 'Organization',
+    sector: 'health-care',
+  },
+  wallet,
+  verifier,
+);
+
+console.log(sdkB.getAppHeaders());
+// { AppId: 'es.globaldatacare.portal', AppVersion: 'v2.4.0' }
 ```
 
 ## 4. Pick persistence policy by device trust
@@ -168,12 +239,12 @@ Pending frontend work:
 ```ts
 const cryptography = new CryptographyService(cryptoHelper);
 
-const deviceIdentity = await initializeCommunicationIdentityFromSeed({
+const deviceIdentity = await initializeCommunicationIdentity({
   entityId: 'did:web:portal.example.org:user-frontend',
   cryptography,
   includeVcSigningKey: true,
-  // Optional explicit seed. If omitted, deterministic mode derives from entityId.
-  // seedMaterial: crypto.getRandomValues(new Uint8Array(32)),
+  // Deterministic mode requires an explicit seed.
+  seedMaterial: crypto.getRandomValues(new Uint8Array(32)),
 });
 ```
 
@@ -186,8 +257,8 @@ Useful outputs:
 
 If you omit `seedMaterial`:
 
-- `mode = deterministic` derives seeds from `entityId`
-- `mode = random` lets the cryptography engine generate random seed material internally
+- the helper defaults to `mode = random`
+- `mode = deterministic` requires explicit `seedMaterial`
 
 ## 6. Create the frontend SDK bootstrap object
 
@@ -199,8 +270,10 @@ const sdk = new ClientSDK(
     fetcher: fetch,
   },
   {
-    name: 'Demo Health App',
-    version: '0.1.0',
+    appId: 'https://globaldatacare.es/mobile',
+    appVersion: 'v1.3.0',
+    appType: 'Family',
+    sector: 'health-care',
   },
   wallet,
   verifier,
@@ -245,7 +318,7 @@ const session = await sdk.initializeSession(
     email: 'user@example.org',
     role: 'individual',
     providerDid: 'did:web:provider.example.org',
-    appType: 'individual',
+    appType: 'Family',
   },
   createVaultForProfile,
 );
@@ -477,6 +550,6 @@ For demo/evaluation use:
 
 ## 18. Where to look next
 
-- [README.md](README.md)
-- [../gdc-sdk-core-ts/README.md](../gdc-sdk-core-ts/README.md)
+- [README.md](../README.md)
+- [gdc-sdk-core-ts/README.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/README.md)
 - `gdc-common-utils-ts`

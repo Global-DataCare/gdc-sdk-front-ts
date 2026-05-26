@@ -1,6 +1,6 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
-import type { DataPersistencePolicy } from '../../gdc-sdk-core-ts/dist/index.js';
+import type { DataPersistencePolicy } from 'gdc-sdk-core-ts';
 
 export type LegacyFrontSourcePackage = never;
 

@@ -4,11 +4,11 @@ import type {
   ActorFlags,
   ActorFacadeDescriptor,
   ActorSessionDescriptor,
-} from '../../gdc-sdk-core-ts/dist/index.js';
+} from 'gdc-sdk-core-ts';
 import {
   buildActorSessionDescriptorFromActorFlags,
   expandActorSessionDescriptorToFacades,
-} from '../../gdc-sdk-core-ts/dist/index.js';
+} from 'gdc-sdk-core-ts';
 
 export type FrontActorFlags = ActorFlags;
 
