@@ -219,12 +219,12 @@ import {
 } from 'gdc-common-utils-ts/examples/consent-access';
 import { HealthcareActorRoles } from 'gdc-common-utils-ts/constants/healthcare';
 
-const individualDidWeb = EXAMPLE_INDIVIDUAL_DID_WEB;
+const subjectDid = EXAMPLE_INDIVIDUAL_DID_WEB;
 const emailProfessional = EXAMPLE_EMAIL_PROFESSIONAL;
 const missing = getMissingPermissions(evaluation);
 
 const communication = buildPermissionRequestCommunication({
-  subject: individualDidWeb,
+  subject: subjectDid,
   requester: { actorKind: 'professional', email: emailProfessional },
   requesterRole: HealthcareActorRoles.Physician,
   missing,

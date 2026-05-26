@@ -1,564 +1,197 @@
 # SDK Integration 101 for Frontend / Native Apps
 
-This guide is for a developer integrating `gdc-sdk-front-ts` into:
+This file is the short frontend integration map.
 
-- a native app
-- Expo / React Native
-- a web portal
+If you want the business-flow overview first, start here:
 
-It explains the current bootstrap/session/document API in simple terms and shows the recommended patterns while the convergence work is still in progress.
+- [gdc-sdk-core-ts/docs/SDK_FLOWS_101.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/SDK_FLOWS_101.md)
 
-## Documentation Rules For This 101
+If you want the shared lifecycle semantics and reusable placeholders, use:
 
-When adding or updating examples in this file:
+- [gdc-common-utils-ts/docs/LIFECYCLE_101.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/LIFECYCLE_101.md)
 
-- start from semantic variables already present in app state or UI forms
-- prefer shared builders/helpers over transport-shaped nested objects
-- use shared constants/types instead of raw role/purpose/channel literals
-- use canonical names such as:
-  - `individualDidWeb`
+This document should answer only these questions:
+
+- which package/class should the frontend instantiate
+- which helper should the frontend call next
+- which concepts belong to UI/session state
+- which concepts belong to shared activation/discovery contracts
+
+## Rules
+
+- Start from app state and UI forms, not GW wire payloads.
+- Use shared helpers/constants instead of hardcoded role or claim strings.
+- Keep technical device identity separate from actor identity.
+- Keep provider identity separate from actor identity.
+- Do not collapse these three concepts into one:
+  - persisted activation claim: `org.schema.Service.serviceType`
+  - shared builder input: `serviceCapabilities` / `service.capabilities`
+  - frontend UX/session flags: `facets`
+- Use canonical names such as:
+  - `subjectDid`
+  - `professionalDid`
+  - `orgControllerDid`
+  - `individualControllerDid`
   - `emailProfessional`
   - `emailControllerOrg`
   - `emailControllerIndividual`
-  - `emailRelatedPerson`
 
-The goal is that a frontend developer or AI agent can answer:
-
-1. which value do I already have
-2. which helper do I call with that value
-3. which SDK method do I call next
-4. which result do I store or display
-
-without reverse-engineering a GW payload body first.
-
-Current convergence status:
-
-- `gdc-sdk-core-ts` now defines runtime-neutral contracts for identity stores, discovery facades, canonical activation payloads, and provider DID to endpoint resolution.
-- `gdc-sdk-front-ts` still needs to wire those contracts into real browser/native runtime adapters.
-
-Naming rule for activation capabilities:
-
-- persisted activation/storage contract: `org.schema.Service.serviceType`
-- SDK builder input in core/node: `serviceCapabilities` or `service.capabilities`
-- frontend session/profile UX layer: `facets`
-
-Do not collapse these three names into one concept. Frontend facets are not the
-same thing as the persisted activation claim.
-
-## 1. Package roles
+## Package Map
 
 - `gdc-common-utils-ts`
-  - low-level shared utilities, crypto, DID/DIDComm/FHIR helpers
+  - shared constants
+  - shared examples
+  - DID/DIDComm/FHIR helpers
+  - healthcare codings
 - `gdc-sdk-core-ts`
-  - runtime-neutral communication/document/draft helpers
+  - runtime-neutral builders
+  - communication draft helpers
+  - consent-access helpers
+  - activation/discovery contracts
 - `gdc-sdk-front-ts`
-  - frontend-facing session/profile bootstrap and app-side services
+  - frontend session bootstrap
+  - provider metadata fetch
+  - profile/session state
+  - frontend-facing services
 
-Reference for CORE GW trust/VC semantics used by the examples below:
+## Main Frontend Runtime
+
+Use:
+
+- `ClientSDK`
+
+Important frontend-facing pieces:
+
+- `ClientSDK`
+- `ProfileManager`
+- `ProfileRegistry`
+- `IndividualService`
+- `VerifierService`
+
+## Typical Frontend Initialization Order
+
+1. Choose provider URL or `did:web`.
+2. Create `ClientSDK`.
+3. Initialize technical communication identity.
+4. Resolve provider metadata.
+5. Initialize profile/session state.
+6. Materialize actor-facing services from the current profile/session.
+
+## What The Frontend Already Has
+
+Usually the frontend starts from:
+
+- app configuration
+- provider URL or `did:web`
+- actor email
+- actor kind/role
+- tenant/jurisdiction/sector
+- local wallet or secure device storage
+
+It should not start from:
+
+- raw `_activate` JSON
+- nested GW `body.data[0].resource.meta.claims`
+- hardcoded consent claim keys
+
+## Flow Map
+
+### Provider bootstrap
+
+Use:
+
+- `ClientSDK.fetchWellKnownApiConfig(...)`
+- `ClientSDK.fetchSupportedFields(...)`
+
+This is still simpler than the final ICA/operator/provider discovery story.
+
+### Technical communication identity
+
+Use:
+
+- `initializeCommunicationIdentity(...)` from `gdc-common-utils-ts`
+
+This is device/app technical identity, not the human controller identity.
+
+### Session bootstrap
+
+Use:
+
+- `new ClientSDK(...)`
+- `initializeSession(...)`
+- `initializeProfileRegistry(...)`
+
+### Legal organization activation
+
+Frontend note:
+
+- the shared/core activation contract already models mandatory capabilities
+- persisted GW claim: `org.schema.Service.serviceType`
+- shared builder vocabulary: `serviceCapabilities` or `service.capabilities`
+- frontend session/profile layer may expose `facets`, but that is not the persisted contract
+
+Reference:
 
 - [gwtemplate-node-ts/docs/API_CORE_INTEGRATION.md](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/docs/API_CORE_INTEGRATION.md)
-  - activation trust rules
-  - `credentialSubject.memberOf.taxID`
-  - `credentialSubject.hasOccupation.identifier.value`
-
-## 2. Current discovery status
-
-The final first-class discovery API for:
-
-- one or more ICAs
-- node operators resolved from those ICAs
-- service providers / individual index services published by node operators
-
-is still converging.
-
-Today, the recommended frontend pattern is:
-
-1. start from one or more ICA `did:web` values or known provider URLs
-2. resolve provider metadata through `did:web` and `/.well-known`
-3. pick the provider DID/base URL
-4. initialize the frontend session against that provider
-
-What already exists today:
-
-- `ClientSDK.fetchWellKnownApiConfig(source)`
-- `ClientSDK.fetchSupportedFields(source)`
-- provider bootstrap from URL or `did:web`
-- shared core contracts for:
-  - `IdentityStore`
-  - `DiscoveryFacade`
-  - canonical `_activate` payload building
-  - provider DID to `service[]` endpoint selection
-
-What is still missing in the frontend runtime:
-
-- first-class provider/operator/ICA discovery orchestration
-- explicit storage of `deviceIdentity`, `actorIdentity`, and `providerIdentity`
-- controller bootstrap helper that builds `_activate` with `vp_token + controller.*`
-
-Reusable payload source of truth for the examples in this guide:
-
-- `gdc-common-utils-ts/examples/frontend-session`
-- `gdc-common-utils-ts/examples/professional`
-- `gdc-common-utils-ts/examples/api-flow-examples`
-
-CORE vs extension note:
-
-- keep technical transport identity, provider identity, and actor identity separate
-- CORE canonical examples are not phone-first
-- phone-driven consent or notification UX belongs to extension layers
-
-Semantic split to keep explicit:
-
-- individual/family bootstrap
-  - the human controller is modeled as owner of the subject index organization
-  - frontend builders should therefore expect `org.schema.Organization.owner.email` / `owner.telephone`
-- legal organization activation
-  - the controller is modeled as `Person` / legal representative member of a legal organization
-  - activation trust and VC binding use `credentialSubject.memberOf.*` plus `credentialSubject.hasOccupation.*`
-
-## 3. Install and imports
-
-```ts
-import {
-  ClientSDK,
-  createCommunicationDraft,
-  addFhirResourceToDraft,
-  createOutboxJobFromDraft,
-  createCommunicationFacade,
-  createHeartRateObservation,
-  createBloodPressureObservation,
-  createBodyTemperatureObservation,
-} from 'gdc-sdk-front-ts';
-
-import { CryptographyService } from 'gdc-common-utils-ts';
-import {
-  ClaimsPersonSchemaorg,
-  DataspaceSectors,
-  initializeCommunicationIdentity,
-  buildOrganizationDidWeb,
-  buildProfessionalDidWeb,
-  buildIndividualDidWeb,
-  HealthcareActorRoles,
-  HealthcareBasicSections,
-  HealthcareConsentPurposes,
-  HealthcareConsentActions,
-  DeviceUserClasses,
-  DeviceAppTypes,
-  ResourceTypesFhirR4,
-} from 'gdc-common-utils-ts';
-```
-
-## 3.1 AppId and AppVersion: the simple rule
-
-If you only remember one thing, remember this:
-
-- `appId` is mandatory
-- `appVersion` is optional
-- if you omit `appVersion`, the SDK sends `v1.0`
-- if you pass a URL or domain in `appId`, the SDK converts it to reverse-DNS
-
-Copy/paste example:
-
-```ts
-const sdk = new ClientSDK(
-  {
-    network,
-    api,
-    fetcher: fetch,
-  },
-  {
-    appId: 'https://globaldatacare.es/portal',
-    appType: 'Family',
-    sector: 'health-care',
-  },
-  wallet,
-  verifier,
-);
-
-console.log(sdk.getResolvedAppInfo());
-// {
-//   appId: 'es.globaldatacare',
-//   appVersion: 'v1.0',
-//   appType: 'Family',
-//   sector: 'health-care'
-// }
-```
-
-More copy/paste examples:
-
-```ts
-const sdkA = new ClientSDK(
-  { network, api, fetcher: fetch },
-  {
-    appId: 'globaldatacare.es',
-    appType: 'Family',
-    sector: 'health-care',
-  },
-  wallet,
-  verifier,
-);
-
-console.log(sdkA.getAppHeaders());
-// { AppId: 'es.globaldatacare', AppVersion: 'v1.0' }
-```
-
-```ts
-const sdkB = new ClientSDK(
-  { network, api, fetcher: fetch },
-  {
-    appId: 'portal.globaldatacare.es',
-    appVersion: 'v2.4.0',
-    appType: 'Organization',
-    sector: 'health-care',
-  },
-  wallet,
-  verifier,
-);
-
-console.log(sdkB.getAppHeaders());
-// { AppId: 'es.globaldatacare.portal', AppVersion: 'v2.4.0' }
-```
-
-## 4. Pick persistence policy by device trust
-
-Use memory-only mode on shared devices such as public kiosks or library computers.
-
-Use secure local persistence on confidential personal devices.
-
-Conceptually:
-
-- shared/public device
-  - `persistencePolicy.mode = 'memory'`
-- confidential personal device
-  - `persistencePolicy.mode = 'local-secure'`
-
-## 5. Initialize technical communication identity from seed
-
-This is the profile/device/portal technical identity.
-
-It is not the same as the personal wallet/controller identity of the
-professional or individual who may later sign access-token or authorization
-requests. This identity is for securing communications.
-
-Pending frontend work:
-
-- separate persistence/orchestration for technical transport identity and human actor identity
-- provider DID document resolution cached alongside the active app session
-
-```ts
-const cryptography = new CryptographyService(cryptoHelper);
-
-const deviceIdentity = await initializeCommunicationIdentity({
-  entityId: 'did:web:portal.example.org:user-frontend',
-  cryptography,
-  includeVcSigningKey: true,
-  // Deterministic mode requires an explicit seed.
-  seedMaterial: crypto.getRandomValues(new Uint8Array(32)),
-});
-```
-
-Useful outputs:
-
-- `deviceIdentity.commSigningKeyPair.publicJWKey.kid`
-- `deviceIdentity.commEncryptionKeyPair.publicJWKey.kid`
-- `deviceIdentity.headers.jwsProtected`
-- `deviceIdentity.headers.jweHeader`
-
-If you omit `seedMaterial`:
-
-- the helper defaults to `mode = random`
-- `mode = deterministic` requires explicit `seedMaterial`
-
-## 6. Create the frontend SDK bootstrap object
-
-```ts
-const sdk = new ClientSDK(
-  {
-    network,
-    api,
-    fetcher: fetch,
-  },
-  {
-    appId: 'https://globaldatacare.es/mobile',
-    appVersion: 'v1.3.0',
-    appType: 'Family',
-    sector: 'health-care',
-  },
-  wallet,
-  verifier,
-  'did:web:ica.example.org',
-);
-```
-
-## 7. Resolve provider metadata
-
-### From URL
-
-```ts
-const apiConfig = await sdk.fetchWellKnownApiConfig('https://provider.example.org');
-```
-
-### From `did:web`
-
-```ts
-sdk.addMockDidDocument('did:web:provider.example.org', {
-  id: 'did:web:provider.example.org',
-  service: [
-    {
-      id: '#api',
-      type: 'GatewayApi',
-      serviceEndpoint: 'https://provider.example.org/',
-    },
-  ],
-});
-
-const apiConfig = await sdk.fetchWellKnownApiConfig('did:web:provider.example.org');
-const supportedFields = await sdk.fetchSupportedFields('did:web:provider.example.org');
-```
-
-This is the current lightweight discovery path while the ICA/node operator/DCAT3 discovery API is still being converged.
-
-## 8. Initialize a user/profile session
-
-```ts
-const session = await sdk.initializeSession(
-  {
-    profileId: 'profile-001',
-    email: 'user@example.org',
-    role: 'individual',
-    providerDid: 'did:web:provider.example.org',
-    appType: 'Family',
-  },
-  createVaultForProfile,
-);
-```
-
-## 9. Professional role and permission examples
-
-Shared examples for professional access scenarios live in:
-
-- `gdc-common-utils-ts/examples/professional`
-
-Those examples cover reusable combinations of:
-
-- professional role such as physician, nursing professional, or paramedic
-- actor target such as direct email, organization, or jurisdiction
-- consent purpose
-- section-level consent actions over an individual
-- SMART scopes requested against GW CORE
-- expected FHIR resource types after access
-- expected allow/deny outcome for the token request depending on current active consent state
-
-The shared consent-access helpers are re-exported by the SDK packages and cover:
-
-- grouping all active subject consents for controller inspection
-- evaluation precedence: explicit deny for a concrete email, explicit permit for a concrete email, organization, jurisdiction, default deny
-- missing coverage extraction for a concrete SMART request
-- canonical permission-request `Communication` payload creation
-- canonical lookup query creation by `Communication.identifier`, `thid`, or `DocumentReference.contenthash`
-
-Source payload reference:
-
-- `gdc-common-utils-ts/examples/frontend-session`
-  - `EXAMPLE_PROFILE_SESSION_INPUT`
-
-This returns a `ProfileManager`.
-
-## 9. What `ProfileManager` gives you
-
-Depending on role/capabilities, the session may expose:
-
-- `session.common.auth`
-- `session.orgAdmin`
-- `session.familyAdmin`
-- `session.individual`
-- `session.professional`
-
-It also provides convenience methods directly on the manager.
-
-## 10. Organization/professional flow from frontend
-
-### Create an organization employee
-
-```ts
-const organizationDid = buildOrganizationDidWeb({
-  hostDidWeb: 'did:web:api.example.org',
-  tenantId: 'acme-id',
-  jurisdiction: 'ES',
-  sector: DataspaceSectors.HealthCare,
-});
-
-const professionalDid = buildProfessionalDidWeb({
-  organizationDidWeb: organizationDid,
-  email: 'doctor@example.org',
-  role: HealthcareActorRoles.Physician,
-});
-
-const employee = await session.createOrganizationEmployee(
-  'did:web:provider.example.org',
-  '<id-token>',
-  {
-    email: 'doctor@example.org',
-    role: HealthcareActorRoles.Physician,
-    userClass: DeviceUserClasses.Employee,
-    type: DeviceAppTypes.Mobile,
-  },
-);
-```
-
-When you build equivalent claims for the backend/GW side, use canonical `org.schema.Person.*` keys:
-
-```ts
-const employeeClaims = {
-  '@context': 'org.schema',
-  [ClaimsPersonSchemaorg.identifier]: professionalDid,
-  [ClaimsPersonSchemaorg.email]: 'doctor@example.org',
-  [ClaimsPersonSchemaorg.hasOccupationalRoleValue]: HealthcareActorRoles.Physician,
-  [ClaimsPersonSchemaorg.memberOfTaxId]: 'acme-id',
-};
-```
-
-## 11. Individual flow from frontend
-
-### Bootstrap subject organization/index
-
-```ts
-const bootstrap = await session.bootstrapSubjectOrganizationIndex({
-  registrationClaims: {
-    sub: 'did:web:api.example.org:individual:subject-001',
-  },
-  providerDid: 'did:web:provider.example.org',
-  idToken: '<id-token>',
-});
-```
-
-### Grant professional access
-
-```ts
-const subjectDid = buildIndividualDidWeb({
-  organizationDidWeb: organizationDid,
-  subjectId: 'subject-001',
-});
-const professionalEmail = 'doctor@example.org';
-
-const consent = await session.grantProfessionalAccess({
-  subjectDid,
-  actorId: professionalEmail,
-  actorRole: HealthcareActorRoles.Physician,
-  purpose: HealthcareConsentPurposes.Treatment,
-  actions: [HealthcareConsentActions.PatientSummaryDocument],
-  providerDid: 'did:web:provider.example.org',
-  requiredScope: 'user/*.write',
-  idToken: '<id-token>',
-});
-```
-
-In a real integration, the controller will often know the professional email
-or, in veterinary scenarios, a `tel:+...` identifier before knowing a full
-professional `did:web`. All of these map to the flat `Consent.actor-identifier`
-claim.
-
-### Import IPS or FHIR
-
-```ts
-const ingest = await session.importIpsOrFhirAndUpdateIndex({
-  compositionPayload: ipsBundle,
-  providerDid: 'did:web:provider.example.org',
-  requiredScope: 'user/*.write',
-  idToken: '<id-token>',
-  format: 'org.hl7.fhir.r4',
-});
-```
-
-## 12. Compose a communication draft in memory
-
-```ts
-let draft = createCommunicationDraft({
-  subject: subjectDid,
-  sender: professionalDid,
-  recipient: 'did:web:provider.example.org',
-  noteText: 'Vitals update',
-});
-```
-
-## 13. Add vital signs to the draft
-
-```ts
-draft = addFhirResourceToDraft(
-  draft,
-  createHeartRateObservation({
-    subject: subjectDid,
-    effectiveDateTime: '2026-05-22T10:00:00Z',
-    value: 72,
-  }),
-);
-
-draft = addFhirResourceToDraft(
-  draft,
-  createBloodPressureObservation({
-    subject: subjectDid,
-    effectiveDateTime: '2026-05-22T10:00:00Z',
-    systolic: 120,
-    diastolic: 78,
-  }),
-);
-```
-
-## 14. Freeze the draft into an outbox job
-
-```ts
-const job = createOutboxJobFromDraft(draft, {
-  batchOptions: {
-    requestUrl: 'individual/org.hl7.fhir.r4/Communication',
-  },
-});
-```
-
-Use this split mentally:
-
-- `draft`
-  - editable in-memory object
-- `job`
-  - transport snapshot
-
-## 15. Read documents back from a communication
-
-```ts
-const communicationFacade = createCommunicationFacade();
-const resolved = communicationFacade.getDocument(job.payload);
-
-if (resolved?.kind === 'fhir') {
-  const fhirDoc = communicationFacade.getFhirDocument(job.payload);
-  const sections = fhirDoc?.getSections() || [];
-  const observations = fhirDoc?.getResources(ResourceTypesFhirR4.Observation) || [];
-}
-```
-
-This hides:
-
-- direct bundle attachment
-- embedded `DocumentReference`
-- attachment metadata lookup
-
-## 16. Recommended simple setup for evaluations
-
-For demo/evaluation use:
-
-1. one ICA `did:web`
-2. one provider `did:web` or base URL
-3. one frontend profile
-4. one in-memory or secure-local draft flow
-5. one consent grant
-6. one IPS or vital signs communication
-
-## 17. Current limitations
-
-- the full ICA -> node operator -> DCAT3 discovery chain is not yet a dedicated typed frontend API
-- the frontend package is still in convergence and some app-facing services remain lightweight placeholders
-- secure signed/encrypted DIDComm is not yet the default demo path
-
-## 18. Where to look next
-
-- [README.md](../README.md)
-- [gdc-sdk-core-ts/README.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/README.md)
-- `gdc-common-utils-ts`
+
+### Employee / professional flows
+
+Frontend usually prepares UX/state for:
+
+- employee invitation/activation
+- SMART token request
+- consent-aware access
+
+Shared business flow reference:
+
+- [gdc-sdk-core-ts/docs/SDK_FLOWS_101.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/SDK_FLOWS_101.md)
+
+### Individual / family flows
+
+Frontend usually prepares UX/state for:
+
+- individual bootstrap
+- consent grant/review
+- related-person invitation
+- IPS/FHIR import and read flows
+
+Use shared references instead of restating the full tutorial here.
+
+## Shared Builders And Constants
+
+Prefer these shared helpers:
+
+- `initializeCommunicationIdentity(...)`
+- `buildOrganizationDidWeb(...)`
+- `buildProfessionalDidWeb(...)`
+- `buildIndividualDidWeb(...)`
+- healthcare constants/codings from `gdc-common-utils-ts`
+- communication draft helpers from `gdc-sdk-core-ts`
+
+## Discovery Status
+
+What already exists:
+
+- provider bootstrap by URL
+- provider bootstrap by `did:web`
+- provider metadata fetch from the frontend runtime
+
+What is still converging:
+
+- first-class ICA discovery
+- first-class operator discovery
+- first-class DCAT3 frontend discovery helpers
+- a single beginner-friendly activation helper that hides all onboarding assembly
+
+## Use This File For
+
+- finding the right frontend runtime class
+- knowing which layer owns which concern
+- checking naming and contract rules
+- jumping to the correct deeper document
+
+## Do Not Use This File For
+
+- a long end-to-end business tutorial
+- repeating the node backend onboarding flow
+- teaching raw GW route payloads

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.2] - 2026-05-26
+
+### Changed
+- Reduced `docs/SDK_INTEGRATION_101.md` to a short frontend integration map instead of a second long tutorial.
+- Aligned the frontend doc naming with the shared/core/node vocabulary:
+  - `subjectDid`
+  - `org.schema.Service.serviceType`
+  - `serviceCapabilities` / `service.capabilities`
+  - `facets` as UI/session-only terminology
+- Updated README examples to avoid `individualDidWeb` as the teaching variable name.
+
+### Testing
+- Doc-only change; no runtime surface change.
+
 ## [0.3.1] - 2026-05-26
 
 ### Changed
