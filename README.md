@@ -18,23 +18,27 @@ details.
 
 If you are integrating this package for the first time, open these in order:
 
-1. [SDK_INTEGRATION_101.md](./SDK_INTEGRATION_101.md)
+1. [docs/SDK_INTEGRATION_101.md](./docs/SDK_INTEGRATION_101.md)
    Real frontend/native setup, imports, `new ClientSDK(...)`,
-   `initializeCommunicationIdentityFromSeed(...)`, provider discovery, and
+   `initializeCommunicationIdentity(...)`, provider discovery, and
    `initializeSession(...)`.
-2. [../gdc-sdk-core-ts/docs/SDK_FLOWS_101.md](../gdc-sdk-core-ts/docs/SDK_FLOWS_101.md)
+2. [gdc-sdk-core-ts/docs/SDK_FLOWS_101.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/SDK_FLOWS_101.md)
    Shared business-flow map by actor family.
-3. [../gdc-common-utils-ts/src/examples/frontend-session.ts](../gdc-common-utils-ts/src/examples/frontend-session.ts)
+3. [gdc-common-utils-ts/src/examples/frontend-session.ts](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/src/examples/frontend-session.ts)
    Shared profile/session payload source of truth.
+4. [gdc-common-utils-ts/docs/LIFECYCLE_101.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/LIFECYCLE_101.md)
+   Canonical lifecycle semantics and reusable placeholders for UI and portal flows.
 
 If you need the shortest path:
 
+- app identity required by GW CORE:
+  `appId` mandatory, `appVersion` optional with default `v1.0`
 - frontend technical identity:
-  [`initializeCommunicationIdentityFromSeed(...)`](./SDK_INTEGRATION_101.md)
+  [`initializeCommunicationIdentity(...)`](./docs/SDK_INTEGRATION_101.md)
 - main runtime class:
   [`ClientSDK`](src/ClientSDK.ts)
 - profile/session bootstrap:
-  [`initializeSession(...)`](./SDK_INTEGRATION_101.md)
+  [`initializeSession(...)`](./docs/SDK_INTEGRATION_101.md)
 
 ## Executable Usage Examples
 
@@ -229,13 +233,14 @@ const communication = buildPermissionRequestCommunication({
 
 ## Shared Contract Sources
 
-- [../gdc-sdk-core-ts/README.md](../gdc-sdk-core-ts/README.md)
-- [../gdc-common-utils-ts/docs/CONSENT_ACCESS_101.md](../gdc-common-utils-ts/docs/CONSENT_ACCESS_101.md)
+- [gdc-sdk-core-ts/README.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/README.md)
+- [gdc-common-utils-ts/docs/CONSENT_ACCESS_101.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/CONSENT_ACCESS_101.md)
 
 Reusable payload examples:
 
 - `gdc-common-utils-ts/examples/frontend-session`
 - `gdc-common-utils-ts/examples/professional`
+- `gdc-common-utils-ts/examples/lifecycle`
 - `gdc-common-utils-ts/examples/api-flow-examples`
 
 ## API Index

@@ -11,6 +11,11 @@ import type {
   ProfileRegistryEntry,
   SdkConfig,
 } from './types.js';
+import {
+  buildAppHeaders,
+  resolveAppInfo,
+  type ResolvedAppInfo,
+} from 'gdc-sdk-core-ts';
 
 /**
  * Frontend-facing SDK entry point for profile/session bootstrapping, lightweight
@@ -25,12 +30,32 @@ import type {
  */
 export class ClientSDK {
   private readonly mockDidDocuments = new Map<string, unknown>();
+  private readonly resolvedAppInfo: ResolvedAppInfo;
   public currentSession: ProfileManager | null = null;
   public profileRegistry: ProfileRegistry | null = null;
 
   /**
    * @param sdkConfig Frontend runtime adapters such as fetch/network/api.
-   * @param appInfo Information about the host app.
+   * @param appInfo Information about the host app. `appId` is mandatory and
+   * may be a reverse-DNS string or a URL/domain. `appVersion` is optional and
+   * defaults to `v1.0`.
+   *
+   * @example
+   * ```ts
+   * const sdk = new ClientSDK(
+   *   { network, api, fetcher: fetch },
+   *   {
+   *     appId: 'https://globaldatacare.es/portal',
+   *     appType: 'Family',
+   *     sector: 'health-care',
+   *   },
+   *   wallet,
+   *   verifier,
+   * );
+   *
+   * console.log(sdk.getAppHeaders());
+   * // { AppId: 'es.globaldatacare', AppVersion: 'v1.0' }
+   * ```
    * @param _wallet Reserved wallet/provider dependency.
    * @param _verifier DID/VC verifier dependency.
    * @param _icaDid Optional bootstrap ICA DID used by the host app.
@@ -41,7 +66,23 @@ export class ClientSDK {
     private readonly _wallet: unknown,
     private readonly _verifier: IVerifier,
     private readonly _icaDid?: string,
-  ) {}
+  ) {
+    this.resolvedAppInfo = resolveAppInfo(appInfo);
+  }
+
+  /**
+   * Returns the canonical GW CORE app identity resolved by the SDK.
+   */
+  public getResolvedAppInfo(): ResolvedAppInfo {
+    return { ...this.resolvedAppInfo };
+  }
+
+  /**
+   * Returns the standard GW CORE headers added by the SDK to outbound requests.
+   */
+  public getAppHeaders(): Record<'AppId' | 'AppVersion', string> {
+    return buildAppHeaders(this.resolvedAppInfo);
+  }
 
   /**
    * Registers a mock DID document for local/demo discovery flows.
@@ -55,7 +96,9 @@ export class ClientSDK {
    */
   public async fetchWellKnownApiConfig(source: string): Promise<Record<string, unknown>> {
     const baseUrl = await this.resolveBaseUrl(source);
-    const response = await this.sdkConfig.fetcher(new URL('.well-known/api-config.json', baseUrl).href);
+    const response = await this.sdkConfig.fetcher(new URL('.well-known/api-config.json', baseUrl).href, {
+      headers: this.getAppHeaders(),
+    });
     if (!response.ok) {
       throw new Error(`Failed to load API config (${response.status}).`);
     }
@@ -67,7 +110,9 @@ export class ClientSDK {
    */
   public async fetchSupportedFields(source: string): Promise<Array<{ code: string; display: string }>> {
     const baseUrl = await this.resolveBaseUrl(source);
-    const response = await this.sdkConfig.fetcher(new URL('.well-known/supported-fields.json', baseUrl).href);
+    const response = await this.sdkConfig.fetcher(new URL('.well-known/supported-fields.json', baseUrl).href, {
+      headers: this.getAppHeaders(),
+    });
     if (!response.ok) return [];
     const body = await response.json() as Record<string, unknown>;
     const candidates = body.fields || body.supportedFields || [];

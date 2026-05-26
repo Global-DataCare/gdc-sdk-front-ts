@@ -59,7 +59,7 @@ function createSdk() {
         throw new Error('unexpected fetch');
       },
     },
-    { appType: 'Family', sector: 'health' },
+    { appId: 'https://globaldatacare.es/app', appType: 'Family', sector: 'health' },
     {},
     {
       verifyCredential: async () => true,
@@ -68,6 +68,22 @@ function createSdk() {
     'did:web:ica.example',
   );
 }
+
+test('ClientSDK resolves app identity and defaults appVersion to v1.0', () => {
+  const sdk = createSdk();
+
+  assert.deepEqual(sdk.getResolvedAppInfo(), {
+    appId: 'es.globaldatacare',
+    appVersion: 'v1.0',
+    appType: 'Family',
+    sector: 'health',
+  });
+
+  assert.deepEqual(sdk.getAppHeaders(), {
+    AppId: 'es.globaldatacare',
+    AppVersion: 'v1.0',
+  });
+});
 
 test('ClientSDK.initializeSession creates the current session and persists the profile', async () => {
   const { calls, vault } = createVaultStub();
@@ -131,4 +147,46 @@ test('ClientSDK.initializeProfileRegistry initializes the vault once and stores 
   assert.ok(registry instanceof ProfileRegistry);
   assert.equal(sdk.profileRegistry, registry);
   assert.equal(calls.initialize, 1);
+});
+
+test('ClientSDK sends AppId and AppVersion headers in provider discovery requests', async () => {
+  const requests = [];
+  const sdk = new ClientSDK(
+    {
+      network: { isConnected: async () => true },
+      api: {
+        operationMode: 'DEMO',
+        legacyFhirEnabled: false,
+        getRetryPolicy: () => ({ retries: 0, delayMs: 0 }),
+      },
+      fetcher: async (url, init) => {
+        requests.push([url, init]);
+        return {
+          ok: true,
+          async json() {
+            return { fields: [] };
+          },
+        };
+      },
+    },
+    { appId: 'portal.globaldatacare.es', appVersion: 'v3.2.1', appType: 'Family', sector: 'health' },
+    {},
+    {
+      verifyCredential: async () => true,
+      verifyPresentation: async () => true,
+    },
+  );
+
+  await sdk.fetchWellKnownApiConfig('https://provider.example.org');
+  await sdk.fetchSupportedFields('https://provider.example.org');
+
+  assert.equal(requests.length, 2);
+  assert.deepEqual(requests[0][1].headers, {
+    AppId: 'es.globaldatacare.portal',
+    AppVersion: 'v3.2.1',
+  });
+  assert.deepEqual(requests[1][1].headers, {
+    AppId: 'es.globaldatacare.portal',
+    AppVersion: 'v3.2.1',
+  });
 });

@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-05-25
+
+### Changed
+- Switched published frontend imports from workspace-relative `../../gdc-sdk-core-ts/dist/...` paths to the package import `gdc-sdk-core-ts`, so the npm artifact works outside the monorepo checkout.
+- Aligned shared dependencies to `gdc-common-utils-ts@^1.6.0` and `gdc-sdk-core-ts@^0.3.0`.
+- Kept the frontend docs pointing at the canonical shared lifecycle and `101` material instead of duplicating payload examples locally.
+
+### Testing
+- `npm run build` passes.
+- `npm test` passes.
+
 ## [0.2.1] - 2026-05-24
 
 ### Changed

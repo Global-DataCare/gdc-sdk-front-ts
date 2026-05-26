@@ -1,6 +1,7 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 import type {
   AppInfo,
+  ResolvedAppInfo,
   IApiConfig,
   InitializeSessionParams,
   INetwork,
@@ -13,9 +14,9 @@ import type {
   ProfileRegistryEntry,
   VaultQuery,
   VaultQueryCondition,
-} from '../../gdc-sdk-core-ts/dist/index.js';
+} from 'gdc-sdk-core-ts';
 
-export type { AppInfo, InitializeSessionParams, Profile, ProfileRegistryEntry, VaultQueryCondition, VaultQuery, IVaultRepository, IApiConfig, INetwork, IVerifier } from '../../gdc-sdk-core-ts/dist/index.js';
+export type { AppInfo, ResolvedAppInfo, InitializeSessionParams, Profile, ProfileRegistryEntry, VaultQueryCondition, VaultQuery, IVaultRepository, IApiConfig, INetwork, IVerifier } from 'gdc-sdk-core-ts';
 
 export type SdkConfig = {
   crypto?: unknown;
