@@ -36,6 +36,15 @@ Current convergence status:
 - `gdc-sdk-core-ts` now defines runtime-neutral contracts for identity stores, discovery facades, canonical activation payloads, and provider DID to endpoint resolution.
 - `gdc-sdk-front-ts` still needs to wire those contracts into real browser/native runtime adapters.
 
+Naming rule for activation capabilities:
+
+- persisted activation/storage contract: `org.schema.Service.serviceType`
+- SDK builder input in core/node: `serviceCapabilities` or `service.capabilities`
+- frontend session/profile UX layer: `facets`
+
+Do not collapse these three names into one concept. Frontend facets are not the
+same thing as the persisted activation claim.
+
 ## 1. Package roles
 
 - `gdc-common-utils-ts`
