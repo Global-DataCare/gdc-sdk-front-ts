@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { ActorCapabilities, ActorKinds } from 'gdc-common-utils-ts/constants/actor-session';
 
 import {
   expandActorSessionDescriptorToFacades,
@@ -8,12 +9,12 @@ import {
 
 test('gdc-sdk-front-ts reuses core facade expansion for Family sessions', () => {
   const facades = expandActorSessionDescriptorToFacades({
-    actorKinds: ['individual_controller', 'individual_member'],
+    actorKinds: [ActorKinds.IndividualController, ActorKinds.IndividualMember],
     capabilities: [
-      'individual.bootstrap',
-      'individual.import_ips',
-      'individual.generate_digital_twin',
-      'consent.grant_professional_access',
+      ActorCapabilities.IndividualBootstrap,
+      ActorCapabilities.IndividualImportIps,
+      ActorCapabilities.IndividualGenerateDigitalTwin,
+      ActorCapabilities.ConsentGrantProfessionalAccess,
     ],
     appType: 'Family',
     profileId: 'profile-family-1',
@@ -22,16 +23,16 @@ test('gdc-sdk-front-ts reuses core facade expansion for Family sessions', () => 
 
   assert.deepEqual(facades, [
     {
-      actorKind: 'individual_controller',
-      capabilities: ['individual.bootstrap', 'consent.grant_professional_access'],
+      actorKind: ActorKinds.IndividualController,
+      capabilities: [ActorCapabilities.IndividualBootstrap, ActorCapabilities.ConsentGrantProfessionalAccess],
       appType: 'Family',
       profileId: 'profile-family-1',
       profileDid: 'did:web:family:controller',
       role: undefined,
     },
     {
-      actorKind: 'individual_member',
-      capabilities: ['individual.import_ips', 'individual.generate_digital_twin'],
+      actorKind: ActorKinds.IndividualMember,
+      capabilities: [ActorCapabilities.IndividualImportIps, ActorCapabilities.IndividualGenerateDigitalTwin],
       appType: 'Family',
       profileId: 'profile-family-1',
       profileDid: 'did:web:family:controller',
@@ -42,11 +43,11 @@ test('gdc-sdk-front-ts reuses core facade expansion for Family sessions', () => 
 
 test('gdc-sdk-front-ts reuses core capability filtering', () => {
   assert.deepEqual(
-    filterCapabilitiesForActor('organization_employee', [
-      'organization.issue_activation_code',
-      'organization.request_smart_token',
-      'individual.import_ips',
+    filterCapabilitiesForActor(ActorKinds.OrganizationEmployee, [
+      ActorCapabilities.OrganizationIssueActivationCode,
+      ActorCapabilities.OrganizationRequestSmartToken,
+      ActorCapabilities.IndividualImportIps,
     ]),
-    ['organization.issue_activation_code', 'organization.request_smart_token'],
+    [ActorCapabilities.OrganizationIssueActivationCode, ActorCapabilities.OrganizationRequestSmartToken],
   );
 });

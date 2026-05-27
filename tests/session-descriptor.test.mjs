@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { ActorCapabilities, ActorKinds } from 'gdc-common-utils-ts/constants/actor-session';
 
 import {
   describeFrontActorFacades,
@@ -19,12 +20,16 @@ test('describeFrontActorSession builds a composite Family descriptor from actor 
   });
 
   assert.deepEqual(descriptor, {
-    actorKinds: ['individual_controller', 'individual_member'],
+    actorKinds: [ActorKinds.IndividualController, ActorKinds.IndividualMember],
     capabilities: [
-      'individual.bootstrap',
-      'consent.grant_professional_access',
-      'individual.import_ips',
-      'individual.generate_digital_twin',
+      ActorCapabilities.IndividualBootstrap,
+      ActorCapabilities.IndividualDisable,
+      ActorCapabilities.IndividualPurge,
+      ActorCapabilities.IndividualMemberDisable,
+      ActorCapabilities.IndividualMemberPurge,
+      ActorCapabilities.ConsentGrantProfessionalAccess,
+      ActorCapabilities.IndividualImportIps,
+      ActorCapabilities.IndividualGenerateDigitalTwin,
     ],
     appType: 'Family',
     profileId: 'profile-family-1',
@@ -46,16 +51,23 @@ test('describeFrontActorFacades splits Family descriptor into scoped facades', (
 
   assert.deepEqual(facades, [
     {
-      actorKind: 'individual_controller',
-      capabilities: ['individual.bootstrap', 'consent.grant_professional_access'],
+      actorKind: ActorKinds.IndividualController,
+      capabilities: [
+        ActorCapabilities.IndividualBootstrap,
+        ActorCapabilities.IndividualDisable,
+        ActorCapabilities.IndividualPurge,
+        ActorCapabilities.IndividualMemberDisable,
+        ActorCapabilities.IndividualMemberPurge,
+        ActorCapabilities.ConsentGrantProfessionalAccess,
+      ],
       appType: 'Family',
       profileId: 'profile-family-1',
       profileDid: 'did:web:family:controller',
       role: undefined,
     },
     {
-      actorKind: 'individual_member',
-      capabilities: ['individual.import_ips', 'individual.generate_digital_twin'],
+      actorKind: ActorKinds.IndividualMember,
+      capabilities: [ActorCapabilities.IndividualImportIps, ActorCapabilities.IndividualGenerateDigitalTwin],
       appType: 'Family',
       profileId: 'profile-family-1',
       profileDid: 'did:web:family:controller',
