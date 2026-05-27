@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] - 2026-05-27
+
+### Changed
+- Updated shared dependency targets to:
+  - `gdc-common-utils-ts@^1.10.0`
+  - `gdc-sdk-core-ts@^0.5.1`
+- Kept frontend-facing onboarding vocabulary aligned with the clearer shared
+  capability naming.
+
+### Testing
+- `npm run build`
+
 ## [0.3.2] - 2026-05-26
 
 ### Changed
