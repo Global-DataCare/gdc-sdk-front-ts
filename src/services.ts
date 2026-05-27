@@ -1,6 +1,15 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
+/**
+ * @fileoverview Frontend-only service facades.
+ *
+ * @architecture 101
+ * Keep this layer free from GW routing/crypto concerns. Product apps should call
+ * their portal/BFF here and map responses into shared DTOs.
+ */
 
 import type { DeviceAppType, DeviceUserClass } from 'gdc-common-utils-ts/constants';
+import { RELATED_PROFILE_SEARCH_PARAM_ACTOR_IDENTIFIER } from 'gdc-sdk-core-ts';
+import type { FrontRelatedProfileSearchResult, FrontRelatedProfileSummary } from './types.js';
 
 function requireNonEmptyText(value: unknown, fieldName: string): string {
   const normalized = String(value ?? '').trim();
@@ -226,6 +235,24 @@ export class IndividualService {
     _date?: { start?: string; end?: string },
   ): Promise<{ thid: string }> {
     return { thid: `thid-${Date.now()}` };
+  }
+
+  /**
+   * Placeholder frontend-facing related-profile query surface.
+   *
+   * Product integrations are expected to call a portal/BFF endpoint such as
+   * `GET /api/personal/related-profiles` and map the response to this shared DTO.
+   */
+  public async listRelatedProfiles(
+    actorIdentifier: string,
+  ): Promise<FrontRelatedProfileSearchResult> {
+    requireNonEmptyText(actorIdentifier, `listRelatedProfiles ${RELATED_PROFILE_SEARCH_PARAM_ACTOR_IDENTIFIER}`);
+    const data: FrontRelatedProfileSummary[] = [];
+    return {
+      actorIdentifier,
+      total: data.length,
+      data,
+    };
   }
 }
 

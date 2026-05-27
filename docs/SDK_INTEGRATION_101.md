@@ -2,6 +2,10 @@
 
 This file is the short frontend integration map.
 
+Related profiles / active subject selector:
+
+- [SDK_RELATED_PROFILES_101.md](./SDK_RELATED_PROFILES_101.md)
+
 If you want the business-flow overview first, start here:
 
 - [gdc-sdk-core-ts/docs/SDK_FLOWS_101.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/SDK_FLOWS_101.md)
