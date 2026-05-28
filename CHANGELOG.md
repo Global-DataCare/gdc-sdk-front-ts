@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.2] - 2026-05-28
+
+### Changed
+- Updated shared dependency target to `gdc-common-utils-ts@^1.11.0`.
+- Kept frontend package alignment with the latest shared key-binding and VP-token documentation.
+
+### Testing
+- `npm run build`
+
 ## [0.5.1] - 2026-05-27
 
 ### Changed
