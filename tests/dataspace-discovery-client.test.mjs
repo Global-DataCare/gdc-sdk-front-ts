@@ -13,7 +13,10 @@ import {
 
 import {
   filterPublishedProviderCardsByCapability,
+  HttpDataspaceDiscoveryClient,
+  mapHostingOperatorMatchToCard,
   mapHostingOperatorRecordToCard,
+  mapPublishedProviderMatchToCard,
   mapPublishedProviderRecordToCard,
 } from '../dist/index.js';
 
@@ -49,6 +52,35 @@ test('frontend discovery maps published providers into UI cards', () => {
   assert.equal(card.sector, DataspaceSectors.AnimalCare);
 });
 
+test('frontend discovery maps backend match DTOs into UI cards', () => {
+  const providerCard = mapPublishedProviderMatchToCard({
+    providerDid: EXAMPLE_TENANT_SERVICE_DID,
+    record: {
+      providerDid: EXAMPLE_TENANT_SERVICE_DID,
+      serviceType: ServiceCapabilityToken.IndexProvider,
+      category: DataspaceSectors.AnimalCare,
+      areaServed: EXAMPLE_COVERAGE_SCOPE_EU,
+      endpointUrl: EXAMPLE_PROVIDER_PUBLISHED_ENDPOINT_URL,
+      catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+    },
+  });
+  const hostCard = mapHostingOperatorMatchToCard({
+    operatorDid: EXAMPLE_HOSTING_OPERATOR_DID,
+    record: {
+      subjectId: EXAMPLE_HOSTING_OPERATOR_DID,
+      serviceTypes: [ServiceCapabilityToken.IndexProvider],
+      categories: [DataspaceSectors.AnimalCare],
+      areaServed: [EXAMPLE_COVERAGE_SCOPE_EU, EXAMPLE_JURISDICTION],
+      addressCountry: EXAMPLE_JURISDICTION,
+      coverageScope: EXAMPLE_COVERAGE_SCOPE_EU,
+    },
+    catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+  });
+
+  assert.equal(providerCard.did, EXAMPLE_TENANT_SERVICE_DID);
+  assert.equal(hostCard.did, EXAMPLE_HOSTING_OPERATOR_DID);
+});
+
 test('frontend discovery filters provider cards by capability', () => {
   const filtered = filterPublishedProviderCardsByCapability([
     {
@@ -67,4 +99,175 @@ test('frontend discovery filters provider cards by capability', () => {
 
   assert.equal(filtered.length, 1);
   assert.equal(filtered[0]?.did, EXAMPLE_TENANT_SERVICE_DID);
+});
+
+test('HttpDataspaceDiscoveryClient maps backend discovery DTOs into UI cards', async () => {
+  const client = new HttpDataspaceDiscoveryClient({
+    endpointUrl: 'https://portal.example.org/api/dataspace-discovery/providers',
+    fetcher: async (_input, init) => {
+      assert.equal(init?.method, 'POST');
+      assert.match(String(init?.body || ''), /"providerCapability":"indexing\.cruds"/);
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          providers: [{
+            providerDid: EXAMPLE_TENANT_SERVICE_DID,
+            record: {
+              providerDid: EXAMPLE_TENANT_SERVICE_DID,
+              serviceType: ServiceCapabilityToken.IndexProvider,
+              category: DataspaceSectors.AnimalCare,
+              areaServed: EXAMPLE_COVERAGE_SCOPE_EU,
+              endpointUrl: EXAMPLE_PROVIDER_PUBLISHED_ENDPOINT_URL,
+              catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+            },
+            hostingOperatorDid: EXAMPLE_HOSTING_OPERATOR_DID,
+          }],
+          hostingOperators: [{
+            operatorDid: EXAMPLE_HOSTING_OPERATOR_DID,
+            record: {
+              subjectId: EXAMPLE_HOSTING_OPERATOR_DID,
+              serviceTypes: [ServiceCapabilityToken.IndexProvider],
+              categories: [DataspaceSectors.AnimalCare],
+              areaServed: [EXAMPLE_COVERAGE_SCOPE_EU, EXAMPLE_JURISDICTION],
+              addressCountry: EXAMPLE_JURISDICTION,
+              coverageScope: EXAMPLE_COVERAGE_SCOPE_EU,
+            },
+            catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+          }],
+        }),
+      };
+    },
+  });
+
+  const result = await client.listPublishedProviders({
+    sector: DataspaceSectors.AnimalCare,
+    providerCapability: ServiceCapabilityToken.IndexProvider,
+    coverageScope: EXAMPLE_COVERAGE_SCOPE_EU,
+  });
+
+  assert.equal(result.providers.length, 1);
+  assert.equal(result.providers[0]?.did, EXAMPLE_TENANT_SERVICE_DID);
+  assert.equal(result.providers[0]?.endpointUrl, EXAMPLE_PROVIDER_PUBLISHED_ENDPOINT_URL);
+  assert.equal(result.hostingOperators?.[0]?.did, EXAMPLE_HOSTING_OPERATOR_DID);
+});
+
+test('HttpDataspaceDiscoveryClient sends app identity and custom headers to the BFF', async () => {
+  const requests = [];
+  const client = new HttpDataspaceDiscoveryClient({
+    endpointUrl: '/api/personal/dataspace-discovery/providers',
+    appInfo: {
+      appId: 'portal.globaldatacare.es',
+      appVersion: 'v2.4.0',
+      appType: 'Family',
+      sector: 'animal-care',
+    },
+    requestHeaders: {
+      Authorization: 'Bearer test-token',
+    },
+    fetcher: async (url, init) => {
+      requests.push({ url, init });
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ providers: [] }),
+      };
+    },
+  });
+
+  await client.listPublishedProviders({
+    sector: DataspaceSectors.AnimalCare,
+    providerCapability: ServiceCapabilityToken.IndexProvider,
+    jurisdiction: EXAMPLE_JURISDICTION,
+    coverageScope: EXAMPLE_COVERAGE_SCOPE_EU,
+  });
+
+  assert.deepEqual(requests, [{
+    url: '/api/personal/dataspace-discovery/providers',
+    init: {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        AppId: 'es.globaldatacare.portal',
+        AppVersion: 'v2.4.0',
+        Authorization: 'Bearer test-token',
+      },
+      body: JSON.stringify({
+        sector: DataspaceSectors.AnimalCare,
+        providerCapability: ServiceCapabilityToken.IndexProvider,
+        jurisdiction: EXAMPLE_JURISDICTION,
+        coverageScope: EXAMPLE_COVERAGE_SCOPE_EU,
+      }),
+    },
+  }]);
+});
+
+test('HttpDataspaceDiscoveryClient derives hosting operators from provider matches when the BFF omits them', async () => {
+  const client = new HttpDataspaceDiscoveryClient({
+    fetcher: async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        providers: [
+          {
+            providerDid: EXAMPLE_TENANT_SERVICE_DID,
+            record: {
+              providerDid: EXAMPLE_TENANT_SERVICE_DID,
+              serviceType: ServiceCapabilityToken.IndexProvider,
+              category: DataspaceSectors.AnimalCare,
+              areaServed: EXAMPLE_COVERAGE_SCOPE_EU,
+              endpointUrl: EXAMPLE_PROVIDER_PUBLISHED_ENDPOINT_URL,
+              catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+            },
+            hostingOperatorDid: EXAMPLE_HOSTING_OPERATOR_DID,
+            hostingOperatorTitle: 'Host A',
+            hostingOperator: {
+              subjectId: EXAMPLE_HOSTING_OPERATOR_DID,
+              serviceTypes: [ServiceCapabilityToken.IndexProvider],
+              categories: [DataspaceSectors.AnimalCare],
+              areaServed: [EXAMPLE_COVERAGE_SCOPE_EU, EXAMPLE_JURISDICTION],
+              addressCountry: EXAMPLE_JURISDICTION,
+              coverageScope: EXAMPLE_COVERAGE_SCOPE_EU,
+            },
+          },
+          {
+            providerDid: EXAMPLE_SECONDARY_TENANT_SERVICE_DID,
+            record: {
+              providerDid: EXAMPLE_SECONDARY_TENANT_SERVICE_DID,
+              serviceType: ServiceCapabilityToken.IndexProvider,
+              category: DataspaceSectors.AnimalCare,
+              areaServed: EXAMPLE_COVERAGE_SCOPE_EU,
+              endpointUrl: EXAMPLE_PROVIDER_PUBLISHED_ENDPOINT_URL,
+              catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+            },
+            hostingOperatorDid: EXAMPLE_HOSTING_OPERATOR_DID,
+            hostingOperatorTitle: 'Host A',
+            hostingOperator: {
+              subjectId: EXAMPLE_HOSTING_OPERATOR_DID,
+              serviceTypes: [ServiceCapabilityToken.IndexProvider],
+              categories: [DataspaceSectors.AnimalCare],
+              areaServed: [EXAMPLE_COVERAGE_SCOPE_EU, EXAMPLE_JURISDICTION],
+              addressCountry: EXAMPLE_JURISDICTION,
+              coverageScope: EXAMPLE_COVERAGE_SCOPE_EU,
+            },
+          },
+        ],
+      }),
+    }),
+  });
+
+  const result = await client.listPublishedProviders({
+    sector: DataspaceSectors.AnimalCare,
+    providerCapability: ServiceCapabilityToken.IndexProvider,
+  });
+
+  assert.equal(result.providers.length, 2);
+  assert.deepEqual(result.hostingOperators, [{
+    did: EXAMPLE_HOSTING_OPERATOR_DID,
+    title: 'Host A',
+    sectors: [DataspaceSectors.AnimalCare],
+    coverageLabel: `${EXAMPLE_COVERAGE_SCOPE_EU}, ${EXAMPLE_JURISDICTION}`,
+    catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+  }]);
 });

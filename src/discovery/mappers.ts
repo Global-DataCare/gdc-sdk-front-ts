@@ -4,7 +4,12 @@ import type {
   HostingOperatorSemanticRecord,
   PublishedProviderCatalogRecord,
 } from 'gdc-common-utils-ts';
-import type { HostingOperatorCard, PublishedProviderCard } from './types.js';
+import type {
+  HostingOperatorCard,
+  HostingOperatorMatchDto,
+  PublishedProviderCard,
+  PublishedProviderMatchDto,
+} from './types.js';
 
 function titleFromDid(did: string): string {
   const normalized = String(did || '').trim();
@@ -45,6 +50,31 @@ export function mapPublishedProviderRecordToCard(
     endpointUrl: record.endpointUrl,
     catalogUrl: record.catalogUrl,
   };
+}
+
+/**
+ * Maps a normalized backend/BFF hosting-operator match DTO to a compact UI
+ * card.
+ */
+export function mapHostingOperatorMatchToCard(
+  match: HostingOperatorMatchDto,
+): HostingOperatorCard {
+  return mapHostingOperatorRecordToCard(match.record, {
+    catalogUrl: match.catalogUrl,
+    title: match.title,
+  });
+}
+
+/**
+ * Maps a normalized backend/BFF published-provider match DTO to a compact UI
+ * card.
+ */
+export function mapPublishedProviderMatchToCard(
+  match: PublishedProviderMatchDto,
+): PublishedProviderCard {
+  return mapPublishedProviderRecordToCard(match.record, {
+    title: match.title,
+  });
 }
 
 /**
