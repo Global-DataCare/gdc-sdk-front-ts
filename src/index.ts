@@ -12,3 +12,4 @@ export * from './VerifierService.js';
 export * from './ProfileManager.js';
 export * from './ProfileRegistry.js';
 export * from './ClientSDK.js';
+export * from './discovery/index.js';

@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2026-05-29
+
+### Added
+- Added the first frontend-facing dataspace discovery runtime surface:
+  - `src/discovery/DataspaceDiscoveryClient.ts`
+  - `src/discovery/types.ts`
+  - `src/discovery/mappers.ts`
+  - `src/discovery/index.ts`
+- Added public root exports for the dataspace discovery client contract and UI
+  mapping helpers.
+- Added focused frontend discovery tests covering:
+  - hosting-operator card mapping
+  - published-provider card mapping
+  - capability filtering at presentation layer
+
+### Changed
+- Updated the shared dependency target to `gdc-common-utils-ts@^1.12.0` so the
+  frontend runtime can align with the new common dataspace discovery semantics.
+- Updated `TODO.md` and `docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md` to keep the
+  default integration path BFF-first, with direct public-catalog mode treated
+  as an optional later adapter.
+
+### Testing
+- `npm test -- tests/dataspace-discovery-client.test.mjs`
+
 ## [0.5.2] - 2026-05-28
 
 ### Changed
