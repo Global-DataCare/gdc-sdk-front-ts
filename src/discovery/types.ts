@@ -1,14 +1,13 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
+import type { DataspaceDiscoveryFilter } from 'gdc-common-utils-ts';
+
 /**
  * Input used by frontend discovery clients to request published providers from
  * a backend/BFF or, optionally, a public-catalog adapter.
  */
-export type ListPublishedProvidersInput = Readonly<{
-  sector: string;
+export type ListPublishedProvidersInput = Omit<DataspaceDiscoveryFilter, 'capability' | 'requiredCapabilities'> & Readonly<{
   providerCapability: string;
-  jurisdiction?: string;
-  coverageScope?: string;
 }>;
 
 /**
