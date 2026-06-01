@@ -1,11 +1,5 @@
 # Frontend Discovery 101
 
-Version:
-- Frontend runtime release: `0.6.0`
-- Depends on: `gdc-common-utils-ts@1.12.0`
-- Depends on normalized node/BFF discovery DTOs
-- Date: `2026-06-01`
-
 ## Purpose
 
 This document defines the frontend-facing discovery surface for web/native apps.
@@ -17,6 +11,28 @@ The default frontend integration path is:
 
 Direct public-catalog consumption may exist as an optional mode, but must not be
 the default path for portal/browser applications.
+
+## Main idea
+
+Frontend developers should think in this simple flow:
+
+1. choose `sector`
+2. choose `jurisdiction`
+3. choose provider capability:
+   - `IndexProvider`
+   - `DigitalTwinProvider`
+4. call the backend/BFF
+5. render the returned provider and host cards
+
+The frontend should not need to know:
+
+- `networkType`
+- ICA defaults
+- host bootstrap plans
+- `/.well-known/dspace-version`
+- `/dsp/catalog/dcat.json`
+
+Those belong to the backend.
 
 ## Public API
 
@@ -83,6 +99,7 @@ Executable reference:
 import { HttpDataspaceDiscoveryClient } from 'gdc-sdk-front-ts';
 import { ServiceCapabilityToken } from 'gdc-common-utils-ts/constants';
 
+// Frontend client for one backend endpoint.
 const client = new HttpDataspaceDiscoveryClient({
   endpointUrl: '/api/dataspace-discovery/providers',
   requestHeaders: {
@@ -90,6 +107,8 @@ const client = new HttpDataspaceDiscoveryClient({
   },
 });
 
+// Ask the backend for one business use case:
+// "show me index providers for animal-care in ES".
 const result = await client.listPublishedProviders({
   sector: 'animal-care',
   jurisdiction: 'ES',
@@ -97,6 +116,7 @@ const result = await client.listPublishedProviders({
   providerCapability: ServiceCapabilityToken.IndexProvider,
 });
 
+// Render the returned cards in the UI.
 for (const provider of result.providers) {
   console.log(provider.did, provider.title, provider.endpointUrl);
 }
@@ -104,10 +124,29 @@ for (const provider of result.providers) {
 
 Expected backend behavior behind that endpoint:
 
-1. resolve hosting operators from normalized semantic records
-2. fetch host `/.well-known/dspace-version`
-3. derive `/dsp/catalog/dcat.json`
-4. return normalized provider/operator DTOs to the frontend
+1. load configured defaults or live discovery sources
+2. resolve hosting operators for one `sector + jurisdiction`
+3. fetch host `/.well-known/dspace-version` when provider catalogs are needed
+4. derive `/dsp/catalog/dcat.json`
+5. return normalized provider/operator DTOs to the frontend
+
+## What the frontend should remember
+
+- frontend asks only for:
+  - `sector`
+  - `jurisdiction`
+  - `providerCapability`
+- backend owns:
+  - `networkType`
+  - `default-first`
+  - ICA/default host bootstrap
+  - host catalog crawling
+- frontend renders:
+  - provider title
+  - provider did
+  - provider endpoint URL
+  - host title when present
+  - coverage labels
 
 ## Example Rules
 

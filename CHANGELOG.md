@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.3] - 2026-06-01
+
+### Changed
+- Simplified frontend discovery documentation so the primary integration story
+  is:
+  - frontend sends `sector + jurisdiction + providerCapability` to its backend
+  - backend owns `default-first`, `networkType`, and host bootstrap
+  - frontend renders normalized provider/host cards
+- Reworked the README discovery snippet to be more self-explanatory for portal
+  developers and to avoid mixing frontend concerns with backend bootstrap
+  internals.
+
+### Testing
+- `npm test`
+
 ## [0.6.1] - 2026-06-01
 
 ### Changed

@@ -83,17 +83,32 @@ Copy/paste starting point:
 import { HttpDataspaceDiscoveryClient } from 'gdc-sdk-front-ts';
 import { ServiceCapabilityToken } from 'gdc-common-utils-ts/constants';
 
+// Frontend talks to its own backend/BFF.
+// The frontend should not need to know `networkType` or host bootstrap rules.
 const discoveryClient = new HttpDataspaceDiscoveryClient({
   endpointUrl: '/api/dataspace-discovery/providers',
 });
 
+// Ask for providers for one business sector in one jurisdiction.
 const result = await discoveryClient.listPublishedProviders({
   sector: 'animal-care',
   jurisdiction: 'ES',
   coverageScope: 'EU',
   providerCapability: ServiceCapabilityToken.IndexProvider,
 });
+
+// Use the returned cards directly in the UI.
+for (const provider of result.providers) {
+  console.log(provider.did, provider.title, provider.endpointUrl);
+}
 ```
+
+What happens behind that frontend call:
+
+- frontend sends `sector + jurisdiction + capability` to its backend
+- backend uses `gdc-sdk-node-ts` with `default-first`
+- backend resolves hosts and providers
+- frontend receives normalized cards and renders them
 
 ## Actor Split And UI Scope
 
