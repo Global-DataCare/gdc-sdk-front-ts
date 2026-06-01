@@ -10,6 +10,10 @@ import type {
 /**
  * Input used by frontend discovery clients to request published providers from
  * a backend/BFF or, optionally, a public-catalog adapter.
+ *
+ * Default integration:
+ * - browser/native app calls its backend
+ * - backend resolves host DSP discovery and returns normalized DTOs
  */
 export type ListPublishedProvidersInput = Omit<DataspaceDiscoveryFilter, 'capability' | 'requiredCapabilities'> & Readonly<{
   providerCapability: string;
@@ -18,6 +22,10 @@ export type ListPublishedProvidersInput = Omit<DataspaceDiscoveryFilter, 'capabi
 /**
  * Normalized hosting-operator match DTO returned by a backend/BFF discovery
  * endpoint.
+ *
+ * `catalogUrl` is optional because the frontend should not need to know
+ * whether the backend started from `/.well-known/dspace-version` and derived
+ * the DSP artifact or received a pre-normalized DTO from another layer.
  */
 export type HostingOperatorMatchDto = Readonly<{
   operatorDid: string;
@@ -30,6 +38,11 @@ export type HostingOperatorMatchDto = Readonly<{
 /**
  * Normalized published-provider match DTO returned by a backend/BFF discovery
  * endpoint.
+ *
+ * `record.discoveryUrl` is the participant-scoped `/.well-known/dspace-version`
+ * entrypoint when the backend chooses to expose it.
+ *
+ * `record.catalogUrl` is the derived `/dsp/catalog/dcat.json` artifact.
  */
 export type PublishedProviderMatchDto = Readonly<{
   providerDid: string;

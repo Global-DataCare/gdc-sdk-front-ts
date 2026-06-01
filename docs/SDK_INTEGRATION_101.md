@@ -205,7 +205,7 @@ What is still converging:
 
 - first-class ICA discovery
 - first-class operator discovery
-- first-class DCAT3 frontend discovery helpers
+- first-class DSP frontend discovery helpers for optional direct mode
 - a single activation helper that hides most onboarding assembly
 
 ## Use This File For

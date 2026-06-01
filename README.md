@@ -22,11 +22,14 @@ If you are integrating this package for the first time, open these in order:
    Real frontend/native setup, imports, `new ClientSDK(...)`,
    `initializeCommunicationIdentity(...)`, provider discovery, and
    `initializeSession(...)`.
-2. [gdc-sdk-core-ts/docs/SDK_FLOWS_101.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/SDK_FLOWS_101.md)
+2. [docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md](./docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md)
+   Frontend discovery guide for BFF-first provider/operator discovery, UI card
+   mapping, and copy/paste backend DTO consumption.
+3. [gdc-sdk-core-ts/docs/SDK_FLOWS_101.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/SDK_FLOWS_101.md)
    Shared business-flow map by actor family.
-3. [gdc-common-utils-ts/src/examples/frontend-session.ts](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/src/examples/frontend-session.ts)
+4. [gdc-common-utils-ts/src/examples/frontend-session.ts](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/src/examples/frontend-session.ts)
    Shared profile/session payload source of truth.
-4. [gdc-common-utils-ts/docs/LIFECYCLE_101.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/LIFECYCLE_101.md)
+5. [gdc-common-utils-ts/docs/LIFECYCLE_101.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/LIFECYCLE_101.md)
    Canonical lifecycle semantics and reusable placeholders for UI and portal flows.
 
 If you need the shortest path:
@@ -55,6 +58,42 @@ Open these tests when you want to see exact frontend calls and exact inputs:
   Profile registry and persistence behavior.
 - [tests/session-descriptor.test.mjs](tests/session-descriptor.test.mjs)
   Session descriptor shaping for UI/runtime code.
+- [tests/dataspace-discovery-client.test.mjs](tests/dataspace-discovery-client.test.mjs)
+  BFF-first dataspace discovery mapping, capability filtering, and DTO-to-card
+  behavior.
+
+## Frontend Discovery Quick Map
+
+Frontend apps should not crawl host catalogs directly by default.
+
+Preferred model:
+
+- backend/BFF resolves host discovery from `/.well-known/dspace-version`
+- backend/BFF derives `/dsp/catalog/dcat.json`
+- frontend consumes normalized DTOs and maps them into cards
+
+Primary references:
+
+- [docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md](./docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md)
+- [tests/dataspace-discovery-client.test.mjs](tests/dataspace-discovery-client.test.mjs)
+
+Copy/paste starting point:
+
+```ts
+import { HttpDataspaceDiscoveryClient } from 'gdc-sdk-front-ts';
+import { ServiceCapabilityToken } from 'gdc-common-utils-ts/constants';
+
+const discoveryClient = new HttpDataspaceDiscoveryClient({
+  endpointUrl: '/api/dataspace-discovery/providers',
+});
+
+const result = await discoveryClient.listPublishedProviders({
+  sector: 'animal-care',
+  jurisdiction: 'ES',
+  coverageScope: 'EU',
+  providerCapability: ServiceCapabilityToken.IndexProvider,
+});
+```
 
 ## Actor Split And UI Scope
 

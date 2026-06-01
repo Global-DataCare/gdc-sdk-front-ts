@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { DataspaceSectors, ServiceCapabilityToken } from 'gdc-common-utils-ts/constants';
 import {
   EXAMPLE_COVERAGE_SCOPE_EU,
-  EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+  EXAMPLE_HOSTING_OPERATOR_CATALOG_ARTIFACT_URL,
+  EXAMPLE_HOSTING_OPERATOR_DSPACE_VERSION_URL,
   EXAMPLE_HOSTING_OPERATOR_DID,
   EXAMPLE_JURISDICTION,
   EXAMPLE_PROVIDER_PUBLISHED_ENDPOINT_URL,
@@ -29,7 +30,7 @@ test('frontend discovery maps hosting operators into UI cards', () => {
     addressCountry: EXAMPLE_JURISDICTION,
     coverageScope: EXAMPLE_COVERAGE_SCOPE_EU,
   }, {
-    catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+    catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_ARTIFACT_URL,
   });
 
   assert.equal(card.did, EXAMPLE_HOSTING_OPERATOR_DID);
@@ -41,11 +42,12 @@ test('frontend discovery maps published providers into UI cards', () => {
   const card = mapPublishedProviderRecordToCard({
     providerDid: EXAMPLE_TENANT_SERVICE_DID,
     serviceType: ServiceCapabilityToken.IndexProvider,
-    category: DataspaceSectors.AnimalCare,
-    areaServed: EXAMPLE_COVERAGE_SCOPE_EU,
-    endpointUrl: EXAMPLE_PROVIDER_PUBLISHED_ENDPOINT_URL,
-    catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
-  });
+      category: DataspaceSectors.AnimalCare,
+      areaServed: EXAMPLE_COVERAGE_SCOPE_EU,
+      endpointUrl: EXAMPLE_PROVIDER_PUBLISHED_ENDPOINT_URL,
+      discoveryUrl: EXAMPLE_HOSTING_OPERATOR_DSPACE_VERSION_URL,
+      catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_ARTIFACT_URL,
+    });
 
   assert.equal(card.did, EXAMPLE_TENANT_SERVICE_DID);
   assert.equal(card.capability, ServiceCapabilityToken.IndexProvider);
@@ -61,7 +63,8 @@ test('frontend discovery maps backend match DTOs into UI cards', () => {
       category: DataspaceSectors.AnimalCare,
       areaServed: EXAMPLE_COVERAGE_SCOPE_EU,
       endpointUrl: EXAMPLE_PROVIDER_PUBLISHED_ENDPOINT_URL,
-      catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+      discoveryUrl: EXAMPLE_HOSTING_OPERATOR_DSPACE_VERSION_URL,
+      catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_ARTIFACT_URL,
     },
   });
   const hostCard = mapHostingOperatorMatchToCard({
@@ -74,7 +77,7 @@ test('frontend discovery maps backend match DTOs into UI cards', () => {
       addressCountry: EXAMPLE_JURISDICTION,
       coverageScope: EXAMPLE_COVERAGE_SCOPE_EU,
     },
-    catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+    catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_ARTIFACT_URL,
   });
 
   assert.equal(providerCard.did, EXAMPLE_TENANT_SERVICE_DID);
@@ -119,7 +122,8 @@ test('HttpDataspaceDiscoveryClient maps backend discovery DTOs into UI cards', a
               category: DataspaceSectors.AnimalCare,
               areaServed: EXAMPLE_COVERAGE_SCOPE_EU,
               endpointUrl: EXAMPLE_PROVIDER_PUBLISHED_ENDPOINT_URL,
-              catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+              discoveryUrl: EXAMPLE_HOSTING_OPERATOR_DSPACE_VERSION_URL,
+              catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_ARTIFACT_URL,
             },
             hostingOperatorDid: EXAMPLE_HOSTING_OPERATOR_DID,
           }],
@@ -133,7 +137,7 @@ test('HttpDataspaceDiscoveryClient maps backend discovery DTOs into UI cards', a
               addressCountry: EXAMPLE_JURISDICTION,
               coverageScope: EXAMPLE_COVERAGE_SCOPE_EU,
             },
-            catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+            catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_ARTIFACT_URL,
           }],
         }),
       };
@@ -218,7 +222,8 @@ test('HttpDataspaceDiscoveryClient derives hosting operators from provider match
               category: DataspaceSectors.AnimalCare,
               areaServed: EXAMPLE_COVERAGE_SCOPE_EU,
               endpointUrl: EXAMPLE_PROVIDER_PUBLISHED_ENDPOINT_URL,
-              catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+              discoveryUrl: EXAMPLE_HOSTING_OPERATOR_DSPACE_VERSION_URL,
+              catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_ARTIFACT_URL,
             },
             hostingOperatorDid: EXAMPLE_HOSTING_OPERATOR_DID,
             hostingOperatorTitle: 'Host A',
@@ -239,7 +244,8 @@ test('HttpDataspaceDiscoveryClient derives hosting operators from provider match
               category: DataspaceSectors.AnimalCare,
               areaServed: EXAMPLE_COVERAGE_SCOPE_EU,
               endpointUrl: EXAMPLE_PROVIDER_PUBLISHED_ENDPOINT_URL,
-              catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+              discoveryUrl: EXAMPLE_HOSTING_OPERATOR_DSPACE_VERSION_URL,
+              catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_ARTIFACT_URL,
             },
             hostingOperatorDid: EXAMPLE_HOSTING_OPERATOR_DID,
             hostingOperatorTitle: 'Host A',
@@ -268,6 +274,6 @@ test('HttpDataspaceDiscoveryClient derives hosting operators from provider match
     title: 'Host A',
     sectors: [DataspaceSectors.AnimalCare],
     coverageLabel: `${EXAMPLE_COVERAGE_SCOPE_EU}, ${EXAMPLE_JURISDICTION}`,
-    catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_URL,
+    catalogUrl: EXAMPLE_HOSTING_OPERATOR_CATALOG_ARTIFACT_URL,
   }]);
 });

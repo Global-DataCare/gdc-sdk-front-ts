@@ -18,11 +18,16 @@ All notable changes to this project will be documented in this file.
   - capability filtering at presentation layer
 
 ### Changed
-- Updated the shared dependency target to `gdc-common-utils-ts@^1.12.0` so the
+- Updated the shared dependency targets to:
+  - `gdc-common-utils-ts@^1.13.0`
+  - `gdc-sdk-core-ts@^0.6.0`
+  so the
   frontend runtime can align with the new common dataspace discovery semantics.
 - Updated `TODO.md` and `docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md` to keep the
   default integration path BFF-first, with direct public-catalog mode treated
   as an optional later adapter.
+- Clarified frontend DTO/documentation examples so `discoveryUrl` and
+  `/dsp/catalog/dcat.json` are treated as distinct concerns.
 
 ### Testing
 - `npm test -- tests/dataspace-discovery-client.test.mjs`

@@ -1,11 +1,10 @@
-# Dataspace Discovery Frontend TODO
+# Frontend Discovery 101
 
 Version:
-- Planned runtime release: `0.6.0`
+- Frontend runtime release: `0.6.0`
 - Depends on: `gdc-common-utils-ts@1.12.0`
-- Depends on node/BFF discovery contract alignment
-- Branch baseline: `feat/dataspace-discovery-foundation`
-- Date: `2026-05-29`
+- Depends on normalized node/BFF discovery DTOs
+- Date: `2026-06-01`
 
 ## Purpose
 
@@ -19,15 +18,15 @@ The default frontend integration path is:
 Direct public-catalog consumption may exist as an optional mode, but must not be
 the default path for portal/browser applications.
 
-## Public API To Add
+## Public API
 
-Add a frontend discovery client module under:
+Current frontend discovery module:
 
 - `src/discovery/DataspaceDiscoveryClient.ts`
 - `src/discovery/types.ts`
 - `src/discovery/index.ts`
 
-Expected public surface:
+Current public surface:
 
 - `interface DataspaceDiscoveryClient`
 - `type ListPublishedProvidersInput`
@@ -52,9 +51,9 @@ If direct public-catalog discovery is added later:
 - reuse shared semantic parsing from `gdc-common-utils-ts`
 - avoid embedding credentials or privileged topology assumptions
 
-## JSDoc To Generate
+## JSDoc Targets
 
-Required JSDoc targets:
+Keep these exports documented:
 
 - `DataspaceDiscoveryClient`
 - all exported DTOs
@@ -66,17 +65,49 @@ Each JSDoc block must state:
 - optional direct-public-catalog mode as secondary path
 - no tenant-host private linkage assumptions on the client
 
-## Tests To Add
-
-Add:
-
-- `tests/dataspace-discovery-client.test.mjs`
+## Tests
 
 Coverage minimum:
 
 - backend DTO to frontend card mapping
 - sector and coverage label normalization
 - provider capability filtering at presentation layer
+
+Executable reference:
+
+- [`tests/dataspace-discovery-client.test.mjs`](../tests/dataspace-discovery-client.test.mjs)
+
+## Copy/Paste Backend DTO Consumption
+
+```ts
+import { HttpDataspaceDiscoveryClient } from 'gdc-sdk-front-ts';
+import { ServiceCapabilityToken } from 'gdc-common-utils-ts/constants';
+
+const client = new HttpDataspaceDiscoveryClient({
+  endpointUrl: '/api/dataspace-discovery/providers',
+  requestHeaders: {
+    Authorization: `Bearer ${accessToken}`,
+  },
+});
+
+const result = await client.listPublishedProviders({
+  sector: 'animal-care',
+  jurisdiction: 'ES',
+  coverageScope: 'EU',
+  providerCapability: ServiceCapabilityToken.IndexProvider,
+});
+
+for (const provider of result.providers) {
+  console.log(provider.did, provider.title, provider.endpointUrl);
+}
+```
+
+Expected backend behavior behind that endpoint:
+
+1. resolve hosting operators from normalized semantic records
+2. fetch host `/.well-known/dspace-version`
+3. derive `/dsp/catalog/dcat.json`
+4. return normalized provider/operator DTOs to the frontend
 
 ## Example Rules
 
