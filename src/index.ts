@@ -2,6 +2,7 @@
 
 export * from 'gdc-sdk-core-ts';
 export * from './runtime-contracts.js';
+export * from './consent-claim-helpers.js';
 export * from './actor-session.js';
 export * from './session-descriptor.js';
 export * from './types.js';
