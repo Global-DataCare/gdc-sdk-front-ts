@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.1] - 2026-06-01
+
+### Changed
+- Updated shared dependency targets to:
+  - `gdc-common-utils-ts@^1.14.0`
+  - `gdc-sdk-core-ts@^0.6.1`
+- Kept frontend discovery docs/examples aligned with the shared
+  `default-first` backend bootstrap guidance.
+
+### Testing
+- `npm test`
+
 ## [0.6.0] - 2026-05-29
 
 ### Added
