@@ -11,12 +11,29 @@ import type {
 } from './roleRegistry.js';
 import { CommonAuthService } from './services.js';
 import { mapCapabilitiesToServices } from './capabilityMapper.js';
+import {
+  HostOnboardingSdk,
+} from './orchestration/host-onboarding-sdk.js';
+import { IndividualControllerSdk } from './orchestration/individual-controller-sdk.js';
+import { IndividualMemberSdk } from './orchestration/individual-member-sdk.js';
+import { OrganizationControllerSdk } from './orchestration/organization-controller-sdk.js';
+import { OrganizationEmployeeSdk } from './orchestration/organization-employee-sdk.js';
+import { PersonalSdk } from './orchestration/personal-sdk.js';
+import { ProfessionalSdk } from './orchestration/professional-sdk.js';
+import { createSyntheticSubmitAndPollResult, type FrontRuntimeClient } from './orchestration/client-port.js';
 
 /**
  * Role-scoped session object returned by `ClientSDK.initializeSession(...)`.
  *
  * It exposes the common/auth surface plus the services allowed by the current
  * profile capabilities.
+ *
+ * Architectural note:
+ * `ProfileManager` remains the frontend session/composition entry point, but it
+ * also materializes actor-scoped facades that mirror `gdc-sdk-node-ts`.
+ *
+ * The goal is to preserve the legacy/frontend-friendly session API while
+ * keeping the same actor boundaries as the backend runtime.
  */
 export class ProfileManager {
   public readonly profile: Profile;
@@ -26,6 +43,7 @@ export class ProfileManager {
   public readonly familyAdmin?: FamilyAdminServices;
   public readonly individual?: IndividualServices;
   public readonly professional?: ProfessionalServices;
+  private readonly runtimeClient: FrontRuntimeClient;
 
   /**
    * @param profile Current logical profile.
@@ -40,6 +58,129 @@ export class ProfileManager {
     this.familyAdmin = mapped.familyAdmin;
     this.individual = mapped.individual;
     this.professional = mapped.professional;
+    this.runtimeClient = {
+      activateOrganizationInGatewayFromIcaProof: (input) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.activateOrganizationInGatewayFromIcaProof(input);
+      },
+      confirmLegalOrganizationOrder: (input) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.confirmLegalOrganizationOrder(input);
+      },
+      createOrganizationEmployee: (ctx, input) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.createOrganizationEmployee(ctx.providerDid, ctx.idToken, input)
+          .then((result) => createSyntheticSubmitAndPollResult(result.thid));
+      },
+      disableEmployee: (ctx, input) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.disableEmployee(ctx.providerDid, ctx.idToken, input);
+      },
+      purgeEmployee: (ctx, input) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.purgeEmployee(ctx.providerDid, ctx.idToken, input);
+      },
+      activateEmployeeDeviceWithActivationRequest: (ctx, input) =>
+        this.common.auth.activateEmployeeDeviceWithActivationRequest(input.activationCode, ctx.providerDid, ctx.idToken, input.dcrPayload),
+      requestSmartToken: (input) => this.common.auth.requestSmartToken(input),
+      startIndividualOrganization: (ctx, input) => {
+        if (!this.familyAdmin?.admin) throw new Error('familyAdmin.admin service is not available for this profile.');
+        return this.familyAdmin.admin.startIndividualOrganization(ctx.providerDid, ctx.idToken, input);
+      },
+      confirmIndividualOrganizationOrder: (ctx, input) => {
+        if (!this.familyAdmin?.admin) throw new Error('familyAdmin.admin service is not available for this profile.');
+        return this.familyAdmin.admin.confirmIndividualOrganizationOrder(ctx.providerDid, ctx.idToken, input);
+      },
+      disableIndividual: (ctx, input) => {
+        if (!this.familyAdmin?.admin) throw new Error('familyAdmin.admin service is not available for this profile.');
+        return this.familyAdmin.admin.disableIndividual(ctx.providerDid, ctx.idToken, input);
+      },
+      purgeIndividual: (ctx, input) => {
+        if (!this.familyAdmin?.admin) throw new Error('familyAdmin.admin service is not available for this profile.');
+        return this.familyAdmin.admin.purgeIndividual(ctx.providerDid, ctx.idToken, input);
+      },
+      disableIndividualMember: (ctx, input) => {
+        if (!this.familyAdmin?.admin) throw new Error('familyAdmin.admin service is not available for this profile.');
+        return this.familyAdmin.admin.disableIndividualMember(ctx.providerDid, ctx.idToken, input);
+      },
+      purgeIndividualMember: (ctx, input) => {
+        if (!this.familyAdmin?.admin) throw new Error('familyAdmin.admin service is not available for this profile.');
+        return this.familyAdmin.admin.purgeIndividualMember(ctx.providerDid, ctx.idToken, input);
+      },
+      grantProfessionalAccess: (ctx, input) => {
+        if (this.professional?.physician) {
+          return this.professional.physician.grantProfessionalAccess({ ...input, providerDid: ctx.providerDid, requiredScope: ctx.requiredScope, idToken: ctx.idToken });
+        }
+        if (!this.individual?.service) throw new Error('individual.service is not available for this profile.');
+        return this.individual.service.grantProfessionalAccess({ ...input, providerDid: ctx.providerDid, requiredScope: ctx.requiredScope || '', idToken: ctx.idToken });
+      },
+      importIpsOrFhirAndUpdateIndex: (ctx, input) => {
+        if (!this.individual?.service) throw new Error('individual.service is not available for this profile.');
+        return this.individual.service.importIpsOrFhirAndUpdateIndex(
+          input.compositionPayload,
+          ctx.providerDid,
+          ctx.requiredScope || '',
+          ctx.idToken,
+          input.format,
+        ).then((result) => createSyntheticSubmitAndPollResult(result.thid));
+      },
+      upsertRelatedPersonAndPoll: (ctx, input) => {
+        if (!this.individual?.service) throw new Error('individual.service is not available for this profile.');
+        return this.individual.service.upsertRelatedPersonAndPoll(
+          input.relatedPersonPayload,
+          ctx.providerDid,
+          ctx.requiredScope || '',
+          ctx.idToken,
+        );
+      },
+      ingestCommunicationAndUpdateIndex: (ctx, input) => {
+        if (this.professional?.physician) {
+          return this.professional.physician.ingestCommunicationAndUpdateIndex(
+            input.communicationPayload,
+            ctx.providerDid,
+            ctx.requiredScope || '',
+            ctx.idToken,
+            input.pathFormatSegment,
+          );
+        }
+        if (this.professional?.paramedic) {
+          return this.professional.paramedic.ingestCommunicationAndUpdateIndex(
+            input.communicationPayload,
+            ctx.providerDid,
+            ctx.requiredScope || '',
+            ctx.idToken,
+            input.pathFormatSegment,
+          );
+        }
+        if (!this.individual?.service) throw new Error('individual.service is not available for this profile.');
+        return this.individual.service.ingestCommunicationAndUpdateIndex(
+          input.communicationPayload,
+          ctx.providerDid,
+          ctx.requiredScope || '',
+          ctx.idToken,
+          input.pathFormatSegment,
+        );
+      },
+      generateDigitalTwinFromSubjectData: (ctx, input) => {
+        if (!this.individual?.service) throw new Error('individual.service is not available for this profile.');
+        return this.individual.service.generateDigitalTwinFromSubjectData(
+          input.compositionPayload,
+          ctx.providerDid,
+          ctx.requiredScope || '',
+          ctx.idToken,
+          input.format,
+        ).then((result) => createSyntheticSubmitAndPollResult(result.thid));
+      },
+      searchClinicalBundle: (ctx, input) => {
+        if (!this.individual?.service) throw new Error('individual.service is not available for this profile.');
+        return this.individual.service.searchClinicalBundle(input as any, ctx.providerDid, ctx.requiredScope || '', ctx.idToken);
+      },
+      getLatestIps: (ctx, subject) => {
+        if (!this.individual?.service) throw new Error('individual.service is not available for this profile.');
+        return this.individual.service.getLatestIps(subject, ctx.providerDid, ctx.requiredScope || '', ctx.idToken);
+      },
+      submitAndPoll: async (_submitPath, _pollPath, payload) => createSyntheticSubmitAndPollResult(String(payload.thid || `front-${Date.now()}`)),
+    };
   }
 
   /**
@@ -192,6 +333,44 @@ export class ProfileManager {
       params.idToken,
       params.format,
     );
+  }
+
+  public asHostOnboarding(): HostOnboardingSdk {
+    if (!this.orgAdmin?.admin) throw new Error('HostOnboardingSdk is not available for this profile.');
+    return new HostOnboardingSdk(this.runtimeClient);
+  }
+
+  public asOrganizationController(): OrganizationControllerSdk {
+    if (!this.orgAdmin?.admin) throw new Error('OrganizationControllerSdk is not available for this profile.');
+    return new OrganizationControllerSdk(this.runtimeClient);
+  }
+
+  public asOrganizationEmployee(): OrganizationEmployeeSdk {
+    return new OrganizationEmployeeSdk(this.runtimeClient);
+  }
+
+  public asIndividualController(): IndividualControllerSdk {
+    if (!this.familyAdmin?.admin) throw new Error('IndividualControllerSdk is not available for this profile.');
+    return new IndividualControllerSdk(this.runtimeClient);
+  }
+
+  public asIndividualMember(): IndividualMemberSdk {
+    if (!this.individual?.service) throw new Error('IndividualMemberSdk is not available for this profile.');
+    return new IndividualMemberSdk(this.runtimeClient);
+  }
+
+  public asPersonal(): PersonalSdk {
+    if (!this.familyAdmin?.admin && !this.individual?.service) {
+      throw new Error('PersonalSdk is not available for this profile.');
+    }
+    return new PersonalSdk(this.runtimeClient);
+  }
+
+  public asProfessional(): ProfessionalSdk {
+    if (!this.professional?.physician && !this.professional?.paramedic && !this.individual?.service) {
+      throw new Error('ProfessionalSdk is not available for this profile.');
+    }
+    return new ProfessionalSdk(this.runtimeClient);
   }
 }
 

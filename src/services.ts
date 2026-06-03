@@ -1,6 +1,13 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
 import type { DeviceAppType, DeviceUserClass } from 'gdc-common-utils-ts/constants';
+import type { SubmitAndPollResult } from 'gdc-sdk-core-ts';
+import {
+  createSyntheticSubmitAndPollResult,
+  type FrontGrantProfessionalAccessResult,
+  type FrontSmartTokenExchangeResult,
+  type FrontSmartTokenRequestInput,
+} from './orchestration/client-port.js';
 
 function requireNonEmptyText(value: unknown, fieldName: string): string {
   const normalized = String(value ?? '').trim();
@@ -8,6 +15,10 @@ function requireNonEmptyText(value: unknown, fieldName: string): string {
     throw new Error(`${fieldName} is required.`);
   }
   return normalized;
+}
+
+function runtimeThid(prefix: string): string {
+  return `${prefix}-${Date.now()}`;
 }
 
 export class CommonAuthService {
@@ -18,9 +29,54 @@ export class CommonAuthService {
   ): Promise<{ thid: string }> {
     return { thid: `thid-${Date.now()}` };
   }
+
+  public async activateEmployeeDeviceWithActivationRequest(
+    _activationCode: string,
+    _providerDid: string,
+    _idToken: string,
+    _dcrPayload?: Record<string, unknown>,
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('employee-device-activation'));
+  }
+
+  public async requestSmartToken(input: FrontSmartTokenRequestInput): Promise<FrontSmartTokenExchangeResult> {
+    const scopes = [...new Set((input.scopes || []).filter(Boolean))];
+    return {
+      status: 'fetched',
+      accessToken: `front-token-${Date.now()}`,
+      tokenType: 'Bearer',
+      scopes,
+      statusCode: 200,
+      response: {
+        actorDid: input.actorDid,
+        subjectDid: input.subjectDid,
+        scopes,
+      },
+    };
+  }
 }
 
 export class OrgAdminService {
+  public async activateOrganizationInGatewayFromIcaProof(
+    _input: {
+      vpToken: string;
+      controller?: Record<string, unknown>;
+      service?: Record<string, unknown>;
+      additionalClaims?: Record<string, unknown>;
+    },
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('host-activation'));
+  }
+
+  public async confirmLegalOrganizationOrder(
+    _input: {
+      offerId: string;
+      orderClaims?: Record<string, unknown>;
+    },
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('host-order-confirmation'));
+  }
+
   public async createOrganizationEmployee(
     _providerDid: string,
     _idToken: string,
@@ -33,18 +89,106 @@ export class OrgAdminService {
   ): Promise<{ thid: string }> {
     return { thid: `thid-${Date.now()}` };
   }
+
+  public async disableEmployee(
+    _providerDid: string,
+    _idToken: string,
+    _input: {
+      employeeClaims?: Record<string, unknown>;
+      resourceId?: string;
+    },
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('employee-disable'));
+  }
+
+  public async purgeEmployee(
+    _providerDid: string,
+    _idToken: string,
+    _input: {
+      employeeClaims?: Record<string, unknown>;
+      resourceId?: string;
+    },
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('employee-purge'));
+  }
 }
 
 export class FamilyAdminService {
-  public async bootstrapSubjectOrganizationIndex(
+  public async startIndividualOrganization(
+    _providerDid: string,
+    _idToken: string,
     _params: {
+      registrationClaims: object;
+      acceptedOfferId?: string;
+    },
+  ): Promise<{ registrationThid: string; confirmationThid?: string }> {
+    return { registrationThid: runtimeThid('individual-bootstrap') };
+  }
+
+  public async bootstrapSubjectOrganizationIndex(
+    params: {
       registrationClaims: object;
       providerDid: string;
       idToken: string;
       acceptedOfferId?: string;
     },
   ): Promise<{ registrationThid: string; confirmationThid?: string }> {
-    return { registrationThid: `thid-${Date.now()}` };
+    return this.startIndividualOrganization(params.providerDid, params.idToken, params);
+  }
+
+  public async confirmIndividualOrganizationOrder(
+    _providerDid: string,
+    _idToken: string,
+    _input: {
+      offerId: string;
+      orderClaims?: Record<string, unknown>;
+    },
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('individual-order-confirmation'));
+  }
+
+  public async disableIndividual(
+    _providerDid: string,
+    _idToken: string,
+    _input: {
+      organizationClaims?: Record<string, unknown>;
+      resourceId?: string;
+    },
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('individual-disable'));
+  }
+
+  public async purgeIndividual(
+    _providerDid: string,
+    _idToken: string,
+    _input: {
+      organizationClaims?: Record<string, unknown>;
+      resourceId?: string;
+    },
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('individual-purge'));
+  }
+
+  public async disableIndividualMember(
+    _providerDid: string,
+    _idToken: string,
+    _input: {
+      memberClaims?: Record<string, unknown>;
+      resourceId?: string;
+    },
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('individual-member-disable'));
+  }
+
+  public async purgeIndividualMember(
+    _providerDid: string,
+    _idToken: string,
+    _input: {
+      memberClaims?: Record<string, unknown>;
+      resourceId?: string;
+    },
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('individual-member-purge'));
   }
 }
 
@@ -128,15 +272,11 @@ export class IndividualService {
     decision?: 'permit' | 'deny';
     attachmentContentType?: string;
     attachmentBase64?: string;
-  }): Promise<{
-    thid: string;
-    subjectIdentifier: string;
-    actorIdentifier: string;
-    consentClaims: Record<string, unknown>;
-    claimsCid?: string;
-  }> {
+  }): Promise<FrontGrantProfessionalAccessResult> {
+    const thid = runtimeThid('consent');
     return {
-      thid: `thid-${Date.now()}`,
+      thid,
+      consent: createSyntheticSubmitAndPollResult(thid),
       subjectIdentifier: '',
       actorIdentifier: '',
       consentClaims: {},
@@ -151,6 +291,25 @@ export class IndividualService {
     _format?: 'org.hl7.fhir.r4' | 'org.hl7.fhir.api',
   ): Promise<{ thid: string }> {
     return { thid: `thid-${Date.now()}` };
+  }
+
+  public async upsertRelatedPersonAndPoll(
+    _relatedPersonPayload: object,
+    _providerDid: string,
+    _requiredScope: string,
+    _idToken: string,
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('related-person-upsert'));
+  }
+
+  public async ingestCommunicationAndUpdateIndex(
+    _communicationPayload: object,
+    _providerDid: string,
+    _requiredScope: string,
+    _idToken: string,
+    _format?: 'org.hl7.fhir.r4' | 'org.hl7.fhir.api',
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('communication-ingest'));
   }
 
   /**
@@ -229,5 +388,38 @@ export class IndividualService {
   }
 }
 
-export class PhysicianService {}
-export class ParamedicService {}
+export class ParamedicService {
+  public async requestSmartToken(input: FrontSmartTokenRequestInput): Promise<FrontSmartTokenExchangeResult> {
+    return {
+      status: 'fetched',
+      accessToken: `front-token-${Date.now()}`,
+      tokenType: 'Bearer',
+      scopes: [...new Set((input.scopes || []).filter(Boolean))],
+      statusCode: 200,
+      response: { actorDid: input.actorDid },
+    };
+  }
+
+  public async ingestCommunicationAndUpdateIndex(
+    _communicationPayload: object,
+    _providerDid: string,
+    _requiredScope: string,
+    _idToken: string,
+    _format?: 'org.hl7.fhir.r4' | 'org.hl7.fhir.api',
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('professional-communication'));
+  }
+}
+
+export class PhysicianService extends ParamedicService {
+  public async grantProfessionalAccess(_params: Record<string, unknown>): Promise<FrontGrantProfessionalAccessResult> {
+    const thid = runtimeThid('professional-consent');
+    return {
+      thid,
+      consent: createSyntheticSubmitAndPollResult(thid),
+      subjectIdentifier: '',
+      actorIdentifier: '',
+      consentClaims: {},
+    };
+  }
+}

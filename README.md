@@ -14,13 +14,23 @@ Use this package when your frontend needs to:
 This package is frontend-facing. It should explain app flows, not gateway route
 details.
 
+Architectural rule:
+
+- `gdc-sdk-front-ts` should converge on the same actor-scoped facade boundaries
+  as `gdc-sdk-node-ts`
+- transport and adapter details may differ
+- business ownership must not differ by runtime
+
 ## Start Here
 
 If you are integrating this package for the first time, open these in order:
 
+1. [gdc-sdk-core-ts/docs/101-SDK_PACKAGE_BOUNDARIES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_PACKAGE_BOUNDARIES.md)
+   Why `core`, `node`, and `front` are separate packages, what each one owns,
+   and why frontend facades should mirror backend actor boundaries.
 1. [docs/101-SDK_INTEGRATION.md](./docs/101-SDK_INTEGRATION.md)
-   Real frontend/native setup, imports, `new ClientSDK(...)`,
-   `initializeCommunicationIdentity(...)`, provider discovery, and
+  Real frontend/native setup, imports, `new ClientSDK(...)`,
+  `initializeCommunicationIdentity(...)`, provider discovery, and
    `initializeSession(...)`.
 2. [docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md](./docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md)
    Frontend discovery guide for BFF-first provider/operator discovery, UI card
