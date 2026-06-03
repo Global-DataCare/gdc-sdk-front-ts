@@ -18,14 +18,14 @@ details.
 
 If you are integrating this package for the first time, open these in order:
 
-1. [docs/SDK_INTEGRATION_101.md](./docs/SDK_INTEGRATION_101.md)
+1. [docs/101-SDK_INTEGRATION.md](./docs/101-SDK_INTEGRATION.md)
    Real frontend/native setup, imports, `new ClientSDK(...)`,
    `initializeCommunicationIdentity(...)`, provider discovery, and
    `initializeSession(...)`.
 2. [docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md](./docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md)
    Frontend discovery guide for BFF-first provider/operator discovery, UI card
    mapping, and copy/paste backend DTO consumption.
-3. [gdc-sdk-core-ts/docs/SDK_FLOWS_101.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/SDK_FLOWS_101.md)
+3. [gdc-sdk-core-ts/docs/101-SDK_FLOWS.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_FLOWS.md)
    Shared business-flow map by actor family.
 4. [gdc-common-utils-ts/src/examples/frontend-session.ts](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/src/examples/frontend-session.ts)
    Shared profile/session payload source of truth.
@@ -37,12 +37,12 @@ If you need the shortest path:
 - app identity required by GW CORE:
   `appId` mandatory, `appVersion` optional with default `v1.0`
 - frontend technical identity:
-  [`initializeCommunicationIdentity(...)`](./docs/SDK_INTEGRATION_101.md)
+  [`initializeCommunicationIdentity(...)`](./docs/101-SDK_INTEGRATION.md)
   for the technical device/channel profile identity, not the legal organization id
 - main runtime class:
   [`ClientSDK`](src/ClientSDK.ts)
 - profile/session bootstrap:
-  [`initializeSession(...)`](./docs/SDK_INTEGRATION_101.md)
+  [`initializeSession(...)`](./docs/101-SDK_INTEGRATION.md)
 
 ## Executable Usage Examples
 

@@ -4,7 +4,7 @@ This file is the short frontend integration map.
 
 If you want the business-flow overview first, start here:
 
-- [gdc-sdk-core-ts/docs/SDK_FLOWS_101.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/SDK_FLOWS_101.md)
+- [gdc-sdk-core-ts/docs/101-SDK_FLOWS.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_FLOWS.md)
 
 If you want the shared lifecycle semantics and reusable placeholders, use:
 
@@ -12,7 +12,7 @@ If you want the shared lifecycle semantics and reusable placeholders, use:
 
 If you are implementing employee create/search/disable/purge flows, use:
 
-- [gdc-sdk-core-ts/docs/EMPLOYEES_101.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/EMPLOYEES_101.md)
+- [gdc-sdk-core-ts/docs/101-EMPLOYEES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-EMPLOYEES.md)
 
 This document should answer only these questions:
 
@@ -57,6 +57,25 @@ This document should answer only these questions:
   - provider metadata fetch
   - profile/session state
   - frontend-facing services
+
+## Actor Map
+
+- `gdc-common-utils-ts`
+  - pure helpers, constants, and reusable examples
+- `gdc-sdk-core-ts`
+  - shared actor/capability model and runtime-neutral builders
+- `gdc-sdk-front-ts`
+  - session/profile materialization and capability-to-service mapping
+
+Employee management belongs to:
+
+- `orgAdmin`
+  - create/search/disable/purge employee from the organization-controller side
+
+It does not belong to:
+
+- `professional`
+  - professional-facing clinical and access flows
 
 ## Main Frontend Runtime
 
@@ -173,7 +192,7 @@ Frontend usually prepares UX/state for:
 
 Shared business flow reference:
 
-- [gdc-sdk-core-ts/docs/SDK_FLOWS_101.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/SDK_FLOWS_101.md)
+- [gdc-sdk-core-ts/docs/101-SDK_FLOWS.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_FLOWS.md)
 
 ### Individual / family flows
 
