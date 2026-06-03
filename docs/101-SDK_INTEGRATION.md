@@ -14,6 +14,12 @@ If you are implementing employee create/search/disable/purge flows, use:
 
 - [gdc-sdk-core-ts/docs/101-EMPLOYEES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-EMPLOYEES.md)
 
+When teaching employee flows in this frontend guide, keep this order:
+
+1. create
+2. search
+3. lifecycle
+
 If you are confused about DIDComm envelope vs batch body vs entry type vs
 FHIR-like `Communication` vs internal `CommMsgExtended`, read first:
 
@@ -89,6 +95,13 @@ Employee management belongs to:
 
 - `orgAdmin`
   - create/search/disable/purge employee from the organization-controller side
+
+For frontend onboarding, teach those `orgAdmin` employee operations in the same
+fixed order:
+
+- create
+- search
+- lifecycle
 
 It does not belong to:
 
