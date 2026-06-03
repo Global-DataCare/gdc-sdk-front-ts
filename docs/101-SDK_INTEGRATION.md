@@ -14,6 +14,11 @@ If you are implementing employee create/search/disable/purge flows, use:
 
 - [gdc-sdk-core-ts/docs/101-EMPLOYEES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-EMPLOYEES.md)
 
+If you also need a real local GW process or Docker image for end-to-end checks,
+use:
+
+- [gdc-sdk-node-ts/docs/101-LIVE_GW_LOCAL.md](https://github.com/Global-DataCare/gdc-sdk-node-ts/blob/main/docs/101-LIVE_GW_LOCAL.md)
+
 This document should answer only these questions:
 
 - which package/class should the frontend instantiate
