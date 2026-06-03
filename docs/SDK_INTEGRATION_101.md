@@ -10,6 +10,10 @@ If you want the shared lifecycle semantics and reusable placeholders, use:
 
 - [gdc-common-utils-ts/docs/LIFECYCLE_101.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/LIFECYCLE_101.md)
 
+If you are implementing employee create/search/disable/purge flows, use:
+
+- [gdc-sdk-core-ts/docs/EMPLOYEES_101.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/EMPLOYEES_101.md)
+
 This document should answer only these questions:
 
 - which package/class should the frontend instantiate
