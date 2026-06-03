@@ -8,11 +8,16 @@ If you want the business-flow overview first, start here:
 
 If you want the shared lifecycle semantics and reusable placeholders, use:
 
-- [gdc-common-utils-ts/docs/LIFECYCLE_101.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/LIFECYCLE_101.md)
+- [gdc-common-utils-ts/docs/101-LIFECYCLE.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-LIFECYCLE.md)
 
 If you are implementing employee create/search/disable/purge flows, use:
 
 - [gdc-sdk-core-ts/docs/101-EMPLOYEES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-EMPLOYEES.md)
+
+If you are confused about DIDComm envelope vs batch body vs entry type vs
+FHIR-like `Communication` vs internal `CommMsgExtended`, read first:
+
+- [gdc-common-utils-ts/docs/101-COMMUNICATION_LAYERING.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-COMMUNICATION_LAYERING.md)
 
 If you also need a real local GW process or Docker image for end-to-end checks,
 use:
@@ -25,6 +30,14 @@ This document should answer only these questions:
 - which helper should the frontend call next
 - which concepts belong to UI/session state
 - which concepts belong to shared activation/discovery contracts
+
+Teaching rule for this `101`:
+
+- start from the highest-level frontend/session surface
+- then point to the shared/core high-level editor/session object
+- only after that explain lower-level bundle/claims builders
+- do not start a new frontend developer from raw claims keys or raw FHIR
+  bundle payloads
 
 ## Rules
 
@@ -81,6 +94,27 @@ It does not belong to:
 
 - `professional`
   - professional-facing clinical and access flows
+
+## Onboarding Order
+
+For new developers, teach these layers in this order:
+
+1. `ClientSDK` and session/profile surface
+2. actor-facing service surface such as `orgAdmin`
+3. shared high-level editor/session object from `sdk-core`
+4. lower-level shared builders only if needed
+5. raw bundle shapes only for debugging or advanced integration work
+
+## Index Data Rule
+
+For frontend teaching and session flows, keep this rule explicit:
+
+- operations over individual index data travel through `Communication`
+- this includes consent-related index data
+- `Communication` is the auditable envelope
+- attached `Bundle` payloads carry the real resources such as `Consent`,
+  `Composition`, or `DocumentReference`
+- a single batch may carry one or more `Communication` entries
 
 ## Main Frontend Runtime
 
@@ -195,6 +229,11 @@ Frontend usually prepares UX/state for:
 - SMART token request
 - consent-aware access
 
+Transport note:
+
+- when these flows mutate or exchange individual index data, the canonical
+  exchange envelope is `Communication`
+
 Shared business flow reference:
 
 - [gdc-sdk-core-ts/docs/101-SDK_FLOWS.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_FLOWS.md)
@@ -207,6 +246,12 @@ Frontend usually prepares UX/state for:
 - consent grant/review
 - related-person invitation
 - IPS/FHIR import and read flows
+
+Transport note:
+
+- these index-oriented flows should be taught through `Communication` as the
+  canonical auditable exchange envelope, not through standalone resource routes
+  as the first mental model
 
 Use shared references instead of restating the full tutorial here.
 
