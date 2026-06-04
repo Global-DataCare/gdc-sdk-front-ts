@@ -62,7 +62,7 @@ consent payload authoring.
 
 Start from shared editors/builders instead:
 
-- `EmployeeBundleSession`
+- `BundleEditor`
 - `CommunicationAttachedBundleSession`
 - `createConsentAccessEditor(...)`
 
@@ -78,7 +78,7 @@ Use these references first:
 
 Practical rule:
 
-- `EmployeeBundleSession` for employee create/search
+- `BundleEditor` for employee create/search/disable/purge
 - `CommunicationAttachedBundleSession` for `Communication`-carried bundles
 - `createConsentAccessEditor(...)` for editing one consent inside that bundle
 
@@ -106,22 +106,24 @@ Those actor families should start from their own business flow:
 
 ### Create
 
-Use `EmployeeBundleSession` to prepare one employee create bundle. The browser
+Use `BundleEditor` to prepare one employee create bundle. The browser
 does not send it directly to GW CORE.
 The portal backend wraps it into its own request/envelope, then applies KMS,
 DIDComm, submit, and poll.
 
 ```ts
-import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import { BundleEditor } from 'gdc-sdk-core-ts';
 import {
   EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE,
   EXAMPLE_PROVIDER_ORGANIZATION_DID,
 } from 'gdc-common-utils-ts/examples';
 import { ClaimsPersonSchemaorg } from 'gdc-common-utils-ts/constants/schemaorg';
+import { EmployeeBundleOperations } from 'gdc-common-utils-ts/utils/employee';
 
 // Build the employee payload locally in the frontend before calling the portal backend.
-const bundleEditor = new EmployeeBundleSession()
-  .setIdentifier(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
+const bundle = new BundleEditor()
+  .setBundleOperation(EmployeeBundleOperations.create)
+  .newEntry()
   .setEmail(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
   .setRole(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.role)
   .addClaim(ClaimsPersonSchemaorg.memberOf, EXAMPLE_PROVIDER_ORGANIZATION_DID);
@@ -129,11 +131,49 @@ const bundleEditor = new EmployeeBundleSession()
 // `employeeCreateBatchBundle` is the canonical one-entry employee `_batch` bundle.
 // Your Vite frontend normally sends this bundle to its own backend, not
 // directly to GW CORE.
-const employeeCreateBatchBundle = bundleEditor.toBundleBatch({
-  method: 'POST',
-  resourceId: EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier,
-});
+const generatedEmployeeIdentifier = bundle.getIdentifier();
+const employeeCreateBatchBundle = bundle.doneEntry().build();
 console.log(employeeCreateBatchBundle);
+```
+
+If the frontend does not provide an employee identifier up front, the create
+flow can generate one and keep it in the same editor:
+
+```ts
+import { EmployeeBundleOperations } from 'gdc-common-utils-ts/utils/employee';
+
+const bundle = new BundleEditor()
+  .setBundleOperation(EmployeeBundleOperations.create)
+  .newEntry()
+  .setEmail(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
+  .setRole(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.role);
+
+const employeeCreateBatchBundle = bundle.doneEntry().build();
+const generatedEmployeeIdentifier = bundle.getIdentifier();
+```
+
+If a frontend needs explicit claim-level control instead of only `setEmail()` /
+`setRole()`, the same editor also exposes generic claim methods:
+
+```ts
+import { BundleEditor } from 'gdc-sdk-core-ts';
+import {
+  EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE,
+  EXAMPLE_PROVIDER_ORGANIZATION_DID,
+} from 'gdc-common-utils-ts/examples';
+import { ClaimsPersonSchemaorg } from 'gdc-common-utils-ts/constants/schemaorg';
+import { EmployeeBundleOperations } from 'gdc-common-utils-ts/utils/employee';
+
+const bundle = new BundleEditor()
+  .setBundleOperation(EmployeeBundleOperations.create)
+  .newEntry(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
+  .setClaim(ClaimsPersonSchemaorg.email, EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
+  .setClaim(ClaimsPersonSchemaorg.hasOccupationalRoleValue, EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.role)
+  .addClaim(ClaimsPersonSchemaorg.memberOf, EXAMPLE_PROVIDER_ORGANIZATION_DID);
+
+console.log(bundle.getClaim(ClaimsPersonSchemaorg.email));
+
+const employeeCreateBatchBundle = bundle.doneEntry().build();
 ```
 
 ### Search
@@ -143,13 +183,17 @@ Search is a separate operation and should be built separately.
 `email + role` is the recommended exact operational lookup.
 
 ```ts
-import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import { BundleEditor } from 'gdc-sdk-core-ts';
 import { EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE } from 'gdc-common-utils-ts/examples';
+import { EmployeeBundleOperations } from 'gdc-common-utils-ts/utils/employee';
 
-const employeeSearchBundle = new EmployeeBundleSession()
+const employeeSearchBundle = new BundleEditor()
+  .setBundleOperation(EmployeeBundleOperations.search)
+  .newEntry()
   .setEmail(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
   .setRole(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.role)
-  .toBundleSearch();
+  .doneEntry()
+  .build();
 
 console.log(employeeSearchBundle);
 ```
@@ -167,15 +211,15 @@ Disable is a lifecycle operation. Today the shared employee editor still
 produces the canonical `_batch` bundle with inner `request.method = DELETE`.
 
 ```ts
-import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import { BundleEditor } from 'gdc-sdk-core-ts';
 import { EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE } from 'gdc-common-utils-ts/examples';
+import { EmployeeBundleOperations } from 'gdc-common-utils-ts/utils/employee';
 
-const employeeDisableBatchBundle = new EmployeeBundleSession()
-  .setIdentifier(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
-  .toBundleBatch({
-    method: 'DELETE',
-    resourceId: EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier,
-  });
+const employeeDisableBatchBundle = new BundleEditor()
+  .setBundleOperation(EmployeeBundleOperations.disable)
+  .newEntry(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
+  .doneEntry()
+  .build();
 
 console.log(employeeDisableBatchBundle);
 ```
@@ -192,12 +236,11 @@ Current GW CORE contract vs preferred target:
 Conceptual `PATCH` example for state change:
 
 ```ts
-const employeeDisablePatchBatchBundle = new EmployeeBundleSession()
-  .setIdentifier(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
-  .toBundleBatch({
-    method: 'PATCH',
-    resourceId: EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier,
-  });
+import { EmployeeBundleOperations } from 'gdc-common-utils-ts/utils/employee';
+
+const employeeDisablePatchBatchBundle = new BundleEditor()
+  .setBundleOperation(EmployeeBundleOperations.disable)
+  .newEntry(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier);
 ```
 
 Business meaning:
@@ -209,19 +252,23 @@ Business meaning:
 
 ### Purge
 
-Purge is not the same contract as create/disable. The portal backend or runtime
-calls the explicit `Employee/_purge` flow and normally identifies the employee
-with `identifier`.
+Purge is not the same route as create/disable, but the frontend should still
+prepare a `Bundle` for it. The portal backend or runtime later submits that
+bundle to the explicit `Employee/_purge` flow. The canonical purge selector is
+the employee `identifier`.
 
 ```ts
-import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import { BundleEditor } from 'gdc-sdk-core-ts';
 import { EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE } from 'gdc-common-utils-ts/examples';
+import { EmployeeBundleOperations } from 'gdc-common-utils-ts/utils/employee';
 
-const employeePurgeSelector = new EmployeeBundleSession()
-  .setIdentifier(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
-  .toClaims();
+const employeePurgeBundle = new BundleEditor()
+  .setBundleOperation(EmployeeBundleOperations.purge)
+  .newEntry(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
+  .doneEntry()
+  .build();
 
-console.log(employeePurgeSelector);
+console.log(employeePurgeBundle);
 ```
 
 ### Confidential app / direct client runtime
@@ -269,11 +316,12 @@ Minimal confidential-app example:
 
 ```ts
 import { ClientSDK } from 'gdc-sdk-front-ts';
-import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import { BundleEditor } from 'gdc-sdk-core-ts';
 import {
   EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE,
   EXAMPLE_PROFILE_SESSION_INPUT,
 } from 'gdc-common-utils-ts/examples';
+import { EmployeeBundleOperations } from 'gdc-common-utils-ts/utils/employee';
 
 const appId = frontendAppConfig.appId;
 const client = new ClientSDK({ appId });
@@ -282,10 +330,13 @@ const client = new ClientSDK({ appId });
 const session = await client.initializeSession(EXAMPLE_PROFILE_SESSION_INPUT);
 
 // The shared editor still models the employee search bundle.
-const employeeSearchBundle = new EmployeeBundleSession()
+const employeeSearchBundle = new BundleEditor()
+  .setBundleOperation(EmployeeBundleOperations.search)
+  .newEntry()
   .setEmail(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
   .setRole(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.role)
-  .toBundleSearch();
+  .doneEntry()
+  .build();
 
 console.log(session, employeeSearchBundle);
 ```

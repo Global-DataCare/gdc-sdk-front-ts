@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2026-06-04
+
+### Changed
+- Updated shared dependency targets to:
+  - `gdc-common-utils-ts@^1.15.0`
+  - `gdc-sdk-core-ts@^0.7.0`
+- Reworked the frontend employee documentation so the primary teaching path now
+  starts from the shared `BundleEditor` model rather than employee-specific
+  ad-hoc bundle helpers.
+- Clarified the split between:
+  - portal web / Vite with backend-owned KMS and transport
+  - confidential/native apps with client-side runtime and local key custody
+
+### Testing
+- `npm run build`
+
 ## [0.6.5] - 2026-06-02
 
 ### Changed
