@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.1] - 2026-06-04
+
+### Changed
+- Updated shared dependency targets to:
+  - `gdc-common-utils-ts@^1.16.0`
+  - `gdc-sdk-core-ts@^0.8.1`
+- Tightened frontend actor-facade materialization so:
+  - `asProfessional()` no longer accepts individual-only sessions
+  - `asOrganizationEmployee()` no longer materializes outside organization app
+    profiles
+- Updated actor/session tests to stay aligned with the expanded capability
+  split coming from `sdk-core`.
+
+### Testing
+- `node --test tests/actor-session.test.mjs tests/session-descriptor.test.mjs tests/orchestration.test.mjs`
+- `npm run build`
+
 ## [0.8.0] - 2026-06-04
 
 ### Changed

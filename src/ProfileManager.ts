@@ -346,6 +346,9 @@ export class ProfileManager {
   }
 
   public asOrganizationEmployee(): OrganizationEmployeeSdk {
+    if (this.profile.appType !== 'Organization') {
+      throw new Error('OrganizationEmployeeSdk is not available for this profile.');
+    }
     return new OrganizationEmployeeSdk(this.runtimeClient);
   }
 
@@ -367,7 +370,7 @@ export class ProfileManager {
   }
 
   public asProfessional(): ProfessionalSdk {
-    if (!this.professional?.physician && !this.professional?.paramedic && !this.individual?.service) {
+    if (!this.professional?.physician && !this.professional?.paramedic) {
       throw new Error('ProfessionalSdk is not available for this profile.');
     }
     return new ProfessionalSdk(this.runtimeClient);

@@ -12,6 +12,8 @@ test('gdc-sdk-front-ts reuses core facade expansion for Family sessions', () => 
     actorKinds: [ActorKinds.IndividualController, ActorKinds.IndividualMember],
     capabilities: [
       ActorCapabilities.IndividualBootstrap,
+      ActorCapabilities.IndividualIngestCommunication,
+      ActorCapabilities.IndividualUpsertRelatedPerson,
       ActorCapabilities.IndividualImportIps,
       ActorCapabilities.IndividualGenerateDigitalTwin,
       ActorCapabilities.ConsentGrantProfessionalAccess,
@@ -24,7 +26,14 @@ test('gdc-sdk-front-ts reuses core facade expansion for Family sessions', () => 
   assert.deepEqual(facades, [
     {
       actorKind: ActorKinds.IndividualController,
-      capabilities: [ActorCapabilities.IndividualBootstrap, ActorCapabilities.ConsentGrantProfessionalAccess],
+      capabilities: [
+        ActorCapabilities.IndividualBootstrap,
+        ActorCapabilities.IndividualIngestCommunication,
+        ActorCapabilities.IndividualUpsertRelatedPerson,
+        ActorCapabilities.IndividualImportIps,
+        ActorCapabilities.IndividualGenerateDigitalTwin,
+        ActorCapabilities.ConsentGrantProfessionalAccess,
+      ],
       appType: 'Family',
       profileId: 'profile-family-1',
       profileDid: 'did:web:family:controller',
@@ -32,7 +41,11 @@ test('gdc-sdk-front-ts reuses core facade expansion for Family sessions', () => 
     },
     {
       actorKind: ActorKinds.IndividualMember,
-      capabilities: [ActorCapabilities.IndividualImportIps, ActorCapabilities.IndividualGenerateDigitalTwin],
+      capabilities: [
+        ActorCapabilities.IndividualUpsertRelatedPerson,
+        ActorCapabilities.IndividualImportIps,
+        ActorCapabilities.IndividualGenerateDigitalTwin,
+      ],
       appType: 'Family',
       profileId: 'profile-family-1',
       profileDid: 'did:web:family:controller',

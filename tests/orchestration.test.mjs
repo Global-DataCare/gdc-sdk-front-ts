@@ -82,6 +82,8 @@ test('family controller session materializes individual and personal facades', a
 
   assert.ok(session.asIndividualController() instanceof IndividualControllerSdk);
   assert.ok(session.asPersonal() instanceof PersonalSdk);
+  assert.throws(() => session.asOrganizationEmployee(), /OrganizationEmployeeSdk is not available/);
+  assert.throws(() => session.asProfessional(), /ProfessionalSdk is not available/);
 
   const token = await session.asPersonal().requestSmartToken({
     idToken: 'id-token',
@@ -104,6 +106,7 @@ test('professional session materializes the professional facade without employee
   );
 
   assert.ok(session.asProfessional() instanceof ProfessionalSdk);
+  assert.throws(() => session.asOrganizationController(), /OrganizationControllerSdk is not available/);
   assert.equal(typeof ProfessionalSdk.prototype.activateOrganizationInGatewayFromIcaProof, 'undefined');
   assert.equal(typeof ProfessionalSdk.prototype.createOrganizationEmployee, 'undefined');
   assert.equal(typeof ProfessionalSdk.prototype.activateEmployeeDeviceWithActivationRequest, 'undefined');
