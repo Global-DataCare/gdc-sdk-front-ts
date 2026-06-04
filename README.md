@@ -134,9 +134,11 @@ import {
 // This editor lives only in frontend memory.
 // It helps the UI build the canonical employee payload before sending it to
 // the portal backend.
-const employeeEntry = new BundleEditor()
+const bundle = new BundleEditor()
   .setBundleOperation(EmployeeBundleOperations.create)
-  .setAllowedResourceType(EmployeeResourceTypes.employee)
+  .setAllowedResourceType(EmployeeResourceTypes.employee);
+
+const employeeEntry = bundle
   .newEntry()
   .asEmployee()
   .setEmail(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
@@ -147,7 +149,9 @@ const employeeEntry = new BundleEditor()
 // Your Vite frontend normally sends this bundle to its own backend, not
 // directly to GW CORE.
 const generatedEmployeeIdentifier = employeeEntry.getIdentifier();
-const employeeCreateBatchBundle = employeeEntry.doneEntry().build();
+employeeEntry.doneEntry();
+
+const employeeCreateBatchBundle = bundle.build();
 console.log(employeeCreateBatchBundle);
 ```
 
@@ -157,16 +161,20 @@ flow can generate one and keep it in the same editor:
 ```ts
 import { EmployeeBundleOperations } from 'gdc-common-utils-ts/utils/employee';
 
-const employeeEntry = new BundleEditor()
+const bundle = new BundleEditor()
   .setBundleOperation(EmployeeBundleOperations.create)
-  .setAllowedResourceType(EmployeeResourceTypes.employee)
+  .setAllowedResourceType(EmployeeResourceTypes.employee);
+
+const employeeEntry = bundle
   .newEntry()
   .asEmployee()
   .setEmail(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
   .setRole(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.role);
 
 const generatedEmployeeIdentifier = employeeEntry.getIdentifier();
-const employeeCreateBatchBundle = employeeEntry.doneEntry().build();
+employeeEntry.doneEntry();
+
+const employeeCreateBatchBundle = bundle.build();
 ```
 
 If a frontend needs explicit claim-level control instead of only `setEmail()` /
@@ -184,9 +192,11 @@ import {
   EmployeeResourceTypes,
 } from 'gdc-common-utils-ts/utils/employee';
 
-const employeeEntry = new BundleEditor()
+const bundle = new BundleEditor()
   .setBundleOperation(EmployeeBundleOperations.create)
-  .setAllowedResourceType(EmployeeResourceTypes.employee)
+  .setAllowedResourceType(EmployeeResourceTypes.employee);
+
+const employeeEntry = bundle
   .newEntry(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
   .asEmployee()
   .setClaim(ClaimsPersonSchemaorg.email, EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
@@ -195,7 +205,9 @@ const employeeEntry = new BundleEditor()
 
 console.log(employeeEntry.getClaim(ClaimsPersonSchemaorg.email));
 
-const employeeCreateBatchBundle = employeeEntry.doneEntry().build();
+employeeEntry.doneEntry();
+
+const employeeCreateBatchBundle = bundle.build();
 ```
 
 ### Search
@@ -212,15 +224,18 @@ import {
   EmployeeResourceTypes,
 } from 'gdc-common-utils-ts/utils/employee';
 
-const employeeSearchBundle = new BundleEditor()
+const bundle = new BundleEditor()
   .setBundleOperation(EmployeeBundleOperations.search)
-  .setAllowedResourceType(EmployeeResourceTypes.employee)
+  .setAllowedResourceType(EmployeeResourceTypes.employee);
+
+bundle
   .newEntry()
   .asEmployee()
   .setEmail(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
   .setRole(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.role)
-  .doneEntry()
-  .build();
+  .doneEntry();
+
+const employeeSearchBundle = bundle.build();
 
 console.log(employeeSearchBundle);
 ```
@@ -245,13 +260,16 @@ import {
   EmployeeResourceTypes,
 } from 'gdc-common-utils-ts/utils/employee';
 
-const employeeDisableBatchBundle = new BundleEditor()
+const bundle = new BundleEditor()
   .setBundleOperation(EmployeeBundleOperations.disable)
-  .setAllowedResourceType(EmployeeResourceTypes.employee)
+  .setAllowedResourceType(EmployeeResourceTypes.employee);
+
+bundle
   .newEntry(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
   .asEmployee()
-  .doneEntry()
-  .build();
+  .doneEntry();
+
+const employeeDisableBatchBundle = bundle.build();
 
 console.log(employeeDisableBatchBundle);
 ```
