@@ -45,6 +45,251 @@ Teaching rule for this `101`:
 - do not start a new frontend developer from raw claims keys or raw FHIR
   bundle payloads
 
+## Choose The Frontend Mode First
+
+Before choosing a class or helper, decide which frontend mode you are building.
+
+### Portal web / non confidential app
+
+Use this mode when:
+
+- the frontend is a Vite/web portal
+- the portal backend owns controller/professional keys in AWS KMS
+- the backend sends DIDComm to GW CORE
+
+In this mode, do not start from frontend session/runtime APIs for employee or
+consent payload authoring.
+
+Start from shared editors/builders instead:
+
+- `EmployeeBundleSession`
+- `CommunicationAttachedBundleSession`
+- `createConsentAccessEditor(...)`
+
+Then send the resulting payload or bundle to the portal backend.
+
+Use these references first:
+
+- [gdc-sdk-core-ts/docs/101-EMPLOYEES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-EMPLOYEES.md)
+- [gdc-sdk-core-ts/docs/101-CONSENT_COMMUNICATION.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-CONSENT_COMMUNICATION.md)
+- [gdc-common-utils-ts/docs/101-CONSENT_ACCESS.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-CONSENT_ACCESS.md)
+- [gdc-sdk-core-ts/tests/101-employees.test.mjs](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/101-employees.test.mjs)
+- [gdc-common-utils-ts/__tests__/101-consent-bundle-editor.test.ts](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-consent-bundle-editor.test.ts)
+
+Practical rule:
+
+- `EmployeeBundleSession` for employee create/search
+- `CommunicationAttachedBundleSession` for `Communication`-carried bundles
+- `createConsentAccessEditor(...)` for editing one consent inside that bundle
+
+Controller-only portal-web employee flow:
+
+Use this example only when the current frontend screen belongs to the
+organization-controller/admin side.
+
+Do not reuse this employee example for:
+
+- professional screens
+- individual/family screens
+- generic end-user screens
+
+Those actor families should start from their own business flow:
+
+- professionals
+  - consent-aware access
+  - SMART token
+  - communication/index flows
+- individuals / family
+  - consent editing
+  - related-person flows
+  - IPS/FHIR import or read flows
+
+### Create
+
+Use `EmployeeBundleSession` to prepare one employee create bundle. The browser
+does not send it directly to GW CORE.
+The portal backend wraps it into its own request/envelope, then applies KMS,
+DIDComm, submit, and poll.
+
+```ts
+import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import {
+  EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE,
+  EXAMPLE_PROVIDER_ORGANIZATION_DID,
+} from 'gdc-common-utils-ts/examples';
+import { ClaimsPersonSchemaorg } from 'gdc-common-utils-ts/constants/schemaorg';
+
+// Build the employee payload locally in the frontend before calling the portal backend.
+const bundleEditor = new EmployeeBundleSession()
+  .setIdentifier(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
+  .setEmail(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
+  .setRole(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.role)
+  .addClaim(ClaimsPersonSchemaorg.memberOf, EXAMPLE_PROVIDER_ORGANIZATION_DID);
+
+// `employeeCreateBatchBundle` is the canonical one-entry employee `_batch` bundle.
+// Your Vite frontend normally sends this bundle to its own backend, not
+// directly to GW CORE.
+const employeeCreateBatchBundle = bundleEditor.toBundleBatch({
+  method: 'POST',
+  resourceId: EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier,
+});
+console.log(employeeCreateBatchBundle);
+```
+
+### Search
+
+Search is a separate operation and should be built separately.
+
+`email + role` is the recommended exact operational lookup.
+
+```ts
+import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import { EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE } from 'gdc-common-utils-ts/examples';
+
+const employeeSearchBundle = new EmployeeBundleSession()
+  .setEmail(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
+  .setRole(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.role)
+  .toBundleSearch();
+
+console.log(employeeSearchBundle);
+```
+
+Other valid search shapes:
+
+- by `email` only: all active profiles for that mailbox
+- by `role` only: all active employees for that role
+- with no filters: all employees
+- by `identifier`: one exact technical or historical profile
+
+### Disable
+
+Disable is a lifecycle operation. Today the shared employee editor still
+produces the canonical `_batch` bundle with inner `request.method = DELETE`.
+
+```ts
+import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import { EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE } from 'gdc-common-utils-ts/examples';
+
+const employeeDisableBatchBundle = new EmployeeBundleSession()
+  .setIdentifier(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
+  .toBundleBatch({
+    method: 'DELETE',
+    resourceId: EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier,
+  });
+
+console.log(employeeDisableBatchBundle);
+```
+
+Current GW CORE contract vs preferred target:
+
+- current live contract
+  - disable = `_batch` + inner `request.method = DELETE`
+  - purge = `POST .../Employee/_purge`
+- preferred target contract
+  - disable/enable = semantic state change via `PATCH`
+  - purge = final removal operation kept separate from state changes
+
+Conceptual `PATCH` example for state change:
+
+```ts
+const employeeDisablePatchBatchBundle = new EmployeeBundleSession()
+  .setIdentifier(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
+  .toBundleBatch({
+    method: 'PATCH',
+    resourceId: EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier,
+  });
+```
+
+Business meaning:
+
+- `PATCH` should mean state transition such as enable/disable
+- `DELETE` should be reserved for final removal semantics such as purge
+- future operations like merge/split/destroy should be modeled first as named
+  business operations, then mapped to transport
+
+### Purge
+
+Purge is not the same contract as create/disable. The portal backend or runtime
+calls the explicit `Employee/_purge` flow and normally identifies the employee
+with `identifier`.
+
+```ts
+import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import { EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE } from 'gdc-common-utils-ts/examples';
+
+const employeePurgeSelector = new EmployeeBundleSession()
+  .setIdentifier(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
+  .toClaims();
+
+console.log(employeePurgeSelector);
+```
+
+### Confidential app / direct client runtime
+
+Use this mode when:
+
+- the app stores transport keys locally
+- the app talks directly to GW CORE
+- there is no portal backend doing KMS/DIDComm on behalf of the app
+
+In this mode, start from the frontend runtime/session layer:
+
+- `ClientSDK`
+- `initializeSession(...)`
+
+What `initializeSession(...)` means here:
+
+- it creates the authenticated frontend runtime session
+- it materializes the actor-facing runtime surface for that app/profile
+- use this path when the app itself owns local keys and direct GW interaction
+
+Important actor rule:
+
+- this still does not mean every confidential app should start from employee management
+- employee management belongs only to the organization-controller/admin side
+- professional or individual apps should start from their own actor flow, then
+  use shared bundle editors only for the resources relevant to that actor
+
+Then use the same shared editors/builders from `sdk-core` when the runtime flow
+needs employee or communication payload authoring.
+
+Use these references first:
+
+- [gdc-sdk-node-ts/docs/101-LIVE_GW_LOCAL.md](https://github.com/Global-DataCare/gdc-sdk-node-ts/blob/main/docs/101-LIVE_GW_LOCAL.md)
+- [gdc-sdk-core-ts/docs/101-EMPLOYEES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-EMPLOYEES.md)
+- [gdc-sdk-core-ts/docs/101-SDK_FLOWS.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_FLOWS.md)
+- [gdc-common-utils-ts/docs/101-CONSENT_ACCESS.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-CONSENT_ACCESS.md)
+
+Decision rule:
+
+- no local key custody: start from shared editors/builders and send to backend
+- local key custody: start from `ClientSDK` runtime/session and use the same shared editors/builders underneath
+
+Minimal confidential-app example:
+
+```ts
+import { ClientSDK } from 'gdc-sdk-front-ts';
+import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import {
+  EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE,
+  EXAMPLE_PROFILE_SESSION_INPUT,
+} from 'gdc-common-utils-ts/examples';
+
+const appId = frontendAppConfig.appId;
+const client = new ClientSDK({ appId });
+
+// The authenticated runtime session for this frontend app/profile.
+const session = await client.initializeSession(EXAMPLE_PROFILE_SESSION_INPUT);
+
+// The shared editor still models the employee search bundle.
+const employeeSearchBundle = new EmployeeBundleSession()
+  .setEmail(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
+  .setRole(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.role)
+  .toBundleSearch();
+
+console.log(session, employeeSearchBundle);
+```
+
 ## Rules
 
 - Start from app state and UI forms, not GW wire payloads.
@@ -112,11 +357,12 @@ It does not belong to:
 
 For new developers, teach these layers in this order:
 
-1. `ClientSDK` and session/profile surface
-2. actor-facing service surface such as `orgAdmin`
-3. shared high-level editor/session object from `sdk-core`
-4. lower-level shared builders only if needed
-5. raw bundle shapes only for debugging or advanced integration work
+1. choose the frontend mode: portal web vs confidential app
+2. highest-level runtime or editor surface for that mode
+3. actor-facing service surface when the app owns runtime/session behavior
+4. shared high-level editor/session object from `sdk-core`
+5. lower-level shared builders only if needed
+6. raw bundle shapes only for debugging or advanced integration work
 
 ## Index Data Rule
 
@@ -133,7 +379,7 @@ For frontend teaching and session flows, keep this rule explicit:
 
 Use:
 
-- `ClientSDK`
+- `ClientSDK` for confidential/direct client runtime flows
 
 Important frontend-facing pieces:
 
@@ -207,6 +453,20 @@ Use:
 - `initializeSession(...)`
 - `initializeProfileRegistry(...)`
 
+Frontend note:
+
+- session/profile runtime is mainly the entry point for confidential/direct
+  client apps
+- portal web apps that send employee/consent payloads to their own backend do
+  not need to start here for payload authoring
+
+Frontend note:
+
+- session/profile runtime is mainly the entry point for confidential/direct
+  client apps
+- portal web apps that send employee/consent payloads to their own backend do
+  not need to start here for payload authoring
+
 ### Deployment modes
 
 Simple / compatibility mode:
@@ -250,6 +510,28 @@ Transport note:
 Shared business flow reference:
 
 - [gdc-sdk-core-ts/docs/101-SDK_FLOWS.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_FLOWS.md)
+
+Portal-web modeling references:
+
+- [gdc-sdk-core-ts/docs/101-EMPLOYEES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-EMPLOYEES.md)
+- [gdc-sdk-core-ts/tests/101-employees.test.mjs](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/101-employees.test.mjs)
+
+Portal-web communication/consent references:
+
+- [gdc-sdk-core-ts/docs/101-CONSENT_COMMUNICATION.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-CONSENT_COMMUNICATION.md)
+- [gdc-common-utils-ts/docs/101-CONSENT_ACCESS.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-CONSENT_ACCESS.md)
+- [gdc-common-utils-ts/__tests__/101-consent-bundle-editor.test.ts](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-consent-bundle-editor.test.ts)
+
+Portal-web modeling references:
+
+- [gdc-sdk-core-ts/docs/101-EMPLOYEES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-EMPLOYEES.md)
+- [gdc-sdk-core-ts/tests/101-employees.test.mjs](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/101-employees.test.mjs)
+
+Portal-web communication/consent references:
+
+- [gdc-sdk-core-ts/docs/101-CONSENT_COMMUNICATION.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-CONSENT_COMMUNICATION.md)
+- [gdc-common-utils-ts/docs/101-CONSENT_ACCESS.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-CONSENT_ACCESS.md)
+- [gdc-common-utils-ts/__tests__/101-consent-bundle-editor.test.ts](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-consent-bundle-editor.test.ts)
 
 ### Individual / family flows
 

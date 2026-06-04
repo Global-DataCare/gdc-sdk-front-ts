@@ -93,7 +93,7 @@ All notable changes to this project will be documented in this file.
 ## [0.3.2] - 2026-05-26
 
 ### Changed
-- Reduced `docs/SDK_INTEGRATION_101.md` to a short frontend integration map instead of a second long tutorial.
+- Reduced `docs/101-SDK_INTEGRATION.md` to a short frontend integration map instead of a second long tutorial.
 - Aligned the frontend doc naming with the shared/core/node vocabulary:
   - `subjectDid`
   - `org.schema.Service.serviceType`
@@ -127,7 +127,7 @@ All notable changes to this project will be documented in this file.
 ## [0.2.1] - 2026-05-24
 
 ### Changed
-- Updated README and `SDK_INTEGRATION_101.md` to document the shared consent-access model, controller permission inspection, missing-permission detection, and canonical permission-request `Communication` flow.
+- Updated README and `101-SDK_INTEGRATION.md` to document the shared consent-access model, controller permission inspection, missing-permission detection, and canonical permission-request `Communication` flow.
 
 ### Testing
 - `npm run type-check` passes after the consent-access documentation alignment.
@@ -139,7 +139,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Aligned the shared dependency to `gdc-common-utils-ts@^1.5.0`.
-- Updated README and `SDK_INTEGRATION_101.md` to describe the canonical shared examples and owner-vs-legal-representative semantics.
+- Updated README and `101-SDK_INTEGRATION.md` to describe the canonical shared examples and owner-vs-legal-representative semantics.
 
 ### Testing
 - `npm test` passes against the packaged `gdc-common-utils-ts` artifact.
@@ -153,7 +153,7 @@ All notable changes to this project will be documented in this file.
 - Fixed `ClientSDK.initializeProfileRegistry(...)` so the vault is initialized once instead of twice.
 - Added required-input validation to `IndividualService.sendCommunication(...)` and `IndividualService.searchClinicalBundle(...)`.
 - Frontend contract examples are now consumed from `gdc-common-utils-ts/examples` instead of package-local test fixtures.
-- README and `SDK_INTEGRATION_101.md` now point to the shared request/response example source of truth in `gdc-common-utils-ts`.
+- README and `101-SDK_INTEGRATION.md` now point to the shared request/response example source of truth in `gdc-common-utils-ts`.
 
 ### Testing
 - `npm run type-check` planned.

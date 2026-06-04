@@ -42,7 +42,7 @@ If you are integrating this package for the first time, open these in order:
    real local GW running for end-to-end checks.
 5. [gdc-common-utils-ts/src/examples/frontend-session.ts](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/src/examples/frontend-session.ts)
    Shared profile/session payload source of truth.
-6. [gdc-common-utils-ts/docs/LIFECYCLE_101.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/LIFECYCLE_101.md)
+6. [gdc-common-utils-ts/docs/101-LIFECYCLE.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-LIFECYCLE.md)
    Canonical lifecycle semantics and reusable placeholders for UI and portal flows.
 
 If you need the shortest path:
@@ -56,6 +56,261 @@ If you need the shortest path:
   [`ClientSDK`](src/ClientSDK.ts)
 - profile/session bootstrap:
   [`initializeSession(...)`](./docs/101-SDK_INTEGRATION.md)
+
+## Frontend Runtime Modes
+
+There are two frontend integration modes. New developers should choose the
+mode first, before choosing classes or helpers.
+
+### 1. Portal web / non confidential app
+
+Use this mode when:
+
+- the frontend is a Vite/web portal
+- the portal backend holds controller/professional keys in AWS KMS
+- the frontend does not send DIDComm directly to GW CORE
+
+Recommended entry point:
+
+- start from the shared editors/builders in `gdc-sdk-core-ts`
+- send the resulting payload or bundle to the portal backend
+- let the backend handle KMS, DIDComm, submit, and poll
+
+Main references:
+
+- [gdc-sdk-core-ts/docs/101-EMPLOYEES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-EMPLOYEES.md)
+- [gdc-sdk-core-ts/docs/101-CONSENT_COMMUNICATION.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-CONSENT_COMMUNICATION.md)
+- [gdc-common-utils-ts/docs/101-CONSENT_ACCESS.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-CONSENT_ACCESS.md)
+- [gdc-sdk-core-ts/tests/101-employees.test.mjs](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/101-employees.test.mjs)
+- [gdc-common-utils-ts/__tests__/101-consent-bundle-editor.test.ts](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-consent-bundle-editor.test.ts)
+
+Use:
+
+- `EmployeeBundleSession` for employee create/search payloads
+- `CommunicationAttachedBundleSession` for `Communication`-carried bundles
+- `createConsentAccessEditor(...)` for consent editing inside a communication bundle
+
+Controller-only employee flow in a portal web app:
+
+Use this example only when the current frontend screen belongs to the
+organization-controller/admin side.
+
+Do not reuse this employee example for:
+
+- professional screens
+- individual/family screens
+- generic end-user screens
+
+Those actor families should start from their own business flow:
+
+- professionals
+  - consent-aware access
+  - SMART token
+  - communication/index flows
+- individuals / family
+  - consent editing
+  - related-person flows
+  - IPS/FHIR import or read flows
+
+### Create
+
+Use `EmployeeBundleSession` to prepare one employee create bundle. The browser
+does not send it directly to GW CORE.
+The portal backend wraps it into its own request/envelope, then applies KMS,
+DIDComm, submit, and poll.
+
+```ts
+import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import {
+  EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE,
+  EXAMPLE_PROVIDER_ORGANIZATION_DID,
+} from 'gdc-common-utils-ts/examples';
+import { ClaimsPersonSchemaorg } from 'gdc-common-utils-ts/constants/schemaorg';
+
+// This editor lives only in frontend memory.
+// It helps the UI build the canonical employee payload before sending it to
+// the portal backend.
+const bundleEditor = new EmployeeBundleSession()
+  .setIdentifier(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
+  .setEmail(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
+  .setRole(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.role)
+  .addClaim(ClaimsPersonSchemaorg.memberOf, EXAMPLE_PROVIDER_ORGANIZATION_DID);
+
+// `employeeCreateBatchBundle` is the canonical one-entry employee `_batch` bundle.
+// Your Vite frontend normally sends this bundle to its own backend, not
+// directly to GW CORE.
+const employeeCreateBatchBundle = bundleEditor.toBundleBatch({
+  method: 'POST',
+  resourceId: EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier,
+});
+console.log(employeeCreateBatchBundle);
+```
+
+### Search
+
+Search is a different operation and should be built separately.
+
+`email + role` is the recommended exact operational lookup.
+
+```ts
+import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import { EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE } from 'gdc-common-utils-ts/examples';
+
+const employeeSearchBundle = new EmployeeBundleSession()
+  .setEmail(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
+  .setRole(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.role)
+  .toBundleSearch();
+
+console.log(employeeSearchBundle);
+```
+
+Other valid search shapes:
+
+- by `email` only: all active profiles for that mailbox
+- by `role` only: all active employees for that role
+- with no filters: all employees
+- by `identifier`: one exact technical or historical profile
+
+### Disable
+
+Disable is a lifecycle operation. Today the shared employee editor still
+produces the canonical `_batch` bundle with inner `request.method = DELETE`.
+
+```ts
+import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import { EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE } from 'gdc-common-utils-ts/examples';
+
+const employeeDisableBatchBundle = new EmployeeBundleSession()
+  .setIdentifier(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
+  .toBundleBatch({
+    method: 'DELETE',
+    resourceId: EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier,
+  });
+
+console.log(employeeDisableBatchBundle);
+```
+
+Current GW CORE contract vs preferred target:
+
+- current live contract
+  - disable = `_batch` + inner `request.method = DELETE`
+  - purge = `POST .../Employee/_purge`
+- preferred target contract
+  - disable/enable = semantic state change via `PATCH`
+  - purge = final removal operation kept separate from state changes
+
+Conceptual `PATCH` example for state change:
+
+```ts
+const employeeDisablePatchBatchBundle = new EmployeeBundleSession()
+  .setIdentifier(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
+  .toBundleBatch({
+    method: 'PATCH',
+    resourceId: EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier,
+  });
+```
+
+Business meaning:
+
+- `PATCH` should mean state transition such as enable/disable
+- `DELETE` should be reserved for final removal semantics such as purge
+- future operations like merge/split/destroy should be modeled first as named
+  business operations, then mapped to transport
+
+### Purge
+
+Purge is not the same contract as create/disable. The portal backend or runtime
+calls the explicit `Employee/_purge` flow and normally identifies the employee
+with `identifier`.
+
+```ts
+import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import { EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE } from 'gdc-common-utils-ts/examples';
+
+const employeePurgeSelector = new EmployeeBundleSession()
+  .setIdentifier(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.identifier)
+  .toClaims();
+
+console.log(employeePurgeSelector);
+```
+
+Primary references for those employee flows:
+
+- [gdc-sdk-core-ts/docs/101-EMPLOYEES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-EMPLOYEES.md)
+- [gdc-sdk-core-ts/tests/101-employees.test.mjs](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/101-employees.test.mjs)
+
+Non-controller frontend references:
+
+- professional / individual flow map:
+  - [gdc-sdk-core-ts/docs/101-SDK_FLOWS.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_FLOWS.md)
+- consent editing:
+  - [gdc-common-utils-ts/docs/101-CONSENT_ACCESS.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-CONSENT_ACCESS.md)
+- consent + communication handoff:
+  - [gdc-sdk-core-ts/docs/101-CONSENT_COMMUNICATION.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-CONSENT_COMMUNICATION.md)
+
+### 2. Confidential app / direct client runtime
+
+Use this mode when:
+
+- the app stores transport keys locally
+- the app can talk directly to GW CORE
+- there is no portal backend doing KMS and DIDComm on behalf of the app
+
+Recommended entry point:
+
+- start from `ClientSDK`
+- initialize runtime/session state
+- use the same shared editors/builders from `sdk-core` when a flow needs them
+
+Main references:
+
+- [docs/101-SDK_INTEGRATION.md](./docs/101-SDK_INTEGRATION.md)
+- [gdc-sdk-node-ts/docs/101-LIVE_GW_LOCAL.md](https://github.com/Global-DataCare/gdc-sdk-node-ts/blob/main/docs/101-LIVE_GW_LOCAL.md)
+
+Decision rule:
+
+- no local key custody: start from `sdk-core` editors and send to your backend
+- local key custody: start from `ClientSDK` runtime/session and use `sdk-core` editors as shared modeling helpers
+
+Minimal confidential-app example:
+
+```ts
+import { ClientSDK } from 'gdc-sdk-front-ts';
+import { EmployeeBundleSession } from 'gdc-sdk-core-ts';
+import {
+  EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE,
+  EXAMPLE_PROFILE_SESSION_INPUT,
+} from 'gdc-common-utils-ts/examples';
+
+const appId = frontendAppConfig.appId;
+const client = new ClientSDK({ appId });
+
+// `initializeSession(...)` creates the authenticated frontend runtime session.
+// In a confidential app this session owns the actor-facing runtime surface and
+// can later expose organization-controller/professional capabilities.
+const session = await client.initializeSession(EXAMPLE_PROFILE_SESSION_INPUT);
+
+// The shared editor from sdk-core is still used to model the employee bundle.
+const employeeSearchBundle = new EmployeeBundleSession()
+  .setEmail(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.email)
+  .setRole(EXAMPLE_EMPLOYEE_DOCTOR_ACTIVE.role)
+  .toBundleSearch();
+
+console.log(session, employeeSearchBundle);
+```
+
+Runtime note:
+
+- a confidential app still must choose the correct actor surface before using
+  an employee flow
+- employee management belongs only to the organization-controller/admin side
+- professional or individual apps should start from their own actor flow, not
+  from the employee examples above
+
+Primary references for that flow:
+
+- [docs/101-SDK_INTEGRATION.md](./docs/101-SDK_INTEGRATION.md)
+- [gdc-sdk-node-ts/docs/101-LIVE_GW_LOCAL.md](https://github.com/Global-DataCare/gdc-sdk-node-ts/blob/main/docs/101-LIVE_GW_LOCAL.md)
 
 ## Executable Usage Examples
 
@@ -302,7 +557,7 @@ const communication = buildPermissionRequestCommunication({
 ## Shared Contract Sources
 
 - [gdc-sdk-core-ts/README.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/README.md)
-- [gdc-common-utils-ts/docs/CONSENT_ACCESS_101.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/CONSENT_ACCESS_101.md)
+- [gdc-common-utils-ts/docs/101-CONSENT_ACCESS.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-CONSENT_ACCESS.md)
 
 Reusable payload examples:
 
