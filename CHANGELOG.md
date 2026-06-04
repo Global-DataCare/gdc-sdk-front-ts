@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0] - 2026-06-04
+
+### Changed
+- Updated shared dependency targets to:
+  - `gdc-common-utils-ts@^1.16.0`
+  - `gdc-sdk-core-ts@^0.8.0`
+- Reworked the frontend employee onboarding path so it teaches:
+  - `BundleEditor`
+  - `setAllowedResourceType(EmployeeResourceTypes.employee)`
+  - `newEntry(...).asEmployee()`
+  instead of presenting employee-specific setters directly on the generic
+  bundle editor surface.
+- Clarified in README and `101-SDK_INTEGRATION.md` that employee management in
+  Vite/non-confidential apps builds one homogeneous employee batch/search
+  bundle and sends it to the portal backend.
+
+### Testing
+- `npm run build`
+
 ## [0.7.0] - 2026-06-04
 
 ### Changed
