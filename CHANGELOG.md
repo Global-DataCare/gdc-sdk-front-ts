@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 - Clarified the frontend discovery contract so GW hosting discovery starts from
   the contextualized hosting-operator `/.well-known/dspace-version` URL rather
   than the host root.
+- Clarified in frontend discovery types/docs that the backend-owned host DSP
+  entrypoint is `/host/cds-{hostCoverageScope}/{version}/{hostNetwork}/.well-known/dspace-version`.
 - Expanded the employee/consent frontend handoff with:
   - the split between `gdc-common-utils-ts` and higher-level SDK surfaces
   - the expected `ConsentViewModel` roundtrip and validation path

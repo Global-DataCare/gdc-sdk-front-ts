@@ -27,6 +27,7 @@ Frontend developers should think in this simple flow:
 The frontend should not need to know:
 
 - `networkType`
+- `hostCoverageScope`
 - ICA defaults
 - host bootstrap plans
 - `/.well-known/dspace-version`
