@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.2] - 2026-06-04
+
+### Changed
+- Updated shared dependency targets to:
+  - `gdc-common-utils-ts@^1.17.0`
+  - `gdc-sdk-core-ts@^0.8.2`
+- Added a dedicated frontend task handoff covering:
+  - employee live/local validation order
+  - individual onboarding before consent flows
+  - consent roundtrip against GW demo
+  - required frontend live smoke coverage
+
+### Testing
+- `npm test`
+
 ## [0.8.1] - 2026-06-04
 
 ### Changed
