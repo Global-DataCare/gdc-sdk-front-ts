@@ -225,28 +225,28 @@ The existing real live/local reference is currently in `gwtemplate-node-ts`.
 
 Employee lifecycle smoke references already present in `gwtemplate-node-ts`:
 
-- `README.md`
+- [`gwtemplate-node-ts/README.md`](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/README.md)
   documents the `EMPLOYEE_COUNT=3` bootstrap mode for the local two-employee
   lifecycle smoke:
   - create employee 1
   - create employee 2
   - disable employee 2
   - purge both
-- `scripts/bootstrap-single-tenant.sh`
+- [`gwtemplate-node-ts/scripts/bootstrap-single-tenant.sh`](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/scripts/bootstrap-single-tenant.sh)
   consumes `EMPLOYEE_COUNT` and injects it into the bootstrap payload
-- `src/__tests__/unit/managers/EmployeeManager.test.ts`
+- [`gwtemplate-node-ts/src/__tests__/unit/managers/EmployeeManager.test.ts`](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/src/__tests__/unit/managers/EmployeeManager.test.ts)
   proves the purge rule and mixed-result behavior, including:
   - `should reject purge unless the employee is already inactive`
   - `should return a per-entry conflict for active employees and purge disabled employees in the same bundle`
 
 Primary consent integration test:
 
-- `src/__tests__/integration/consent.communication.api.test.ts`
+- [`gwtemplate-node-ts/src/__tests__/integration/consent.communication.api.test.ts`](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/src/__tests__/integration/consent.communication.api.test.ts)
 
 Current IPS / medication / Communication references already present in the SDK
 family:
 
-- `gdc-sdk-node-ts/tests/live-gw-node-runtime.e2e.test.mjs`
+- [`gdc-sdk-node-ts/tests/live-gw-node-runtime.e2e.test.mjs`](https://github.com/Global-DataCare/gdc-sdk-node-ts/blob/main/tests/live-gw-node-runtime.e2e.test.mjs)
   already contains the live runtime references for:
   - `LIVE communication ingestion indexes two medication statements from two bundles`
   - `LIVE actor-scoped node runtime chain on GW`
@@ -257,7 +257,7 @@ family:
   operation-style request contract
 - `gdc-common-utils-ts/docs/101-IPS_BUNDLE.md`
   is the canonical 101 for requesting IPS through `Communication`
-- `gwtemplate-node-ts/src/__tests__/unit/managers/CommunicationManager.unit.test.ts`
+- [`gwtemplate-node-ts/src/__tests__/unit/managers/CommunicationManager.unit.test.ts`](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/src/__tests__/unit/managers/CommunicationManager.unit.test.ts)
   proves backend execution for:
   - `Bundle/_search referenced in Communication.contentReference`
   - `Subject/$summary referenced in Communication.contentReference as a summary operation`
@@ -266,17 +266,17 @@ family:
 
 Individual onboarding references already present in `gwtemplate-node-ts`:
 
-- `artifacts/openapi-profiles/openapi-extension.json`
+- [`gwtemplate-node-ts/artifacts/openapi-profiles/openapi-extension.json`](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/artifacts/openapi-profiles/openapi-extension.json)
   documents the hosted individual onboarding compatibility route and explicitly
   states that the route accepts a signed individual onboarding PDF as a DIDComm
   attachment
-- `src/__tests__/data/example-payloads.ts`
+- [`gwtemplate-node-ts/src/__tests__/data/example-payloads.ts`](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/src/__tests__/data/example-payloads.ts)
   contains canonical individual onboarding payload material, including:
   - `signed-individual-form-pdf`
   - link-based signed PDF payload placeholders such as `{{signedIndividualFormPdfUrl}}`
   - embedded signed PDF placeholders such as `{{signedIndividualFormPdfBase64}}`
   - individual resource examples under `individual/org.schema/Person/`
-- `src/__tests__/data/customer-onboarding.data.ts`
+- [`gwtemplate-node-ts/src/__tests__/data/customer-onboarding.data.ts`](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/src/__tests__/data/customer-onboarding.data.ts)
   contains individual/customer onboarding evidence examples with PDF attachment
   semantics
 
