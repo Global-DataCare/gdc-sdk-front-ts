@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+- Clarified the frontend discovery contract so GW hosting discovery starts from
+  the contextualized hosting-operator `/.well-known/dspace-version` URL rather
+  than the host root.
+- Expanded the employee/consent frontend handoff with:
+  - the split between `gdc-common-utils-ts` and higher-level SDK surfaces
+  - the expected `ConsentViewModel` roundtrip and validation path
+  - the required live/local verification order for employee and consent flows
+
+### Testing
+- `npm run build`
+
 ## [0.8.2] - 2026-06-04
 
 ### Changed

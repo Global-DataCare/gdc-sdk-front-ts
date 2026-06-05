@@ -440,7 +440,8 @@ Frontend apps should not crawl host catalogs directly by default.
 
 Preferred model:
 
-- backend/BFF resolves host discovery from `/.well-known/dspace-version`
+- backend/BFF resolves host discovery from the contextualized hosting-operator
+  `/.well-known/dspace-version`
 - backend/BFF derives `/dsp/catalog/dcat.json`
 - frontend consumes normalized DTOs and maps them into cards
 

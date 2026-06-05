@@ -14,15 +14,23 @@ boundaries and without mixing employee flows with consent flows.
 
 Before implementing this task in `gdc-sdk-front-ts`:
 
-1. `gdc-sdk-core-ts` should be bumped and released with the latest shared
-   facade/surface area.
-2. `gdc-sdk-front-ts` should then update to that released `gdc-sdk-core-ts`
+1. `gdc-common-utils-ts` is the shared source of truth for test data, shared
+   types, constants, and utilities. Those low-level reusable pieces should live
+   there, not be recreated in `sdk-front`.
+2. `gdc-sdk-core-ts` should be bumped and released with the latest shared
+   facade/surface area built on top of `gdc-common-utils-ts`.
+3. `gdc-sdk-front-ts` should then update to that released `gdc-sdk-core-ts`
    version.
 
 Reason:
 
 - frontend should consume stable `sdk-core` surfaces/facades
 - frontend should not invent its own business ownership or payload semantics
+- test fixtures, permission templates, professional profiles, shared claim
+  constants, and reusable bundle/communication helpers belong in
+  `gdc-common-utils-ts`
+- `gdc-sdk-core-ts` is the shared SDK layer used by organization-controller,
+  professional, individual-controller, and individual-member SDK flows
 
 ## Existing References
 
@@ -69,6 +77,17 @@ SDK core 101 tests that already prove those frontend-facing flows:
 
 These are the high-level shared references behind the frontend-facing bundle
 editor, consent, and communication semantics.
+
+`gdc-common-utils-ts` is also where the reusable shared assets should live:
+
+- canonical test data and reproducible example data
+- shared types, constants, and utilities
+- permission templates and professional profile catalogs
+- bundle/communication semantics reused by every SDK layer
+
+That package is the common base consumed by `gdc-sdk-core-ts`, which then
+provides the higher-level surfaces used by organization-controller,
+professional, individual-controller, and individual-member SDK flows.
 
 - [`gdc-common-utils-ts/docs/101-BUNDLE_EDITOR_READER.md`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-BUNDLE_EDITOR_READER.md)
   is the base 101 for bundle creation and bundle reading through
@@ -433,6 +452,45 @@ implementation hypothesis unless product/UX says otherwise.
 - the frontend works with consent bundle creation plus `Communication` wrapping
 - consent readback should follow the GW read pattern, not an ad-hoc frontend API
 
+## Frontend Consent Representation
+
+The task should make the read/write transformation explicit instead of leaving
+it implicit.
+
+Recommended model:
+
+- read a `Consent` entry from the returned bundle through the shared consent
+  reading surface
+- map it into one frontend-facing `ConsentViewModel` object that is easy to
+  render and edit
+- if the user changes that `ConsentViewModel`, translate it back through the
+  shared consent editing surface before writing the updated `Consent` back into
+  the consent bundle entry
+
+In practice, frontend should not mutate raw FHIR `Consent` resources directly.
+It should work with a `ConsentViewModel` and rely on the shared consent editor
+layer to project changes back into the canonical `Consent` resource shape.
+
+This also means the task should document and test:
+
+- one or more `ConsentViewModel` shapes for frontend rendering
+- mapping from bundle `Consent` entry to `ConsentViewModel`
+- mapping from edited `ConsentViewModel` back to `Consent` through
+  `ConsentAccessEditor`
+- writing the updated `Consent` back into the bundle before wrapping or
+  resending it through `Communication`
+
+This must not stay only as documentation or an in-memory example. It must also
+be proven inside the real live/local GW flow:
+
+- read one persisted `Consent` back from GW
+- map that bundle entry into a `ConsentViewModel`
+- edit the `ConsentViewModel`
+- project it back into the bundle through `ConsentAccessEditor`
+- resend the updated bundle through `Communication`
+- read the updated `Consent` back again from GW
+- verify that the rendered `ConsentViewModel` reflects the persisted change
+
 ## What Is Still Unclear
 
 The user explicitly raised a valid concern:
@@ -492,6 +550,9 @@ This matters because the frontend task is not only about create payloads. It
 also needs to prove that readback and rendering stay coherent after mutations.
 
 ### Consent side
+
+The consent stage must include one live/local `ConsentViewModel` roundtrip, not
+only raw bundle creation and readback.
 
 Add frontend-facing surfaces/helpers for:
 
@@ -580,6 +641,16 @@ For the onboarding precondition, the implementation thread should validate:
 - add one live/local smoke test that submits the employee flow through the
   frontend-facing surface against the demo tenant
 - keep this test runnable independently from later consent or IPS stages
+
+### ConsentViewModel
+
+- add one high-level shared test that teaches:
+  - bundle `Consent` entry to `ConsentViewModel`
+  - edited `ConsentViewModel` back to `Consent` through `ConsentAccessEditor`
+- add one `sdk-core` example or test that shows the individual-controller path
+  using that same `ConsentViewModel` roundtrip before transport
+- add one `sdk-front` live/local test that proves the same roundtrip against
+  the demo GW flow after persisted readback
 
 ### Individual onboarding
 

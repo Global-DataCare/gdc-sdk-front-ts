@@ -24,8 +24,9 @@ export type ListPublishedProvidersInput = Omit<DataspaceDiscoveryFilter, 'capabi
  * endpoint.
  *
  * `catalogUrl` is optional because the frontend should not need to know
- * whether the backend started from `/.well-known/dspace-version` and derived
- * the DSP artifact or received a pre-normalized DTO from another layer.
+ * whether the backend started from the contextualized hosting-operator
+ * `/.well-known/dspace-version` and derived the DSP artifact or received a
+ * pre-normalized DTO from another layer.
  */
 export type HostingOperatorMatchDto = Readonly<{
   operatorDid: string;

@@ -126,7 +126,8 @@ Expected backend behavior behind that endpoint:
 
 1. load configured defaults or live discovery sources
 2. resolve hosting operators for one `sector + jurisdiction`
-3. fetch host `/.well-known/dspace-version` when provider catalogs are needed
+3. fetch the contextualized hosting-operator `/.well-known/dspace-version`
+   when provider catalogs are needed
 4. derive `/dsp/catalog/dcat.json`
 5. return normalized provider/operator DTOs to the frontend
 
