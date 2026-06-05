@@ -357,6 +357,8 @@ That new frontend-facing live test should:
 - build the individual onboarding payload through the frontend SDK surface
 - build the medication-ingestion payloads through the frontend SDK surface
 - build the IPS request through the frontend SDK surface
+- build the additional complete IPS bundle addition payload through the
+  frontend SDK surface when that optional follow-up flow is exercised
 - submit it to the demo backend/BFF or equivalent local gateway path
 - verify that the GW demo accepts it
 - verify the readback path after persistence
@@ -636,7 +638,7 @@ For the onboarding precondition, the implementation thread should validate:
 - use the FHIR operation-style request path with attached `Parameters`
 - verify that the returned IPS includes the two previously ingested medications
 - add optional follow-up coverage for:
-  - IPS update by attached bundle payload
+  - IPS update by attached additional complete IPS bundle payload
   - IPS update by `contentReference`
 - keep medication-ingestion and IPS-read tests runnable incrementally before
   adding the final all-in-one orchestrated test
