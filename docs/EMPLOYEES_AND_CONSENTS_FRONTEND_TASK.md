@@ -74,52 +74,51 @@ SDK core tests that already prove those flows:
 
 ### Shared common utils repo
 
-`gdc-common-utils-ts` is still hosted in GitLab, not GitHub. These links are
-still important because the low-level bundle/editor/communication semantics live
-there.
+These links are important because the low-level bundle/editor/communication
+semantics live there.
 
-- [`gdc-common-utils-ts/docs/101-BUNDLE_EDITOR_READER.md`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/docs/101-BUNDLE_EDITOR_READER.md)
+- [`gdc-common-utils-ts/docs/101-BUNDLE_EDITOR_READER.md`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-BUNDLE_EDITOR_READER.md)
   is the base 101 for bundle creation and bundle reading.
-- [`gdc-common-utils-ts/docs/101-EMPLOYEE_ENTRY_EDITOR.md`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/docs/101-EMPLOYEE_ENTRY_EDITOR.md)
+- [`gdc-common-utils-ts/docs/101-EMPLOYEE_ENTRY_EDITOR.md`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-EMPLOYEE_ENTRY_EDITOR.md)
   explains the employee entry editor layer used inside employee bundles.
-- [`gdc-common-utils-ts/docs/101-CONSENT_ACCESS.md`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/docs/101-CONSENT_ACCESS.md)
+- [`gdc-common-utils-ts/docs/101-CONSENT_ACCESS.md`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-CONSENT_ACCESS.md)
   explains consent editing and reading through `ConsentAccessEditor`.
-- [`gdc-common-utils-ts/docs/101-CONSENT_PERMISSION_TEMPLATES.md`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/docs/101-CONSENT_PERMISSION_TEMPLATES.md)
+- [`gdc-common-utils-ts/docs/101-CONSENT_PERMISSION_TEMPLATES.md`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-CONSENT_PERMISSION_TEMPLATES.md)
   documents the consent permission template layer used to prefill consent data.
-- [`gdc-common-utils-ts/docs/101-IPS_BUNDLE.md`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/docs/101-IPS_BUNDLE.md)
+- [`gdc-common-utils-ts/docs/101-IPS_BUNDLE.md`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-IPS_BUNDLE.md)
   documents the communication search/request contract used as the reference for
   IPS-like communication reads.
-- [`gdc-common-utils-ts/docs/101-COMMUNICATION_LAYERING.md`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/docs/101-COMMUNICATION_LAYERING.md)
+- [`gdc-common-utils-ts/docs/101-COMMUNICATION_LAYERING.md`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-COMMUNICATION_LAYERING.md)
   explains the separation between bundle construction and communication
   transport.
-- [`gdc-common-utils-ts/src/utils/bundle-editor.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/src/utils/bundle-editor.ts)
+- [`gdc-common-utils-ts/src/utils/bundle-editor.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/src/utils/bundle-editor.ts)
   contains `BundleEditor`, the base bundle construction/reading helper.
-- [`gdc-common-utils-ts/src/utils/communication-attached-bundle-session.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/src/utils/communication-attached-bundle-session.ts)
+- [`gdc-common-utils-ts/src/utils/communication-attached-bundle-session.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/src/utils/communication-attached-bundle-session.ts)
   contains `CommunicationAttachedBundleSession`, used to wrap an already-built
   bundle into `Communication`.
-- [`gdc-common-utils-ts/src/utils/communication-bundle-document-request.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/src/utils/communication-bundle-document-request.ts)
+- [`gdc-common-utils-ts/src/utils/communication-bundle-document-request.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/src/utils/communication-bundle-document-request.ts)
   contains the communication request builder logic used for attached search or
   operation payloads.
 
 Common utils tests that already prove the contract:
 
-- [`gdc-common-utils-ts/__tests__/101-bundle-reader.test.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/__tests__/101-bundle-reader.test.ts)
+- [`gdc-common-utils-ts/__tests__/101-bundle-reader.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-bundle-reader.test.ts)
   proves bundle reading.
-- [`gdc-common-utils-ts/__tests__/101-employee-examples.test.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/__tests__/101-employee-examples.test.ts)
+- [`gdc-common-utils-ts/__tests__/101-employee-examples.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-employee-examples.test.ts)
   proves employee example flows.
-- [`gdc-common-utils-ts/__tests__/101-consent-bundle-editor.test.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/__tests__/101-consent-bundle-editor.test.ts)
+- [`gdc-common-utils-ts/__tests__/101-consent-bundle-editor.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-consent-bundle-editor.test.ts)
   proves the high-level consent bundle editor flow.
-- [`gdc-common-utils-ts/__tests__/101-consent-template-bundle-editor.test.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/__tests__/101-consent-template-bundle-editor.test.ts)
+- [`gdc-common-utils-ts/__tests__/101-consent-template-bundle-editor.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-consent-template-bundle-editor.test.ts)
   proves the high-level consent bundle flow populated from permission templates.
-- [`gdc-common-utils-ts/__tests__/101-consent-permission-bundle-readwrite.test.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/__tests__/101-consent-permission-bundle-readwrite.test.ts)
+- [`gdc-common-utils-ts/__tests__/101-consent-permission-bundle-readwrite.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-consent-permission-bundle-readwrite.test.ts)
   proves the complementary lower-level consent template read/write flow.
-- [`gdc-common-utils-ts/__tests__/101-communication-search-reference.test.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/__tests__/101-communication-search-reference.test.ts)
+- [`gdc-common-utils-ts/__tests__/101-communication-search-reference.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-communication-search-reference.test.ts)
   proves the communication-based search reference flow.
-- [`gdc-common-utils-ts/__tests__/utils-communication-bundle-session.test.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/__tests__/utils-communication-bundle-session.test.ts)
+- [`gdc-common-utils-ts/__tests__/utils-communication-bundle-session.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/utils-communication-bundle-session.test.ts)
   covers wrapping bundles into communication sessions.
-- [`gdc-common-utils-ts/__tests__/utils-consent-access-editor-classification.test.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/__tests__/utils-consent-access-editor-classification.test.ts)
+- [`gdc-common-utils-ts/__tests__/utils-consent-access-editor-classification.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/utils-consent-access-editor-classification.test.ts)
   covers consent classification helpers.
-- [`gdc-common-utils-ts/__tests__/utils-communication-bundle-document-request.test.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/__tests__/utils-communication-bundle-document-request.test.ts)
+- [`gdc-common-utils-ts/__tests__/utils-communication-bundle-document-request.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/utils-communication-bundle-document-request.test.ts)
   covers communication request payload construction, including the FHIR
   `$summary` operation carried in `Communication` with attached `Parameters`.
 
