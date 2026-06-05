@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Changed
+- Updated shared dependency targets to:
+  - `gdc-common-utils-ts@^1.18.1`
+  - `gdc-sdk-core-ts@^0.8.3`
 - Clarified the frontend discovery contract so GW hosting discovery starts from
   the contextualized hosting-operator `/.well-known/dspace-version` URL rather
   than the host root.

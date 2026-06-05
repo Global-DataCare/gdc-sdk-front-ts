@@ -17,8 +17,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.28.4",
-    "gdc-common-utils-ts": "^1.17.0",
-    "gdc-sdk-core-ts": "^0.8.2"
+    "gdc-common-utils-ts": "^1.18.1",
+    "gdc-sdk-core-ts": "^0.8.3"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
