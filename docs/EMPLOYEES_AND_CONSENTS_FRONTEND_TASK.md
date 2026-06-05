@@ -15,13 +15,13 @@ boundaries and without mixing employee flows with consent flows.
 Before implementing this task in `gdc-sdk-front-ts`:
 
 1. `gdc-sdk-core-ts` should be bumped and released with the latest shared
-   facade/contracts surface.
+   facade/surface area.
 2. `gdc-sdk-front-ts` should then update to that released `gdc-sdk-core-ts`
    version.
 
 Reason:
 
-- frontend should consume stable `sdk-core` contracts/facades
+- frontend should consume stable `sdk-core` surfaces/facades
 - frontend should not invent its own business ownership or payload semantics
 
 ## Existing References
@@ -35,50 +35,44 @@ be reviewed before adding new frontend helpers.
   explains the package purpose and the current SDK layering at frontend level.
 - [`gdc-sdk-front-ts/docs/101-SDK_INTEGRATION.md`](https://github.com/Global-DataCare/gdc-sdk-front-ts/blob/main/docs/101-SDK_INTEGRATION.md)
   describes how `sdk-front` is expected to consume `sdk-core` and backend-facing
-  contracts.
+  surfaces.
 
 ### SDK core repo
 
+These are the high-level SDK references that frontend work should follow.
+
 - [`gdc-sdk-core-ts/docs/101-EMPLOYEES.md`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-EMPLOYEES.md)
   is the main employee 101 and should be the primary reference for
-  organization-controller employee flows.
+  organization-controller employee flows built around `BundleEditor`, bundle
+  reading, and employee entry rendering.
 - [`gdc-sdk-core-ts/docs/101-CONSENT_COMMUNICATION.md`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-CONSENT_COMMUNICATION.md)
   is the main consent communication 101 and should be the primary reference for
-  individual-controller consent flows.
+  individual-controller consent flows built around consent bundles wrapped in
+  `Communication`.
 - [`gdc-sdk-core-ts/docs/101-IPS_COMMUNICATION_OUTBOX.md`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-IPS_COMMUNICATION_OUTBOX.md)
-  documents the existing communication outbox pattern that consent read/write
-  should stay aligned with.
+  documents the existing high-level communication outbox pattern that consent
+  reads, medication ingestions, and IPS requests should stay aligned with.
 - [`gdc-sdk-core-ts/docs/101-SDK_FLOWS.md`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_FLOWS.md)
-  summarizes higher-level SDK flow composition across the package.
-- [`gdc-sdk-core-ts/src/employee-draft.ts`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/src/employee-draft.ts)
-  reexports the employee bundle/editor surface that frontend is expected to use,
-  including `BundleEditor`, `BundleEntryEditor`, and `EmployeeEntryEditor`.
+  summarizes the high-level SDK flow composition across the package.
 
-SDK core tests that already prove those flows:
+SDK core 101 tests that already prove those frontend-facing flows:
 
 - [`gdc-sdk-core-ts/tests/101-employees.test.mjs`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/101-employees.test.mjs)
   shows the high-level employee flow.
 - [`gdc-sdk-core-ts/tests/101-consent-bundle-outbox.test.mjs`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/101-consent-bundle-outbox.test.mjs)
   shows the high-level consent bundle outbox flow.
 - [`gdc-sdk-core-ts/tests/101-communication-ips-search-outbox.test.mjs`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/101-communication-ips-search-outbox.test.mjs)
-  shows the communication IPS search outbox flow used as the closest existing
-  read pattern.
-- [`gdc-sdk-core-ts/tests/employee-draft.test.mjs`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/employee-draft.test.mjs)
-  covers lower-level employee draft helpers.
-- [`gdc-sdk-core-ts/tests/communication-draft.test.mjs`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/communication-draft.test.mjs)
-  covers the communication draft surface.
-- [`gdc-sdk-core-ts/tests/communication-consent-mutation-contract.test.mjs`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/communication-consent-mutation-contract.test.mjs)
-  covers the consent mutation contract carried by communication.
-- [`gdc-sdk-core-ts/tests/communication-document-facade.test.mjs`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/communication-document-facade.test.mjs)
-  covers communication-level document/request facade behavior.
+  shows the high-level communication IPS search outbox flow used as the closest
+  existing read pattern.
 
 ### Shared common utils repo
 
-These links are important because the low-level bundle/editor/communication
-semantics live there.
+These are the high-level shared references behind the frontend-facing bundle
+editor, consent, and communication semantics.
 
 - [`gdc-common-utils-ts/docs/101-BUNDLE_EDITOR_READER.md`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-BUNDLE_EDITOR_READER.md)
-  is the base 101 for bundle creation and bundle reading.
+  is the base 101 for bundle creation and bundle reading through
+  `BundleEditor` and `BundleReader`.
 - [`gdc-common-utils-ts/docs/101-EMPLOYEE_ENTRY_EDITOR.md`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-EMPLOYEE_ENTRY_EDITOR.md)
   explains the employee entry editor layer used inside employee bundles.
 - [`gdc-common-utils-ts/docs/101-CONSENT_ACCESS.md`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-CONSENT_ACCESS.md)
@@ -86,21 +80,13 @@ semantics live there.
 - [`gdc-common-utils-ts/docs/101-CONSENT_PERMISSION_TEMPLATES.md`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-CONSENT_PERMISSION_TEMPLATES.md)
   documents the consent permission template layer used to prefill consent data.
 - [`gdc-common-utils-ts/docs/101-IPS_BUNDLE.md`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-IPS_BUNDLE.md)
-  documents the communication search/request contract used as the reference for
-  IPS-like communication reads.
+  documents the high-level communication request shape used as the reference
+  for IPS-style communication reads.
 - [`gdc-common-utils-ts/docs/101-COMMUNICATION_LAYERING.md`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-COMMUNICATION_LAYERING.md)
-  explains the separation between bundle construction and communication
-  transport.
-- [`gdc-common-utils-ts/src/utils/bundle-editor.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/src/utils/bundle-editor.ts)
-  contains `BundleEditor`, the base bundle construction/reading helper.
-- [`gdc-common-utils-ts/src/utils/communication-attached-bundle-session.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/src/utils/communication-attached-bundle-session.ts)
-  contains `CommunicationAttachedBundleSession`, used to wrap an already-built
-  bundle into `Communication`.
-- [`gdc-common-utils-ts/src/utils/communication-bundle-document-request.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/src/utils/communication-bundle-document-request.ts)
-  contains the communication request builder logic used for attached search or
-  operation payloads.
+  explains the high-level separation between bundle construction and
+  communication transport.
 
-Common utils tests that already prove the contract:
+Common utils 101 tests that already prove the flow and payload shape:
 
 - [`gdc-common-utils-ts/__tests__/101-bundle-reader.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-bundle-reader.test.ts)
   proves bundle reading.
@@ -111,20 +97,14 @@ Common utils tests that already prove the contract:
 - [`gdc-common-utils-ts/__tests__/101-consent-template-bundle-editor.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-consent-template-bundle-editor.test.ts)
   proves the high-level consent bundle flow populated from permission templates.
 - [`gdc-common-utils-ts/__tests__/101-consent-permission-bundle-readwrite.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-consent-permission-bundle-readwrite.test.ts)
-  proves the complementary lower-level consent template read/write flow.
+  proves the complementary consent template read/write flow beside the bundle
+  editor 101.
 - [`gdc-common-utils-ts/__tests__/101-communication-search-reference.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-communication-search-reference.test.ts)
   proves the communication-based search reference flow.
-- [`gdc-common-utils-ts/__tests__/utils-communication-bundle-session.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/utils-communication-bundle-session.test.ts)
-  covers wrapping bundles into communication sessions.
-- [`gdc-common-utils-ts/__tests__/utils-consent-access-editor-classification.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/utils-consent-access-editor-classification.test.ts)
-  covers consent classification helpers.
-- [`gdc-common-utils-ts/__tests__/utils-communication-bundle-document-request.test.ts`](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/utils-communication-bundle-document-request.test.ts)
-  covers communication request payload construction, including the FHIR
-  `$summary` operation carried in `Communication` with attached `Parameters`.
 
 ## Live Local E2E Validation Setup
 
-The implementation thread should validate the contract against a local GW demo
+The implementation thread should validate the flow against a local GW demo
 stack, not only with pure unit tests.
 
 Use two TTY sessions in `gwtemplate-node-ts`.
@@ -165,7 +145,7 @@ Current status:
 - the real live/local backend proof exists today in `gwtemplate-node-ts`
 - `gdc-common-utils-ts`, `gdc-sdk-core-ts`, and `gdc-sdk-front-ts` mainly prove
   payload construction, facade behavior, and in-memory readback
-- therefore this task must not stop at local contract tests inside `sdk-front`
+- therefore this task must not stop at local shape-only tests inside `sdk-front`
 - it must also add one frontend-facing live/local smoke path that exercises the
   real GW demo flow through the frontend SDK surface
 - that live/local coverage should be split into:
@@ -213,7 +193,7 @@ Important:
   individual before sending consent payloads
 - the preferred test subject should exist with the nickname `Doraemon`
 - the onboarding evidence may be a signed PDF attachment or a signed PDF link,
-  as long as the contract exercised by the frontend matches GW expectations
+  as long as the frontend payload shape matches GW expectations
 - in demo mode, the onboarding flow may use OTP-based evidence instead of a
   certificate-signed PDF, as long as the OTP is bound to the PDF hash and a
   timestamp and the test records that evidence path explicitly
@@ -253,7 +233,7 @@ family:
   shows how the SDK builds the IPS request through `Communication`
 - `gdc-common-utils-ts/__tests__/utils-communication-bundle-document-request.test.ts`
   proves the shared builder for FHIR `Parameters` plus the `$summary`
-  operation-style request contract
+  operation-style request shape
 - `gdc-common-utils-ts/docs/101-IPS_BUNDLE.md`
   is the canonical 101 for requesting IPS through `Communication`
 - [`gwtemplate-node-ts/src/__tests__/unit/managers/CommunicationManager.unit.test.ts`](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/src/__tests__/unit/managers/CommunicationManager.unit.test.ts)
@@ -434,7 +414,7 @@ Current intended backend/GW shape:
 Important:
 
 - this is not the same UX or API shape as employee search
-- this should stay separate in frontend contracts and docs
+- this should stay separate in frontend surfaces and docs
 
 ## What Seems Correct Architecturally
 
@@ -484,7 +464,7 @@ So the implementation thread should first validate:
 
 ### Employee side
 
-Add frontend-facing contracts/helpers for:
+Add frontend-facing surfaces/helpers for:
 
 - building employee create/search requests through `sdk-core`
 - reading returned employee bundles
@@ -513,7 +493,7 @@ also needs to prove that readback and rendering stay coherent after mutations.
 
 ### Consent side
 
-Add frontend-facing contracts/helpers for:
+Add frontend-facing surfaces/helpers for:
 
 - building separate consent grants for:
   - professional
@@ -523,7 +503,7 @@ Add frontend-facing contracts/helpers for:
   evidence before sending those consents
 - wrapping the resulting bundle into `Communication`
 - building the read request for the same subject using the `Communication`
-  embedded search contract
+  embedded search shape
 - creating two distinct medication ingestions through two distinct
   `Communication` payloads
 - requesting the IPS after those ingestions so the returned summary includes
@@ -575,10 +555,10 @@ For the onboarding precondition, the implementation thread should validate:
 6. add frontend adapters/view-model helpers for consent results
 7. document one portal-web flow and one confidential/native flow if their
    transport boundaries differ
-8. add tests for those flows at frontend-contract level
+8. add tests for those flows at frontend-surface level
 9. run live/local end-to-end validation against the demo tenant
 10. add or update one `sdk-front` live/local smoke test that proves the real GW
-    demo roundtrip, not only in-memory contract behavior
+    demo roundtrip, not only in-memory shape behavior
 11. extend that smoke path so it continues from:
    - employee setup
    - to individual onboarding
