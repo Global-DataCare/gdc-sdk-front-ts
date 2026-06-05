@@ -61,8 +61,8 @@ SDK core tests that already prove those flows:
 - [`gdc-sdk-core-ts/tests/101-consent-bundle-outbox.test.mjs`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/101-consent-bundle-outbox.test.mjs)
   shows the high-level consent bundle outbox flow.
 - [`gdc-sdk-core-ts/tests/101-communication-ips-search-outbox.test.mjs`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/101-communication-ips-search-outbox.test.mjs)
-  shows the communication search outbox flow used as the closest existing read
-  pattern.
+  shows the communication IPS search outbox flow used as the closest existing
+  read pattern.
 - [`gdc-sdk-core-ts/tests/employee-draft.test.mjs`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/employee-draft.test.mjs)
   covers lower-level employee draft helpers.
 - [`gdc-sdk-core-ts/tests/communication-draft.test.mjs`](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/communication-draft.test.mjs)
@@ -120,7 +120,8 @@ Common utils tests that already prove the contract:
 - [`gdc-common-utils-ts/__tests__/utils-consent-access-editor-classification.test.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/__tests__/utils-consent-access-editor-classification.test.ts)
   covers consent classification helpers.
 - [`gdc-common-utils-ts/__tests__/utils-communication-bundle-document-request.test.ts`](https://gitlab.dev.accuro.es/idi/espacio-de-datos/global-datacare/gdc-common-utils-ts/-/blob/main/__tests__/utils-communication-bundle-document-request.test.ts)
-  covers communication request payload construction.
+  covers communication request payload construction, including the FHIR
+  `$summary` operation carried in `Communication` with attached `Parameters`.
 
 ## Live Local E2E Validation Setup
 
@@ -168,6 +169,9 @@ Current status:
 - therefore this task must not stop at local contract tests inside `sdk-front`
 - it must also add one frontend-facing live/local smoke path that exercises the
   real GW demo flow through the frontend SDK surface
+- that live/local coverage should be split into:
+  - incremental stage tests
+  - one later orchestrated full-flow test
 
 The goal is to verify not only object construction but also the real transport
 shape expected by GW:
@@ -175,6 +179,17 @@ shape expected by GW:
 - employee bundle create/search/read flows
 - consent bundle wrapped in `Communication`
 - consent readback through `Communication` with embedded `Subject/_search`
+- medication ingestion through `Communication`
+- IPS retrieval after those ingestions through `Communication` using FHIR
+  operation-style search or summary payloads
+
+Testing strategy:
+
+- first add incremental live/local tests per stage so each state transition is
+  independently reproducible and debuggable
+- then add one orchestrated end-to-end test that runs those stages
+  successively against the same tenant state
+- do not replace the incremental tests with only one large smoke test
 
 Recommended continuous validation order for one local demo session:
 
@@ -182,7 +197,12 @@ Recommended continuous validation order for one local demo session:
 2. run the employee lifecycle smoke on that tenant state
 3. create or onboard the individual from the controller-side flow
 4. run the consent create/read flow on that same tenant state
-5. optionally run a follow-up professional IPS request via `Communication`
+5. create two medication ingestions through two separate `Communication`
+   submissions
+6. request the IPS document so it includes those two medications
+7. optionally continue with follow-up flows such as:
+   - updating the index with an attached IPS bundle
+   - updating the index with IPS material referenced by `contentReference`
 
 Do not re-bootstrap between those steps unless the tenant state has been reset
 or the test explicitly requires a clean environment.
@@ -223,6 +243,27 @@ Primary consent integration test:
 
 - `src/__tests__/integration/consent.communication.api.test.ts`
 
+Current IPS / medication / Communication references already present in the SDK
+family:
+
+- `gdc-sdk-node-ts/tests/live-gw-node-runtime.e2e.test.mjs`
+  already contains the live runtime references for:
+  - `LIVE communication ingestion indexes two medication statements from two bundles`
+  - `LIVE actor-scoped node runtime chain on GW`
+- `gdc-sdk-core-ts/tests/101-communication-ips-search-outbox.test.mjs`
+  shows how the SDK builds the IPS request through `Communication`
+- `gdc-common-utils-ts/__tests__/utils-communication-bundle-document-request.test.ts`
+  proves the shared builder for FHIR `Parameters` plus the `$summary`
+  operation-style request contract
+- `gdc-common-utils-ts/docs/101-IPS_BUNDLE.md`
+  is the canonical 101 for requesting IPS through `Communication`
+- `gwtemplate-node-ts/src/__tests__/unit/managers/CommunicationManager.unit.test.ts`
+  proves backend execution for:
+  - `Bundle/_search referenced in Communication.contentReference`
+  - `Subject/$summary referenced in Communication.contentReference as a summary operation`
+  - `Patient/$summary as an alias of Subject/$summary`
+  - `Subject/_search referenced in Communication payload with attached Parameters`
+
 Individual onboarding references already present in `gwtemplate-node-ts`:
 
 - `artifacts/openapi-profiles/openapi-extension.json`
@@ -255,7 +296,8 @@ How the continuous local GW demo flow should be executed:
 3. use that same tenant state first for employee lifecycle validation
 4. then execute the individual onboarding flow on that same tenant state
 5. then execute the consent integration test on that same tenant state
-6. optionally continue with IPS communication validation on that same tenant state
+6. then execute the medication-ingestion and IPS-read flow on that same tenant state
+7. optionally continue with extra index update flows on that same tenant state
 
 For the employee-first bootstrap reference, use:
 
@@ -276,7 +318,23 @@ After that bootstrap, keep using the same tenant state for:
 - employee lifecycle validation
 - individual onboarding validation
 - consent write/read validation
-- optional IPS communication validation
+- medication ingestion validation
+- IPS communication validation
+- optional IPS update-by-attachment or update-by-contentReference validation
+
+For the later medication-to-IPS live reference in `gdc-sdk-node-ts`, use:
+
+```bash
+cd $HOME/GITS/gdc-workspace/gdc-sdk-node-ts
+RUN_LIVE_GW_E2E=1 node --test tests/live-gw-node-runtime.e2e.test.mjs
+```
+
+And, when specifically validating the IPS ingestion branch:
+
+```bash
+cd $HOME/GITS/gdc-workspace/gdc-sdk-node-ts
+RUN_LIVE_GW_E2E=1 RUN_LIVE_GW_E2E_IPS_INGESTION=1 node --test tests/live-gw-node-runtime.e2e.test.mjs
+```
 
 Then run the consent integration test:
 
@@ -297,9 +355,17 @@ That new frontend-facing live test should:
 
 - build the employee or consent payload through the frontend SDK surface
 - build the individual onboarding payload through the frontend SDK surface
+- build the medication-ingestion payloads through the frontend SDK surface
+- build the IPS request through the frontend SDK surface
 - submit it to the demo backend/BFF or equivalent local gateway path
 - verify that the GW demo accepts it
 - verify the readback path after persistence
+
+This should be implemented in two layers:
+
+- layer 1: incremental frontend live/local tests for each stage
+- layer 2: one full orchestrated frontend live/local test that reuses those
+  steps in order
 
 This is required because otherwise `sdk-front` would only prove local payload
 construction, not real end-to-end behavior against GW.
@@ -457,6 +523,10 @@ Add frontend-facing contracts/helpers for:
 - wrapping the resulting bundle into `Communication`
 - building the read request for the same subject using the `Communication`
   embedded search contract
+- creating two distinct medication ingestions through two distinct
+  `Communication` payloads
+- requesting the IPS after those ingestions so the returned summary includes
+  both medications
 - mapping returned consent records into frontend-friendly grouped views
 
 Minimum useful UI-friendly grouped shape to evaluate:
@@ -480,6 +550,9 @@ For the onboarding precondition, the implementation thread should validate:
 - how controller data is projected into `Organization.owner.*` fields
 - how the demo OTP is generated from PDF hash + timestamp
 - how that OTP is automatically consumed by the test to finalize onboarding
+- how the later IPS request is built:
+  - current `Subject/_search` read path for consent retrieval
+  - FHIR `$summary` operation path with attached `Parameters` for IPS retrieval
 
 ## Non-Goals
 
@@ -504,7 +577,15 @@ For the onboarding precondition, the implementation thread should validate:
 8. add tests for those flows at frontend-contract level
 9. run live/local end-to-end validation against the demo tenant
 10. add or update one `sdk-front` live/local smoke test that proves the real GW
-   demo roundtrip, not only in-memory contract behavior
+    demo roundtrip, not only in-memory contract behavior
+11. extend that smoke path so it continues from:
+   - employee setup
+   - to individual onboarding
+   - to consent write/read
+   - to two medication ingestions
+   - to IPS retrieval showing both medications
+12. keep the per-stage tests runnable on their own even after the orchestrated
+    test exists
 
 ## Tests To Add
 
@@ -517,6 +598,7 @@ For the onboarding precondition, the implementation thread should validate:
 - validate create/delete/purge readback behavior after each mutation
 - add one live/local smoke test that submits the employee flow through the
   frontend-facing surface against the demo tenant
+- keep this test runnable independently from later consent or IPS stages
 
 ### Individual onboarding
 
@@ -531,6 +613,7 @@ For the onboarding precondition, the implementation thread should validate:
 - auto-use that OTP inside the test to complete the onboarding flow
 - submit the onboarding flow against the demo tenant
 - verify that the individual is then available for downstream consent flows
+- keep this test runnable independently once employees are already bootstrapped
 
 ### Consents
 
@@ -541,6 +624,35 @@ For the onboarding precondition, the implementation thread should validate:
 - validate live/local readback against the demo tenant
 - add one live/local smoke test that submits and reads the consent flow through
   the frontend-facing surface against the demo tenant
+- keep this test runnable independently once the individual onboarding stage is
+  already satisfied
+
+### Medications and IPS
+
+- build two separate medication ingestions through two separate `Communication`
+  payloads
+- submit both ingestions against the same demo tenant and same subject
+- then build the IPS request through `Communication`
+- use the FHIR operation-style request path with attached `Parameters`
+- verify that the returned IPS includes the two previously ingested medications
+- add optional follow-up coverage for:
+  - IPS update by attached bundle payload
+  - IPS update by `contentReference`
+- keep medication-ingestion and IPS-read tests runnable incrementally before
+  adding the final all-in-one orchestrated test
+
+### Full orchestrator
+
+- add one final live/local orchestrated test that performs, in order:
+  - tenant bootstrap
+  - employee lifecycle baseline
+  - individual onboarding
+  - consent write/read
+  - medication ingestion 1
+  - medication ingestion 2 (optionally with another additional complete IPS bundle)
+  - IPS request/readback
+- this full test should reuse the same canonical payload builders and assertions
+  already used by the incremental tests
 
 ## Thread Handoff
 
