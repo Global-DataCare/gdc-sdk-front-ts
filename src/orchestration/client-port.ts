@@ -1,6 +1,10 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
 import type { DeviceAppType, DeviceUserClass } from 'gdc-common-utils-ts/constants';
+import type {
+  IndividualOnboardingDraftInput,
+  IndividualOnboardingDraftResult,
+} from 'gdc-common-utils-ts/models/individual-onboarding';
 import type { BundleSearchQuery, CommunicationInput, PollOptions, SubmitAndPollResult, SubmitPayload } from 'gdc-sdk-core-ts';
 
 export type FrontRouteContext = {
@@ -78,6 +82,9 @@ export type FrontIndividualOrganizationStartResult = {
   registrationThid: string;
   confirmationThid?: string;
 };
+
+export type FrontIndividualOnboardingPdfDraftInput = IndividualOnboardingDraftInput;
+export type FrontIndividualOnboardingPdfDraftResult = IndividualOnboardingDraftResult;
 
 export type FrontIndividualOrganizationConfirmOrderInput = {
   offerId: string;
@@ -195,6 +202,10 @@ export type FrontRuntimeClient = {
     ctx: FrontRouteContext,
     input: FrontIndividualOrganizationBootstrapInput,
   ) => Promise<FrontIndividualOrganizationStartResult>;
+  prepareIndividualOnboardingPdfDraft?: (
+    ctx: FrontRouteContext,
+    input: FrontIndividualOnboardingPdfDraftInput,
+  ) => Promise<FrontIndividualOnboardingPdfDraftResult>;
   confirmIndividualOrganizationOrder?: (
     ctx: FrontRouteContext,
     input: FrontIndividualOrganizationConfirmOrderInput,

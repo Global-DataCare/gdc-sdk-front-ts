@@ -1,7 +1,8 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
 import type { DeviceAppType, DeviceUserClass } from 'gdc-common-utils-ts/constants';
-import type { SubmitAndPollResult } from 'gdc-sdk-core-ts';
+import type { IndividualOnboardingDraftInput, IndividualOnboardingDraftResult } from 'gdc-common-utils-ts/models/individual-onboarding';
+import { createIndividualOnboardingFacade, type SubmitAndPollResult } from 'gdc-sdk-core-ts';
 import {
   createSyntheticSubmitAndPollResult,
   type FrontGrantProfessionalAccessResult,
@@ -114,6 +115,14 @@ export class OrgAdminService {
 }
 
 export class FamilyAdminService {
+  public async prepareIndividualOnboardingPdfDraft(
+    _providerDid: string,
+    _idToken: string,
+    input: IndividualOnboardingDraftInput,
+  ): Promise<IndividualOnboardingDraftResult> {
+    return createIndividualOnboardingFacade().buildDraft(input);
+  }
+
   public async startIndividualOrganization(
     _providerDid: string,
     _idToken: string,

@@ -109,7 +109,7 @@ test('HttpDataspaceDiscoveryClient maps backend discovery DTOs into UI cards', a
     endpointUrl: 'https://portal.example.org/api/dataspace-discovery/providers',
     fetcher: async (_input, init) => {
       assert.equal(init?.method, 'POST');
-      assert.match(String(init?.body || ''), /"providerCapability":"indexing\.cruds"/);
+      assert.match(String(init?.body || ''), /"providerCapability":"organization\/Composition\.cruds"/);
       return {
         ok: true,
         status: 200,
