@@ -2,12 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.9.0] - 2026-06-10
 
 ### Changed
 - Updated shared dependency targets to:
-  - `gdc-common-utils-ts@^1.18.1`
-  - `gdc-sdk-core-ts@^0.8.3`
+  - `gdc-common-utils-ts@^1.20.0`
+  - `gdc-sdk-core-ts@^0.9.0`
 - Clarified the frontend discovery contract so GW hosting discovery starts from
   the contextualized hosting-operator `/.well-known/dspace-version` URL rather
   than the host root.
@@ -17,8 +17,15 @@ All notable changes to this project will be documented in this file.
   - the split between `gdc-common-utils-ts` and higher-level SDK surfaces
   - the expected `ConsentViewModel` roundtrip and validation path
   - the required live/local verification order for employee and consent flows
+- Added the first frontend onboarding-PDF integration surface so an
+  individual-controller flow can:
+  - materialize an onboarding PDF request bundle
+  - send it through the controller/client orchestration layer
+  - follow the shared `DocumentReference/_create` contract
+- Documented the onboarding PDF request flow in `docs/101-SDK_INTEGRATION.md`.
 
 ### Testing
+- `npm test`
 - `npm run build`
 
 ## [0.8.2] - 2026-06-04

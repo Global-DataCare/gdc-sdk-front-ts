@@ -1,7 +1,7 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
 import type { PollOptions, SubmitAndPollResult } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualMemberLifecycleInput, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationConfirmOrderInput, type FrontIndividualOrganizationLifecycleInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import { requireClientMethod, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualMemberLifecycleInput, type FrontIndividualOnboardingPdfDraftInput, type FrontIndividualOnboardingPdfDraftResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationConfirmOrderInput, type FrontIndividualOrganizationLifecycleInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class IndividualControllerSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
@@ -11,6 +11,13 @@ export class IndividualControllerSdk {
     input: FrontIndividualOrganizationBootstrapInput,
   ): Promise<FrontIndividualOrganizationStartResult> {
     return requireClientMethod(this.client, 'startIndividualOrganization')(ctx, input);
+  }
+
+  public prepareIndividualOnboardingPdfDraft(
+    ctx: FrontRouteContext,
+    input: FrontIndividualOnboardingPdfDraftInput,
+  ): Promise<FrontIndividualOnboardingPdfDraftResult> {
+    return requireClientMethod(this.client, 'prepareIndividualOnboardingPdfDraft')(ctx, input);
   }
 
   public confirmIndividualOrganizationOrder(

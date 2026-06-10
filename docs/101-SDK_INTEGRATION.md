@@ -15,6 +15,10 @@ If you are implementing employee create/search/disable/purge flows, use:
 - [gdc-common-utils-ts/docs/101-EMPLOYEE_ENTRY_EDITOR.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-EMPLOYEE_ENTRY_EDITOR.md)
 - [gdc-sdk-core-ts/docs/101-EMPLOYEES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-EMPLOYEES.md)
 
+If you are implementing the individual-controller onboarding PDF draft flow, use:
+
+- [gdc-common-utils-ts/docs/101-INDIVIDUAL_ONBOARDING_PDF_REQUEST.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-INDIVIDUAL_ONBOARDING_PDF_REQUEST.md)
+
 When teaching employee flows in this frontend guide, keep this order:
 
 1. create
@@ -37,6 +41,26 @@ This document should answer only these questions:
 - which helper should the frontend call next
 - which concepts belong to UI/session state
 - which concepts belong to shared activation/discovery contracts
+
+## Individual Controller Onboarding PDF
+
+For the current onboarding-PDF draft flow:
+
+- actor: `individualController`
+- payload: `Bundle` with one `DocumentReference`
+- canonical PDF base64 field:
+  - `resource.meta.claims[DocumentReferenceClaim.ContentData]`
+
+Use this order:
+
+1. build `kyc`, `formFields`, and `template`
+2. call `createIndividualOnboardingFacade().buildDraft(...)` or
+   `buildPdfDraftRequestBundle(...)`
+3. send that business payload through the individual-controller frontend path
+
+Reference:
+
+- [gdc-common-utils-ts/docs/101-INDIVIDUAL_ONBOARDING_PDF_REQUEST.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-INDIVIDUAL_ONBOARDING_PDF_REQUEST.md)
 
 Teaching rule for this `101`:
 
