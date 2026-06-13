@@ -2,9 +2,17 @@
 
 import type { DeviceAppType, DeviceUserClass } from 'gdc-common-utils-ts/constants';
 import type { IndividualOnboardingDraftInput, IndividualOnboardingDraftResult } from 'gdc-common-utils-ts/models/individual-onboarding';
-import { buildEmployeeSearchBundle, createIndividualOnboardingFacade, type SubmitAndPollResult } from 'gdc-sdk-core-ts';
+import { LicenseListSearchEditor, LicenseOfferSearchEditor, LicenseOrderSearchEditor } from 'gdc-common-utils-ts';
+import {
+  buildEmployeeSearchBundle,
+  createIndividualOnboardingFacade,
+  type SubmitAndPollResult,
+} from 'gdc-sdk-core-ts';
 import {
   createSyntheticSubmitAndPollResult,
+  type FrontLicenseListSearchInput,
+  type FrontLicenseOfferSearchInput,
+  type FrontLicenseOrderSearchInput,
   type FrontOrganizationEmployeeSearchInput,
   type FrontGrantProfessionalAccessResult,
   type FrontSmartTokenExchangeResult,
@@ -127,6 +135,90 @@ export class OrgAdminService {
       }),
     });
   }
+
+  public async searchOrganizationLicenses(
+    _providerDid: string,
+    _idToken: string,
+    input: FrontLicenseListSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    const thid = input.requestThid || runtimeThid('organization-license-search');
+    return createSyntheticSubmitAndPollResult(thid, {
+      thid,
+      request: {
+        resourceType: 'Bundle',
+        type: 'batch',
+        entry: [
+          new LicenseListSearchEditor(input.licenseQuery || {})
+            .buildSearchEntry(),
+        ],
+      },
+    });
+  }
+
+  /** Lists organization-owned license seats with optional semantic filters. */
+  public async listOrganizationLicenses(
+    providerDid: string,
+    idToken: string,
+    input: FrontLicenseListSearchInput = {},
+  ): Promise<SubmitAndPollResult> {
+    return this.searchOrganizationLicenses(providerDid, idToken, input);
+  }
+
+  public async searchOrganizationLicenseOffers(
+    _providerDid: string,
+    _idToken: string,
+    input: FrontLicenseOfferSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    const thid = input.requestThid || runtimeThid('organization-license-offer-search');
+    return createSyntheticSubmitAndPollResult(thid, {
+      thid,
+      request: {
+        resourceType: 'Bundle',
+        type: 'batch',
+        entry: [
+          new LicenseOfferSearchEditor(input.offerQuery || {})
+            .buildSearchEntry(),
+        ],
+      },
+    });
+  }
+
+  /** Lists organization-owned commercial offer records with optional semantic filters. */
+  public async listOrganizationLicenseOffers(
+    providerDid: string,
+    idToken: string,
+    input: FrontLicenseOfferSearchInput = {},
+  ): Promise<SubmitAndPollResult> {
+    return this.searchOrganizationLicenseOffers(providerDid, idToken, input);
+  }
+
+  public async searchOrganizationLicenseOrders(
+    _providerDid: string,
+    _idToken: string,
+    input: FrontLicenseOrderSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    const thid = input.requestThid || runtimeThid('organization-license-order-search');
+    return createSyntheticSubmitAndPollResult(thid, {
+      thid,
+      request: {
+        resourceType: 'Bundle',
+        type: 'batch',
+        entry: [
+          new LicenseOrderSearchEditor(input.orderQuery || {})
+            .buildSearchEntry(),
+        ],
+      },
+    });
+  }
+
+  /** Lists organization-owned commercial order/payment records with optional semantic filters. */
+  public async listOrganizationLicenseOrders(
+    providerDid: string,
+    idToken: string,
+    input: FrontLicenseOrderSearchInput = {},
+  ): Promise<SubmitAndPollResult> {
+    return this.searchOrganizationLicenseOrders(providerDid, idToken, input);
+  }
 }
 
 export class FamilyAdminService {
@@ -213,6 +305,90 @@ export class FamilyAdminService {
     },
   ): Promise<SubmitAndPollResult> {
     return createSyntheticSubmitAndPollResult(runtimeThid('individual-member-purge'));
+  }
+
+  public async searchIndividualLicenses(
+    _providerDid: string,
+    _idToken: string,
+    input: FrontLicenseListSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    const thid = input.requestThid || runtimeThid('individual-license-search');
+    return createSyntheticSubmitAndPollResult(thid, {
+      thid,
+      request: {
+        resourceType: 'Bundle',
+        type: 'batch',
+        entry: [
+          new LicenseListSearchEditor(input.licenseQuery || {})
+            .buildSearchEntry(),
+        ],
+      },
+    });
+  }
+
+  /** Lists subject/individual-side license seats with optional semantic filters. */
+  public async listIndividualLicenses(
+    providerDid: string,
+    idToken: string,
+    input: FrontLicenseListSearchInput = {},
+  ): Promise<SubmitAndPollResult> {
+    return this.searchIndividualLicenses(providerDid, idToken, input);
+  }
+
+  public async searchIndividualLicenseOffers(
+    _providerDid: string,
+    _idToken: string,
+    input: FrontLicenseOfferSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    const thid = input.requestThid || runtimeThid('individual-license-offer-search');
+    return createSyntheticSubmitAndPollResult(thid, {
+      thid,
+      request: {
+        resourceType: 'Bundle',
+        type: 'batch',
+        entry: [
+          new LicenseOfferSearchEditor(input.offerQuery || {})
+            .buildSearchEntry(),
+        ],
+      },
+    });
+  }
+
+  /** Lists subject/individual-side commercial offer records with optional semantic filters. */
+  public async listIndividualLicenseOffers(
+    providerDid: string,
+    idToken: string,
+    input: FrontLicenseOfferSearchInput = {},
+  ): Promise<SubmitAndPollResult> {
+    return this.searchIndividualLicenseOffers(providerDid, idToken, input);
+  }
+
+  public async searchIndividualLicenseOrders(
+    _providerDid: string,
+    _idToken: string,
+    input: FrontLicenseOrderSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    const thid = input.requestThid || runtimeThid('individual-license-order-search');
+    return createSyntheticSubmitAndPollResult(thid, {
+      thid,
+      request: {
+        resourceType: 'Bundle',
+        type: 'batch',
+        entry: [
+          new LicenseOrderSearchEditor(input.orderQuery || {})
+            .buildSearchEntry(),
+        ],
+      },
+    });
+  }
+
+  /** Lists subject/individual-side commercial order/payment records with optional semantic filters. */
+  public async listIndividualLicenseOrders(
+    providerDid: string,
+    idToken: string,
+    input: FrontLicenseOrderSearchInput = {},
+  ): Promise<SubmitAndPollResult> {
+    return this.searchIndividualLicenseOrders(providerDid, idToken, input);
   }
 }
 

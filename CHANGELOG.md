@@ -9,11 +9,22 @@ All notable changes to this project will be documented in this file.
   - `OrganizationControllerSdk` exposes `searchOrganizationEmployees(...)`
   - `IndividualControllerSdk` exposes `searchClinicalBundle(...)`
   - `PersonalSdk` exposes `getLatestIps(...)`
+- Expanded the frontend license/commercial orchestration surface so
+  organization and individual flows can call:
+  - `searchLicenses(...)`
+  - `listLicenses(...)`
+  - `searchLicenseOffers(...)`
+  - `listLicenseOffers(...)`
+  - `searchLicenseOrders(...)`
+  - `listLicenseOrders(...)`
 - Wired frontend employee search through the shared bundle-search contract so
   org-admin flows can submit `Employee/_search` requests from the public
   surface instead of using runtime internals.
 - Kept the frontend clinical read surface aligned with the runtime methods that
   already existed internally, promoting them to stable public façade methods.
+- Promoted the shared commercial/license search/list contract to the public
+  frontend service layer instead of forcing portal/BFF code to drop down into
+  runtime-private helpers.
 - Updated the shared dependency targets to:
   - `gdc-common-utils-ts@^1.21.0`
   - `gdc-sdk-core-ts@^0.10.0`

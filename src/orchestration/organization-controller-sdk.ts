@@ -1,7 +1,7 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
 import type { PollOptions, SubmitAndPollResult } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontEmployeeDeviceActivationRequestInput, type FrontOrganizationEmployeeCreationInput, type FrontOrganizationEmployeeLifecycleInput, type FrontOrganizationEmployeeSearchInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import { requireClientMethod, type FrontEmployeeDeviceActivationRequestInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontOrganizationEmployeeCreationInput, type FrontOrganizationEmployeeLifecycleInput, type FrontOrganizationEmployeeSearchInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class OrganizationControllerSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
@@ -27,6 +27,53 @@ export class OrganizationControllerSdk {
     input: FrontOrganizationEmployeeSearchInput,
   ): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'searchOrganizationEmployees')(ctx, input);
+  }
+
+  public searchLicenses(
+    ctx: FrontRouteContext,
+    input: FrontLicenseListSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'searchOrganizationLicenses')(ctx, input);
+  }
+
+  /** Lists organization-owned license seats with optional filters. */
+  public listLicenses(
+    ctx: FrontRouteContext,
+    input: FrontLicenseListSearchInput = {},
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'listOrganizationLicenses')(ctx, input);
+  }
+
+  /** Searches hosted commercial offer records that back portal list/detail views. */
+  public searchLicenseOffers(
+    ctx: FrontRouteContext,
+    input: FrontLicenseOfferSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'searchOrganizationLicenseOffers')(ctx, input);
+  }
+
+  /** Lists hosted commercial offer records without requiring explicit filters. */
+  public listLicenseOffers(
+    ctx: FrontRouteContext,
+    input: FrontLicenseOfferSearchInput = {},
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'listOrganizationLicenseOffers')(ctx, input);
+  }
+
+  /** Searches hosted commercial order/payment records for portal read-model flows. */
+  public searchLicenseOrders(
+    ctx: FrontRouteContext,
+    input: FrontLicenseOrderSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'searchOrganizationLicenseOrders')(ctx, input);
+  }
+
+  /** Lists hosted commercial order/payment records without requiring explicit filters. */
+  public listLicenseOrders(
+    ctx: FrontRouteContext,
+    input: FrontLicenseOrderSearchInput = {},
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'listOrganizationLicenseOrders')(ctx, input);
   }
 
   public purgeEmployee(

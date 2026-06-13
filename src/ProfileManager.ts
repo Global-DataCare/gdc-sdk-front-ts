@@ -21,7 +21,7 @@ import { OrganizationControllerSdk } from './orchestration/organization-controll
 import { OrganizationEmployeeSdk } from './orchestration/organization-employee-sdk.js';
 import { PersonalSdk } from './orchestration/personal-sdk.js';
 import { ProfessionalSdk } from './orchestration/professional-sdk.js';
-import { createSyntheticSubmitAndPollResult, type FrontOrganizationEmployeeSearchInput, type FrontRuntimeClient } from './orchestration/client-port.js';
+import { createSyntheticSubmitAndPollResult, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontOrganizationEmployeeSearchInput, type FrontRuntimeClient } from './orchestration/client-port.js';
 
 /**
  * Role-scoped session object returned by `ClientSDK.initializeSession(...)`.
@@ -77,6 +77,30 @@ export class ProfileManager {
         if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
         return this.orgAdmin.admin.searchOrganizationEmployees(ctx.providerDid, ctx.idToken, input);
       },
+      searchOrganizationLicenses: (ctx, input) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.searchOrganizationLicenses(ctx.providerDid, ctx.idToken, input);
+      },
+      listOrganizationLicenses: (ctx, input = {}) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.listOrganizationLicenses(ctx.providerDid, ctx.idToken, input);
+      },
+      searchOrganizationLicenseOffers: (ctx, input) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.searchOrganizationLicenseOffers(ctx.providerDid, ctx.idToken, input);
+      },
+      listOrganizationLicenseOffers: (ctx, input = {}) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.listOrganizationLicenseOffers(ctx.providerDid, ctx.idToken, input);
+      },
+      searchOrganizationLicenseOrders: (ctx, input) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.searchOrganizationLicenseOrders(ctx.providerDid, ctx.idToken, input);
+      },
+      listOrganizationLicenseOrders: (ctx, input = {}) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.listOrganizationLicenseOrders(ctx.providerDid, ctx.idToken, input);
+      },
       disableEmployee: (ctx, input) => {
         if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
         return this.orgAdmin.admin.disableEmployee(ctx.providerDid, ctx.idToken, input);
@@ -111,6 +135,30 @@ export class ProfileManager {
       purgeIndividualMember: (ctx, input) => {
         if (!this.familyAdmin?.admin) throw new Error('familyAdmin.admin service is not available for this profile.');
         return this.familyAdmin.admin.purgeIndividualMember(ctx.providerDid, ctx.idToken, input);
+      },
+      searchIndividualLicenses: (ctx, input) => {
+        if (!this.familyAdmin?.admin) throw new Error('familyAdmin.admin service is not available for this profile.');
+        return this.familyAdmin.admin.searchIndividualLicenses(ctx.providerDid, ctx.idToken, input);
+      },
+      listIndividualLicenses: (ctx, input = {}) => {
+        if (!this.familyAdmin?.admin) throw new Error('familyAdmin.admin service is not available for this profile.');
+        return this.familyAdmin.admin.listIndividualLicenses(ctx.providerDid, ctx.idToken, input);
+      },
+      searchIndividualLicenseOffers: (ctx, input) => {
+        if (!this.familyAdmin?.admin) throw new Error('familyAdmin.admin service is not available for this profile.');
+        return this.familyAdmin.admin.searchIndividualLicenseOffers(ctx.providerDid, ctx.idToken, input);
+      },
+      listIndividualLicenseOffers: (ctx, input = {}) => {
+        if (!this.familyAdmin?.admin) throw new Error('familyAdmin.admin service is not available for this profile.');
+        return this.familyAdmin.admin.listIndividualLicenseOffers(ctx.providerDid, ctx.idToken, input);
+      },
+      searchIndividualLicenseOrders: (ctx, input) => {
+        if (!this.familyAdmin?.admin) throw new Error('familyAdmin.admin service is not available for this profile.');
+        return this.familyAdmin.admin.searchIndividualLicenseOrders(ctx.providerDid, ctx.idToken, input);
+      },
+      listIndividualLicenseOrders: (ctx, input = {}) => {
+        if (!this.familyAdmin?.admin) throw new Error('familyAdmin.admin service is not available for this profile.');
+        return this.familyAdmin.admin.listIndividualLicenseOrders(ctx.providerDid, ctx.idToken, input);
       },
       grantProfessionalAccess: (ctx, input) => {
         if (this.professional?.physician) {
@@ -224,6 +272,138 @@ export class ProfileManager {
       params.idToken,
       {
         employeeClaims: params.employeeClaims,
+        requestThid: params.requestThid,
+      },
+    );
+  }
+
+  /**
+   * Organization-admin helper to search/list tenant-owned license seats.
+   */
+  public async searchOrganizationLicenses(params: {
+    providerDid: string;
+    idToken: string;
+    licenseQuery?: FrontLicenseListSearchInput['licenseQuery'];
+    requestThid?: string;
+  }): Promise<SubmitAndPollResult> {
+    if (!this.orgAdmin?.admin) {
+      throw new Error('orgAdmin.admin service is not available for this profile.');
+    }
+    return this.orgAdmin.admin.searchOrganizationLicenses(
+      params.providerDid,
+      params.idToken,
+      {
+        licenseQuery: params.licenseQuery,
+        requestThid: params.requestThid,
+      },
+    );
+  }
+
+  /**
+   * Organization-admin helper to search/list hosted commercial offer records.
+   */
+  public async searchOrganizationLicenseOffers(params: {
+    providerDid: string;
+    idToken: string;
+    offerQuery?: FrontLicenseOfferSearchInput['offerQuery'];
+    requestThid?: string;
+  }): Promise<SubmitAndPollResult> {
+    if (!this.orgAdmin?.admin) {
+      throw new Error('orgAdmin.admin service is not available for this profile.');
+    }
+    return this.orgAdmin.admin.searchOrganizationLicenseOffers(
+      params.providerDid,
+      params.idToken,
+      {
+        offerQuery: params.offerQuery,
+        requestThid: params.requestThid,
+      },
+    );
+  }
+
+  /**
+   * Family-admin helper to search/list subject-side commercial offer records.
+   */
+  public async searchIndividualLicenseOffers(params: {
+    providerDid: string;
+    idToken: string;
+    offerQuery?: FrontLicenseOfferSearchInput['offerQuery'];
+    requestThid?: string;
+  }): Promise<SubmitAndPollResult> {
+    if (!this.familyAdmin?.admin) {
+      throw new Error('familyAdmin.admin service is not available for this profile.');
+    }
+    return this.familyAdmin.admin.searchIndividualLicenseOffers(
+      params.providerDid,
+      params.idToken,
+      {
+        offerQuery: params.offerQuery,
+        requestThid: params.requestThid,
+      },
+    );
+  }
+
+  /**
+   * Organization-admin helper to search/list hosted commercial order/payment records.
+   */
+  public async searchOrganizationLicenseOrders(params: {
+    providerDid: string;
+    idToken: string;
+    orderQuery?: FrontLicenseOrderSearchInput['orderQuery'];
+    requestThid?: string;
+  }): Promise<SubmitAndPollResult> {
+    if (!this.orgAdmin?.admin) {
+      throw new Error('orgAdmin.admin service is not available for this profile.');
+    }
+    return this.orgAdmin.admin.searchOrganizationLicenseOrders(
+      params.providerDid,
+      params.idToken,
+      {
+        orderQuery: params.orderQuery,
+        requestThid: params.requestThid,
+      },
+    );
+  }
+
+  /**
+   * Family-admin helper to search/list subject-side commercial order/payment records.
+   */
+  public async searchIndividualLicenseOrders(params: {
+    providerDid: string;
+    idToken: string;
+    orderQuery?: FrontLicenseOrderSearchInput['orderQuery'];
+    requestThid?: string;
+  }): Promise<SubmitAndPollResult> {
+    if (!this.familyAdmin?.admin) {
+      throw new Error('familyAdmin.admin service is not available for this profile.');
+    }
+    return this.familyAdmin.admin.searchIndividualLicenseOrders(
+      params.providerDid,
+      params.idToken,
+      {
+        orderQuery: params.orderQuery,
+        requestThid: params.requestThid,
+      },
+    );
+  }
+
+  /**
+   * Family/individual-admin helper to search/list subject-side license seats.
+   */
+  public async searchIndividualLicenses(params: {
+    providerDid: string;
+    idToken: string;
+    licenseQuery?: FrontLicenseListSearchInput['licenseQuery'];
+    requestThid?: string;
+  }): Promise<SubmitAndPollResult> {
+    if (!this.familyAdmin?.admin) {
+      throw new Error('familyAdmin.admin service is not available for this profile.');
+    }
+    return this.familyAdmin.admin.searchIndividualLicenses(
+      params.providerDid,
+      params.idToken,
+      {
+        licenseQuery: params.licenseQuery,
         requestThid: params.requestThid,
       },
     );

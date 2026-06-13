@@ -1,7 +1,7 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
 import type { PollOptions, SubmitAndPollResult } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualMemberLifecycleInput, type FrontIndividualOnboardingPdfDraftInput, type FrontIndividualOnboardingPdfDraftResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationConfirmOrderInput, type FrontIndividualOrganizationLifecycleInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualMemberLifecycleInput, type FrontIndividualOnboardingPdfDraftInput, type FrontIndividualOnboardingPdfDraftResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationConfirmOrderInput, type FrontIndividualOrganizationLifecycleInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class IndividualControllerSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
@@ -106,6 +106,53 @@ export class IndividualControllerSdk {
     subject: string,
   ): Promise<{ thid: string }> {
     return requireClientMethod(this.client, 'getLatestIps')(ctx, subject);
+  }
+
+  public searchLicenses(
+    ctx: FrontRouteContext,
+    input: FrontLicenseListSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'searchIndividualLicenses')(ctx, input);
+  }
+
+  /** Lists subject/individual-side license seats with optional filters. */
+  public listLicenses(
+    ctx: FrontRouteContext,
+    input: FrontLicenseListSearchInput = {},
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'listIndividualLicenses')(ctx, input);
+  }
+
+  /** Searches subject-side commercial offer records that back portal list/detail views. */
+  public searchLicenseOffers(
+    ctx: FrontRouteContext,
+    input: FrontLicenseOfferSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'searchIndividualLicenseOffers')(ctx, input);
+  }
+
+  /** Lists subject-side commercial offer records without requiring explicit filters. */
+  public listLicenseOffers(
+    ctx: FrontRouteContext,
+    input: FrontLicenseOfferSearchInput = {},
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'listIndividualLicenseOffers')(ctx, input);
+  }
+
+  /** Searches subject-side commercial order/payment records for portal read-model flows. */
+  public searchLicenseOrders(
+    ctx: FrontRouteContext,
+    input: FrontLicenseOrderSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'searchIndividualLicenseOrders')(ctx, input);
+  }
+
+  /** Lists subject-side commercial order/payment records without requiring explicit filters. */
+  public listLicenseOrders(
+    ctx: FrontRouteContext,
+    input: FrontLicenseOrderSearchInput = {},
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'listIndividualLicenseOrders')(ctx, input);
   }
 
   public requestSmartToken(input: FrontSmartTokenRequestInput): Promise<FrontSmartTokenExchangeResult> {

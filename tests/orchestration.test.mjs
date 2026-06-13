@@ -86,6 +86,31 @@ test('organization controller session materializes host and organization facades
     },
   );
   assert.equal(facadeSearch.poll.status, 200);
+
+  const licenseSearch = await session.asOrganizationController().searchLicenses(
+    { providerDid: 'did:web:org.example', idToken: 'id-token' },
+    { licenseQuery: { active: true } },
+  );
+  assert.equal(licenseSearch.poll.status, 200);
+  assert.equal(licenseSearch.poll.body.request.entry[0].type, 'License-search-request-v1.0');
+
+  const licenseList = await session.asOrganizationController().listLicenses(
+    { providerDid: 'did:web:org.example', idToken: 'id-token' },
+  );
+  assert.equal(licenseList.poll.status, 200);
+
+  const offerSearch = await session.asOrganizationController().searchLicenseOffers(
+    { providerDid: 'did:web:org.example', idToken: 'id-token' },
+    { offerQuery: { active: true } },
+  );
+  assert.equal(offerSearch.poll.status, 200);
+  assert.equal(offerSearch.poll.body.request.entry[0].type, 'Offer-search-request-v1.0');
+
+  const orderList = await session.asOrganizationController().listLicenseOrders(
+    { providerDid: 'did:web:org.example', idToken: 'id-token' },
+  );
+  assert.equal(orderList.poll.status, 200);
+  assert.equal(orderList.poll.body.request.entry[0].type, 'Order-search-request-v1.0');
 });
 
 test('family controller session materializes individual and personal facades', async () => {
@@ -131,6 +156,30 @@ test('family controller session materializes individual and personal facades', a
     'did:web:subject.example',
   );
   assert.match(latestIps.thid, /^thid-/);
+
+  const licenseSearch = await session.asIndividualController().searchLicenses(
+    { providerDid: 'did:web:family.example', idToken: 'id-token' },
+    { licenseQuery: { subjectId: 'did:web:subject.example' } },
+  );
+  assert.equal(licenseSearch.poll.status, 200);
+
+  const personalLicenseList = await session.asPersonal().listLicenses(
+    { providerDid: 'did:web:family.example', idToken: 'id-token' },
+  );
+  assert.equal(personalLicenseList.poll.status, 200);
+
+  const offerSearch = await session.asIndividualController().searchLicenseOffers(
+    { providerDid: 'did:web:family.example', idToken: 'id-token' },
+    { offerQuery: { subjectIds: ['did:web:subject.example'] } },
+  );
+  assert.equal(offerSearch.poll.status, 200);
+  assert.equal(offerSearch.poll.body.request.entry[0].type, 'Offer-search-request-v1.0');
+
+  const orderList = await session.asPersonal().listLicenseOrders(
+    { providerDid: 'did:web:family.example', idToken: 'id-token' },
+  );
+  assert.equal(orderList.poll.status, 200);
+  assert.equal(orderList.poll.body.request.entry[0].type, 'Order-search-request-v1.0');
 });
 
 test('professional session materializes the professional facade without employee helpers', async () => {

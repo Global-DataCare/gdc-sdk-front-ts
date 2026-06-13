@@ -1,11 +1,19 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
 import type { DeviceAppType, DeviceUserClass } from 'gdc-common-utils-ts/constants';
+import type { LicenseListSearchDraft, LicenseOfferSearchDraft, LicenseOrderSearchDraft } from 'gdc-common-utils-ts';
 import type {
   IndividualOnboardingDraftInput,
   IndividualOnboardingDraftResult,
 } from 'gdc-common-utils-ts/models/individual-onboarding';
-import type { BundleSearchQuery, CommunicationInput, EmployeeSearchValue, PollOptions, SubmitAndPollResult, SubmitPayload } from 'gdc-sdk-core-ts';
+import type {
+  BundleSearchQuery,
+  CommunicationInput,
+  EmployeeSearchValue,
+  PollOptions,
+  SubmitAndPollResult,
+  SubmitPayload,
+} from 'gdc-sdk-core-ts';
 
 export type FrontRouteContext = {
   providerDid: string;
@@ -50,6 +58,33 @@ export type FrontOrganizationEmployeeLifecycleInput = {
 
 export type FrontOrganizationEmployeeSearchInput = {
   employeeClaims?: Record<string, EmployeeSearchValue>;
+  requestThid?: string;
+  pollOptions?: PollOptions;
+};
+
+/**
+ * Frontend/runtime search/list input for license seats.
+ */
+export type FrontLicenseListSearchInput = {
+  licenseQuery?: Partial<LicenseListSearchDraft>;
+  requestThid?: string;
+  pollOptions?: PollOptions;
+};
+
+/**
+ * Frontend/runtime search/list input for commercial offer read-models.
+ */
+export type FrontLicenseOfferSearchInput = {
+  offerQuery?: Partial<LicenseOfferSearchDraft>;
+  requestThid?: string;
+  pollOptions?: PollOptions;
+};
+
+/**
+ * Frontend/runtime search/list input for commercial order/payment read-models.
+ */
+export type FrontLicenseOrderSearchInput = {
+  orderQuery?: Partial<LicenseOrderSearchDraft>;
   requestThid?: string;
   pollOptions?: PollOptions;
 };
@@ -196,6 +231,30 @@ export type FrontRuntimeClient = {
     ctx: FrontRouteContext,
     input: FrontOrganizationEmployeeSearchInput,
   ) => Promise<SubmitAndPollResult>;
+  searchOrganizationLicenses?: (
+    ctx: FrontRouteContext,
+    input: FrontLicenseListSearchInput,
+  ) => Promise<SubmitAndPollResult>;
+  listOrganizationLicenses?: (
+    ctx: FrontRouteContext,
+    input?: FrontLicenseListSearchInput,
+  ) => Promise<SubmitAndPollResult>;
+  searchOrganizationLicenseOffers?: (
+    ctx: FrontRouteContext,
+    input: FrontLicenseOfferSearchInput,
+  ) => Promise<SubmitAndPollResult>;
+  listOrganizationLicenseOffers?: (
+    ctx: FrontRouteContext,
+    input?: FrontLicenseOfferSearchInput,
+  ) => Promise<SubmitAndPollResult>;
+  searchOrganizationLicenseOrders?: (
+    ctx: FrontRouteContext,
+    input: FrontLicenseOrderSearchInput,
+  ) => Promise<SubmitAndPollResult>;
+  listOrganizationLicenseOrders?: (
+    ctx: FrontRouteContext,
+    input?: FrontLicenseOrderSearchInput,
+  ) => Promise<SubmitAndPollResult>;
   purgeEmployee?: (
     ctx: FrontRouteContext,
     input: FrontOrganizationEmployeeLifecycleInput,
@@ -239,6 +298,30 @@ export type FrontRuntimeClient = {
     ctx: FrontRouteContext,
     input: FrontIndividualMemberLifecycleInput,
     pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  searchIndividualLicenses?: (
+    ctx: FrontRouteContext,
+    input: FrontLicenseListSearchInput,
+  ) => Promise<SubmitAndPollResult>;
+  listIndividualLicenses?: (
+    ctx: FrontRouteContext,
+    input?: FrontLicenseListSearchInput,
+  ) => Promise<SubmitAndPollResult>;
+  searchIndividualLicenseOffers?: (
+    ctx: FrontRouteContext,
+    input: FrontLicenseOfferSearchInput,
+  ) => Promise<SubmitAndPollResult>;
+  listIndividualLicenseOffers?: (
+    ctx: FrontRouteContext,
+    input?: FrontLicenseOfferSearchInput,
+  ) => Promise<SubmitAndPollResult>;
+  searchIndividualLicenseOrders?: (
+    ctx: FrontRouteContext,
+    input: FrontLicenseOrderSearchInput,
+  ) => Promise<SubmitAndPollResult>;
+  listIndividualLicenseOrders?: (
+    ctx: FrontRouteContext,
+    input?: FrontLicenseOrderSearchInput,
   ) => Promise<SubmitAndPollResult>;
   grantProfessionalAccess?: (
     ctx: FrontRouteContext,
