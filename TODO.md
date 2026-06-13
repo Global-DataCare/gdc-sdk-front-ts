@@ -9,12 +9,30 @@
    - active/pending status
 3. Keep the frontend surface compatible with a portal API such as `GET /api/personal/related-profiles`.
 4. Preserve the separation between technical transport identity and human actor/profile identity in session state.
-5. Add dataspace discovery client contracts aligned with backend/BFF resolution:
+5. Expose the same controller surface gaps already solved at runtime on the frontend facades:
+   - do not leave `searchClinicalBundle` / latest-IPS-style reads hidden behind non-facade service layers when they are part of the controller UX
+   - frontend actor/profile services should not require direct `runtimeClient` escape hatches for controller searches
+   - keep facade parity with the controller capabilities already declared in shared contracts
+6. Add frontend-facing license view contracts/services for controller dashboards:
+   - available / used / free / contracted counters
+   - list/filter seats by `userClass`, app `type`, status, role, and target email
+   - BFF-first DTOs so the browser never needs to understand GW vault internals
+7. Add frontend-facing high-level builders/examples beyond employee-only bundle editing:
+   - `RelatedPerson` request authoring examples
+   - license issue/search examples
+   - `Offer` / `Order` examples for controller flows that still submit batch-style payloads
+   - keep the documentation centered on `BundleEditor`-style ergonomics where shared builders exist
+8. Add BFF-first active-profile selection/state helpers for `related-profiles`:
+   - load `related-profiles` DTOs from portal/BFF
+   - normalize active vs pending relationship cards
+   - select/store the active human profile separately from the transport/session identity
+   - propagate the chosen active related profile through `ProfileManager` and public session helpers
+9. Add dataspace discovery client contracts aligned with backend/BFF resolution:
    - hosting-operator list DTOs
    - published-provider list DTOs
    - UI card mappers for sector and coverage
-6. Follow `docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md` for the exact BFF-first integration scope.
-7. Follow `docs/EMPLOYEES_AND_CONSENTS_FRONTEND_TASK.md` for the next employee vs consent frontend split:
+10. Follow `docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md` for the exact BFF-first integration scope.
+11. Follow `docs/EMPLOYEES_AND_CONSENTS_FRONTEND_TASK.md` for the next employee vs consent frontend split:
    - organization-controller employee bundle create/search/read flows
    - individual-controller consent bundle + `Communication` create/read flows
 

@@ -2,9 +2,10 @@
 
 import type { DeviceAppType, DeviceUserClass } from 'gdc-common-utils-ts/constants';
 import type { IndividualOnboardingDraftInput, IndividualOnboardingDraftResult } from 'gdc-common-utils-ts/models/individual-onboarding';
-import { createIndividualOnboardingFacade, type SubmitAndPollResult } from 'gdc-sdk-core-ts';
+import { buildEmployeeSearchBundle, createIndividualOnboardingFacade, type SubmitAndPollResult } from 'gdc-sdk-core-ts';
 import {
   createSyntheticSubmitAndPollResult,
+  type FrontOrganizationEmployeeSearchInput,
   type FrontGrantProfessionalAccessResult,
   type FrontSmartTokenExchangeResult,
   type FrontSmartTokenRequestInput,
@@ -109,8 +110,22 @@ export class OrgAdminService {
       employeeClaims?: Record<string, unknown>;
       resourceId?: string;
     },
-  ): Promise<SubmitAndPollResult> {
+    ): Promise<SubmitAndPollResult> {
     return createSyntheticSubmitAndPollResult(runtimeThid('employee-purge'));
+  }
+
+  public async searchOrganizationEmployees(
+    _providerDid: string,
+    _idToken: string,
+    input: FrontOrganizationEmployeeSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    const thid = input.requestThid || runtimeThid('employee-search');
+    return createSyntheticSubmitAndPollResult(thid, {
+      thid,
+      request: buildEmployeeSearchBundle({
+        claims: input.employeeClaims,
+      }),
+    });
   }
 }
 

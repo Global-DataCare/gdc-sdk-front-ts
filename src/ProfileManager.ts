@@ -1,6 +1,7 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
 import type { DeviceAppType, DeviceUserClass } from 'gdc-common-utils-ts/constants';
+import type { SubmitAndPollResult } from 'gdc-sdk-core-ts';
 import type { Profile } from './types.js';
 import type {
   CommonServices,
@@ -20,7 +21,7 @@ import { OrganizationControllerSdk } from './orchestration/organization-controll
 import { OrganizationEmployeeSdk } from './orchestration/organization-employee-sdk.js';
 import { PersonalSdk } from './orchestration/personal-sdk.js';
 import { ProfessionalSdk } from './orchestration/professional-sdk.js';
-import { createSyntheticSubmitAndPollResult, type FrontRuntimeClient } from './orchestration/client-port.js';
+import { createSyntheticSubmitAndPollResult, type FrontOrganizationEmployeeSearchInput, type FrontRuntimeClient } from './orchestration/client-port.js';
 
 /**
  * Role-scoped session object returned by `ClientSDK.initializeSession(...)`.
@@ -71,6 +72,10 @@ export class ProfileManager {
         if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
         return this.orgAdmin.admin.createOrganizationEmployee(ctx.providerDid, ctx.idToken, input)
           .then((result) => createSyntheticSubmitAndPollResult(result.thid));
+      },
+      searchOrganizationEmployees: (ctx, input) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.searchOrganizationEmployees(ctx.providerDid, ctx.idToken, input);
       },
       disableEmployee: (ctx, input) => {
         if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
@@ -200,6 +205,28 @@ export class ProfileManager {
       throw new Error('orgAdmin.admin service is not available for this profile.');
     }
     return this.orgAdmin.admin.createOrganizationEmployee(providerDid, idToken, params);
+  }
+
+  /**
+   * Organization-admin helper to search employee bundles through the frontend runtime.
+   */
+  public async searchOrganizationEmployees(params: {
+    providerDid: string;
+    idToken: string;
+    employeeClaims?: FrontOrganizationEmployeeSearchInput['employeeClaims'];
+    requestThid?: string;
+  }): Promise<SubmitAndPollResult> {
+    if (!this.orgAdmin?.admin) {
+      throw new Error('orgAdmin.admin service is not available for this profile.');
+    }
+    return this.orgAdmin.admin.searchOrganizationEmployees(
+      params.providerDid,
+      params.idToken,
+      {
+        employeeClaims: params.employeeClaims,
+        requestThid: params.requestThid,
+      },
+    );
   }
 
   /**

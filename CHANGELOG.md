@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.10.0] - 2026-06-12
+
+### Changed
+- Expanded the public frontend orchestration surface so:
+  - `OrganizationControllerSdk` exposes `searchOrganizationEmployees(...)`
+  - `IndividualControllerSdk` exposes `searchClinicalBundle(...)`
+  - `PersonalSdk` exposes `getLatestIps(...)`
+- Wired frontend employee search through the shared bundle-search contract so
+  org-admin flows can submit `Employee/_search` requests from the public
+  surface instead of using runtime internals.
+- Kept the frontend clinical read surface aligned with the runtime methods that
+  already existed internally, promoting them to stable public façade methods.
+- Updated the shared dependency targets to:
+  - `gdc-common-utils-ts@^1.21.0`
+  - `gdc-sdk-core-ts@^0.10.0`
+- Refreshed `TODO.md` and orchestration coverage so facade parity is tracked in
+  the frontend layer rather than hidden behind runtime-only escape hatches.
+
+### Testing
+- `npm run build`
+- `npm test`
+
 ## [0.9.1] - 2026-06-11
 
 ### Changed

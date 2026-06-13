@@ -1,7 +1,7 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
 import type { PollOptions, SubmitAndPollResult } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualMemberLifecycleInput, type FrontIndividualOnboardingPdfDraftInput, type FrontIndividualOnboardingPdfDraftResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationConfirmOrderInput, type FrontIndividualOrganizationLifecycleInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualMemberLifecycleInput, type FrontIndividualOnboardingPdfDraftInput, type FrontIndividualOnboardingPdfDraftResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationConfirmOrderInput, type FrontIndividualOrganizationLifecycleInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class IndividualControllerSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
@@ -92,6 +92,20 @@ export class IndividualControllerSdk {
     input: FrontDigitalTwinGenerationInput,
   ): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'generateDigitalTwinFromSubjectData')(ctx, input);
+  }
+
+  public searchClinicalBundle(
+    ctx: FrontRouteContext,
+    input: FrontClinicalBundleSearchInput,
+  ): Promise<{ thid: string }> {
+    return requireClientMethod(this.client, 'searchClinicalBundle')(ctx, input);
+  }
+
+  public getLatestIps(
+    ctx: FrontRouteContext,
+    subject: string,
+  ): Promise<{ thid: string }> {
+    return requireClientMethod(this.client, 'getLatestIps')(ctx, subject);
   }
 
   public requestSmartToken(input: FrontSmartTokenRequestInput): Promise<FrontSmartTokenExchangeResult> {

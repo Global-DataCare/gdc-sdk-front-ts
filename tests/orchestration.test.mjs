@@ -65,6 +65,27 @@ test('organization controller session materializes host and organization facades
     { email: 'doctor@example.org', role: 'physician' },
   );
   assert.equal(created.poll.status, 200);
+
+  const search = await session.searchOrganizationEmployees({
+    providerDid: 'did:web:org.example',
+    idToken: 'id-token',
+    employeeClaims: {
+      'org.schema.Person.email': 'doctor@example.org',
+    },
+  });
+  assert.equal(search.poll.status, 200);
+  assert.equal(search.poll.body.request.resourceType, 'Bundle');
+  assert.equal(search.poll.body.request.entry[0].request.url, 'Employee/_search');
+
+  const facadeSearch = await session.asOrganizationController().searchOrganizationEmployees(
+    { providerDid: 'did:web:org.example', idToken: 'id-token' },
+    {
+      employeeClaims: {
+        'org.schema.Person.memberOf.taxID': '12345678',
+      },
+    },
+  );
+  assert.equal(facadeSearch.poll.status, 200);
 });
 
 test('family controller session materializes individual and personal facades', async () => {
@@ -90,6 +111,26 @@ test('family controller session materializes individual and personal facades', a
     scopes: ['individual.index.read'],
   });
   assert.equal(token.status, 'fetched');
+
+  const clinicalSearch = await session.asIndividualController().searchClinicalBundle(
+    {
+      providerDid: 'did:web:family.example',
+      idToken: 'id-token',
+      requiredScope: 'individual.index.read',
+    },
+    { subject: 'did:web:subject.example' },
+  );
+  assert.match(clinicalSearch.thid, /^thid-/);
+
+  const latestIps = await session.asIndividualController().getLatestIps(
+    {
+      providerDid: 'did:web:family.example',
+      idToken: 'id-token',
+      requiredScope: 'individual.index.read',
+    },
+    'did:web:subject.example',
+  );
+  assert.match(latestIps.thid, /^thid-/);
 });
 
 test('professional session materializes the professional facade without employee helpers', async () => {

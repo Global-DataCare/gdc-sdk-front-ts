@@ -5,7 +5,7 @@ import type {
   IndividualOnboardingDraftInput,
   IndividualOnboardingDraftResult,
 } from 'gdc-common-utils-ts/models/individual-onboarding';
-import type { BundleSearchQuery, CommunicationInput, PollOptions, SubmitAndPollResult, SubmitPayload } from 'gdc-sdk-core-ts';
+import type { BundleSearchQuery, CommunicationInput, EmployeeSearchValue, PollOptions, SubmitAndPollResult, SubmitPayload } from 'gdc-sdk-core-ts';
 
 export type FrontRouteContext = {
   providerDid: string;
@@ -46,6 +46,12 @@ export type FrontOrganizationEmployeeCreationInput = {
 export type FrontOrganizationEmployeeLifecycleInput = {
   employeeClaims?: Record<string, unknown>;
   resourceId?: string;
+};
+
+export type FrontOrganizationEmployeeSearchInput = {
+  employeeClaims?: Record<string, EmployeeSearchValue>;
+  requestThid?: string;
+  pollOptions?: PollOptions;
 };
 
 export type FrontEmployeeDeviceActivationRequestInput = {
@@ -185,6 +191,10 @@ export type FrontRuntimeClient = {
     ctx: FrontRouteContext,
     input: FrontOrganizationEmployeeLifecycleInput,
     pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  searchOrganizationEmployees?: (
+    ctx: FrontRouteContext,
+    input: FrontOrganizationEmployeeSearchInput,
   ) => Promise<SubmitAndPollResult>;
   purgeEmployee?: (
     ctx: FrontRouteContext,

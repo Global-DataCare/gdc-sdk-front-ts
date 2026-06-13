@@ -1,7 +1,7 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
 import type { PollOptions, SubmitAndPollResult } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontEmployeeDeviceActivationRequestInput, type FrontOrganizationEmployeeCreationInput, type FrontOrganizationEmployeeLifecycleInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import { requireClientMethod, type FrontEmployeeDeviceActivationRequestInput, type FrontOrganizationEmployeeCreationInput, type FrontOrganizationEmployeeLifecycleInput, type FrontOrganizationEmployeeSearchInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class OrganizationControllerSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
@@ -20,6 +20,13 @@ export class OrganizationControllerSdk {
     pollOptions?: PollOptions,
   ): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'disableEmployee')(ctx, input, pollOptions);
+  }
+
+  public searchOrganizationEmployees(
+    ctx: FrontRouteContext,
+    input: FrontOrganizationEmployeeSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'searchOrganizationEmployees')(ctx, input);
   }
 
   public purgeEmployee(
