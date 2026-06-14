@@ -6,6 +6,10 @@ import { LicenseListSearchEditor, LicenseOfferSearchEditor, LicenseOrderSearchEd
 import {
   buildEmployeeSearchBundle,
   createIndividualOnboardingFacade,
+  type HostLifecycleInput,
+  type HostRouteContext,
+  type HostedTenantLifecycleInput,
+  type LegalOrganizationOrderInput,
   type SubmitAndPollResult,
 } from 'gdc-sdk-core-ts';
 import {
@@ -68,6 +72,7 @@ export class CommonAuthService {
 
 export class OrgAdminService {
   public async activateOrganizationInGatewayFromIcaProof(
+    _hostCtx: HostRouteContext,
     _input: {
       vpToken: string;
       controller?: Record<string, unknown>;
@@ -79,12 +84,24 @@ export class OrgAdminService {
   }
 
   public async confirmLegalOrganizationOrder(
-    _input: {
-      offerId: string;
-      orderClaims?: Record<string, unknown>;
-    },
+    _hostCtx: HostRouteContext,
+    _input: LegalOrganizationOrderInput,
   ): Promise<SubmitAndPollResult> {
     return createSyntheticSubmitAndPollResult(runtimeThid('host-order-confirmation'));
+  }
+
+  public async disableHost(
+    _hostCtx: HostRouteContext,
+    _input: HostLifecycleInput,
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('host-disable'));
+  }
+
+  public async purgeHost(
+    _hostCtx: HostRouteContext,
+    _input: HostLifecycleInput,
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('host-purge'));
   }
 
   public async createOrganizationEmployee(
@@ -118,8 +135,22 @@ export class OrgAdminService {
       employeeClaims?: Record<string, unknown>;
       resourceId?: string;
     },
-    ): Promise<SubmitAndPollResult> {
+  ): Promise<SubmitAndPollResult> {
     return createSyntheticSubmitAndPollResult(runtimeThid('employee-purge'));
+  }
+
+  public async disableTenant(
+    _hostCtx: HostRouteContext,
+    _input: HostedTenantLifecycleInput,
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('tenant-disable'));
+  }
+
+  public async purgeTenant(
+    _hostCtx: HostRouteContext,
+    _input: HostedTenantLifecycleInput,
+  ): Promise<SubmitAndPollResult> {
+    return createSyntheticSubmitAndPollResult(runtimeThid('tenant-purge'));
   }
 
   public async searchOrganizationEmployees(

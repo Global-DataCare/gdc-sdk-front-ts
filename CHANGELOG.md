@@ -25,13 +25,34 @@ All notable changes to this project will be documented in this file.
 - Promoted the shared commercial/license search/list contract to the public
   frontend service layer instead of forcing portal/BFF code to drop down into
   runtime-private helpers.
+- Expanded the public frontend hosting/lifecycle orchestration surface so:
+  - `HostOnboardingSdk` exposes:
+    - `activateOrganizationInGatewayFromIcaProof(...)`
+    - `confirmLegalOrganizationOrder(...)`
+    - `disableHost(...)`
+    - `purgeHost(...)`
+  - `OrganizationControllerSdk` exposes:
+    - `disableTenant(...)`
+    - `purgeTenant(...)`
+- Aligned the frontend runtime contracts and synthetic service layer with the
+  canonical host-registry lifecycle facade already published by
+  `gdc-sdk-core-ts`, so browser/BFF integrations can reason in the same
+  host/tenant lifecycle vocabulary as `gdc-sdk-node-ts`.
 - Updated the shared dependency targets to:
-  - `gdc-common-utils-ts@^1.21.0`
-  - `gdc-sdk-core-ts@^0.10.0`
+  - `gdc-common-utils-ts@^1.24.1`
+  - `gdc-sdk-core-ts@^0.11.1`
 - Refreshed `TODO.md` and orchestration coverage so facade parity is tracked in
   the frontend layer rather than hidden behind runtime-only escape hatches.
+- Refreshed the package guidance docs so portal/BFF integrations now point
+  directly at the canonical GW CORE functional map for:
+  - related persons
+  - invited members
+  - effective consents
+- Refreshed the lockfile so `gdc-sdk-front-ts@0.10.1` resolves the published
+  npm artifacts for the latest shared packages.
 
 ### Testing
+- `npm install gdc-common-utils-ts@^1.24.1 gdc-sdk-core-ts@^0.11.1`
 - `npm run build`
 - `npm test`
 

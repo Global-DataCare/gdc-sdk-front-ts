@@ -1,6 +1,11 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
-import type { PollOptions, SubmitAndPollResult } from 'gdc-sdk-core-ts';
+import type {
+  HostRouteContext,
+  HostedTenantLifecycleInput,
+  PollOptions,
+  SubmitAndPollResult,
+} from 'gdc-sdk-core-ts';
 import { requireClientMethod, type FrontEmployeeDeviceActivationRequestInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontOrganizationEmployeeCreationInput, type FrontOrganizationEmployeeLifecycleInput, type FrontOrganizationEmployeeSearchInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class OrganizationControllerSdk {
@@ -82,6 +87,24 @@ export class OrganizationControllerSdk {
     pollOptions?: PollOptions,
   ): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'purgeEmployee')(ctx, input, pollOptions);
+  }
+
+  /** Disables the hosted tenant itself through the host registry. */
+  public disableTenant(
+    hostCtx: HostRouteContext,
+    input: HostedTenantLifecycleInput,
+    pollOptions?: PollOptions,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'disableTenant')(hostCtx, input, pollOptions);
+  }
+
+  /** Purges the already-disabled hosted tenant through the host registry. */
+  public purgeTenant(
+    hostCtx: HostRouteContext,
+    input: HostedTenantLifecycleInput,
+    pollOptions?: PollOptions,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'purgeTenant')(hostCtx, input, pollOptions);
   }
 
   public activateEmployeeDeviceWithActivationRequest(

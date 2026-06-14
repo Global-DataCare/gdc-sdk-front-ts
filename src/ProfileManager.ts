@@ -60,13 +60,21 @@ export class ProfileManager {
     this.individual = mapped.individual;
     this.professional = mapped.professional;
     this.runtimeClient = {
-      activateOrganizationInGatewayFromIcaProof: (input) => {
+      activateOrganizationInGatewayFromIcaProof: (hostCtx, input) => {
         if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
-        return this.orgAdmin.admin.activateOrganizationInGatewayFromIcaProof(input);
+        return this.orgAdmin.admin.activateOrganizationInGatewayFromIcaProof(hostCtx, input);
       },
-      confirmLegalOrganizationOrder: (input) => {
+      confirmLegalOrganizationOrder: (hostCtx, input) => {
         if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
-        return this.orgAdmin.admin.confirmLegalOrganizationOrder(input);
+        return this.orgAdmin.admin.confirmLegalOrganizationOrder(hostCtx, input);
+      },
+      disableHost: (hostCtx, input) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.disableHost(hostCtx, input);
+      },
+      purgeHost: (hostCtx, input) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.purgeHost(hostCtx, input);
       },
       createOrganizationEmployee: (ctx, input) => {
         if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
@@ -108,6 +116,14 @@ export class ProfileManager {
       purgeEmployee: (ctx, input) => {
         if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
         return this.orgAdmin.admin.purgeEmployee(ctx.providerDid, ctx.idToken, input);
+      },
+      disableTenant: (hostCtx, input) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.disableTenant(hostCtx, input);
+      },
+      purgeTenant: (hostCtx, input) => {
+        if (!this.orgAdmin?.admin) throw new Error('orgAdmin.admin service is not available for this profile.');
+        return this.orgAdmin.admin.purgeTenant(hostCtx, input);
       },
       activateEmployeeDeviceWithActivationRequest: (ctx, input) =>
         this.common.auth.activateEmployeeDeviceWithActivationRequest(input.activationCode, ctx.providerDid, ctx.idToken, input.dcrPayload),

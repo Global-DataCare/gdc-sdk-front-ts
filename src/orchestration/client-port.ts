@@ -10,6 +10,10 @@ import type {
   BundleSearchQuery,
   CommunicationInput,
   EmployeeSearchValue,
+  HostLifecycleInput,
+  HostRouteContext,
+  HostedTenantLifecycleInput,
+  LegalOrganizationOrderInput,
   PollOptions,
   SubmitAndPollResult,
   SubmitPayload,
@@ -210,11 +214,23 @@ export type FrontDigitalTwinGenerationInput = {
 
 export type FrontRuntimeClient = {
   activateOrganizationInGatewayFromIcaProof?: (
+    hostCtx: HostRouteContext,
     input: FrontOrganizationActivationInput,
     pollOptions?: PollOptions,
   ) => Promise<SubmitAndPollResult>;
   confirmLegalOrganizationOrder?: (
-    input: FrontLegalOrganizationOrderInput,
+    hostCtx: HostRouteContext,
+    input: LegalOrganizationOrderInput,
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  disableHost?: (
+    hostCtx: HostRouteContext,
+    input: HostLifecycleInput,
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  purgeHost?: (
+    hostCtx: HostRouteContext,
+    input: HostLifecycleInput,
     pollOptions?: PollOptions,
   ) => Promise<SubmitAndPollResult>;
   createOrganizationEmployee?: (
@@ -258,6 +274,16 @@ export type FrontRuntimeClient = {
   purgeEmployee?: (
     ctx: FrontRouteContext,
     input: FrontOrganizationEmployeeLifecycleInput,
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  disableTenant?: (
+    hostCtx: HostRouteContext,
+    input: HostedTenantLifecycleInput,
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  purgeTenant?: (
+    hostCtx: HostRouteContext,
+    input: HostedTenantLifecycleInput,
     pollOptions?: PollOptions,
   ) => Promise<SubmitAndPollResult>;
   activateEmployeeDeviceWithActivationRequest?: (

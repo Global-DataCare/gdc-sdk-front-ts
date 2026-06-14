@@ -11,6 +11,11 @@ import {
   ProfessionalSdk,
 } from '../dist/index.js';
 
+const HOST_ROUTE_CONTEXT = Object.freeze({
+  jurisdiction: 'ES',
+  hostNetwork: 'test',
+});
+
 function createVaultStub() {
   return {
     async initialize() {},
@@ -59,6 +64,18 @@ test('organization controller session materializes host and organization facades
   assert.ok(session.asHostOnboarding() instanceof HostOnboardingSdk);
   assert.ok(session.asOrganizationController() instanceof OrganizationControllerSdk);
   assert.ok(session.asOrganizationEmployee() instanceof OrganizationEmployeeSdk);
+
+  const hostDisable = await session.asHostOnboarding().disableHost(
+    HOST_ROUTE_CONTEXT,
+    { organizationClaims: { 'org.schema.Organization.identifier.value': 'host-1' } },
+  );
+  assert.equal(hostDisable.poll.status, 200);
+
+  const tenantDisable = await session.asOrganizationController().disableTenant(
+    HOST_ROUTE_CONTEXT,
+    { organizationClaims: { 'org.schema.Organization.identifier.value': 'tenant-1' } },
+  );
+  assert.equal(tenantDisable.poll.status, 200);
 
   const created = await session.asOrganizationController().createOrganizationEmployee(
     { providerDid: 'did:web:org.example', idToken: 'id-token' },

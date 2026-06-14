@@ -42,6 +42,17 @@ This document should answer only these questions:
 - which concepts belong to UI/session state
 - which concepts belong to shared activation/discovery contracts
 
+Canonical portal/BFF functional mapping over GW CORE lives in:
+
+- [gwtemplate-node-ts/docs/PORTAL_API_TO_GW_CORE.md](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/docs/PORTAL_API_TO_GW_CORE.md)
+
+Use that GW CORE document when the frontend team needs the product-facing
+distinction between:
+
+- `related persons` as contacts/relationships
+- invited `members` in the individual health-index context
+- effective `access consents`
+
 ## Individual Controller Onboarding PDF
 
 For the current onboarding-PDF draft flow:
