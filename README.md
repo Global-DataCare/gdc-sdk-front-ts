@@ -1,5 +1,9 @@
 # gdc-sdk-front-ts
 
+See [ARCHITECTURE.md](./ARCHITECTURE.md) and
+[CONTRIBUTING.md](./CONTRIBUTING.md) before adding frontend facades,
+profile/session runtime logic, or orchestration tests.
+
 Frontend runtime package for consuming the shared GDC SDK contracts in web or
 mobile apps.
 

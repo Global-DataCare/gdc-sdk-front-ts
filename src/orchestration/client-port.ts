@@ -1,7 +1,8 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
 import type { DeviceAppType, DeviceUserClass } from 'gdc-common-utils-ts/constants';
-import type { LicenseListSearchDraft, LicenseOfferSearchDraft, LicenseOrderSearchDraft } from 'gdc-common-utils-ts';
+import type { LicenseListSearchState } from 'gdc-common-utils-ts/utils/license-list-search';
+import type { LicenseOfferSearchState, LicenseOrderSearchState } from 'gdc-common-utils-ts/utils/license-commercial-search';
 import type {
   IndividualOnboardingDraftInput,
   IndividualOnboardingDraftResult,
@@ -70,7 +71,7 @@ export type FrontOrganizationEmployeeSearchInput = {
  * Frontend/runtime search/list input for license seats.
  */
 export type FrontLicenseListSearchInput = {
-  licenseQuery?: Partial<LicenseListSearchDraft>;
+  licenseQuery?: Partial<LicenseListSearchState>;
   requestThid?: string;
   pollOptions?: PollOptions;
 };
@@ -79,7 +80,7 @@ export type FrontLicenseListSearchInput = {
  * Frontend/runtime search/list input for commercial offer read-models.
  */
 export type FrontLicenseOfferSearchInput = {
-  offerQuery?: Partial<LicenseOfferSearchDraft>;
+  offerQuery?: Partial<LicenseOfferSearchState>;
   requestThid?: string;
   pollOptions?: PollOptions;
 };
@@ -88,7 +89,7 @@ export type FrontLicenseOfferSearchInput = {
  * Frontend/runtime search/list input for commercial order/payment read-models.
  */
 export type FrontLicenseOrderSearchInput = {
-  orderQuery?: Partial<LicenseOrderSearchDraft>;
+  orderQuery?: Partial<LicenseOrderSearchState>;
   requestThid?: string;
   pollOptions?: PollOptions;
 };

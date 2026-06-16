@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+## [2.0.0] - 2026-06-15
+
+### Added
+- Added canonical v2 architecture and contribution rules for the actor-aware
+  frontend runtime layer:
+  - `ARCHITECTURE.md`
+  - `CONTRIBUTING.md`
+
+### Changed
+- Documented the v2 frontend layering rule that canonical shared high-level
+  `get...` / `set...` methods must originate in `gdc-common-utils-ts` before
+  being consumed by frontend profile/session or orchestration layers.
+- Updated the shared client-port typing surface to follow the v2 shared
+  `Editor` / `State` terminology:
+  - `src/orchestration/client-port.ts`
+- Updated dependency targets to:
+  - `gdc-common-utils-ts@^2.0.0`
+  - `gdc-sdk-core-ts@^2.0.0`
+
+### Breaking
+- Frontend consumers must align with the v2 shared `Editor` / `State`
+  terminology and should not introduce first-class shared semantic accessors in
+  frontend runtime layers when those belong in `gdc-common-utils-ts`.
+
 ## [0.10.1] - 2026-06-13
 
 ### Changed
