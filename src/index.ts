@@ -13,6 +13,8 @@ export * from './VerifierService.js';
 export * from './ProfileManager.js';
 export * from './ProfileRegistry.js';
 export * from './ClientSDK.js';
+export * from './frontend-profile-runtime.js';
+export * from './individual-controller-frontend-runtime.js';
 export * from './discovery/index.js';
 export * from './orchestration/client-port.js';
 export * from './orchestration/host-onboarding-sdk.js';

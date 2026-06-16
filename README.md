@@ -4,6 +4,12 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) and
 [CONTRIBUTING.md](./CONTRIBUTING.md) before adding frontend facades,
 profile/session runtime logic, or orchestration tests.
 
+Short rule:
+
+- `101` tests must stay didactic and step by step
+- reusable fixtures/types must come from `gdc-common-utils-ts` instead of
+  being repeated as frontend-local literals
+
 Frontend runtime package for consuming the shared GDC SDK contracts in web or
 mobile apps.
 
@@ -32,6 +38,13 @@ If you are integrating this package for the first time, open these in order:
 1. [gdc-sdk-core-ts/docs/101-SDK_PACKAGE_BOUNDARIES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_PACKAGE_BOUNDARIES.md)
    Why `core`, `node`, and `front` are separate packages, what each one owns,
    and why frontend facades should mirror backend actor boundaries.
+1. [tests/101-frontend-profile-runtime.test.mjs](./tests/101-frontend-profile-runtime.test.mjs)
+   Minimal frontend-generic walkthrough for loading one actor profile,
+   registering one trusted device/runtime context, connecting to one subject
+   index, and reading one subject index composition.
+1. [tests/101-individual-controller-frontend-runtime.test.mjs](./tests/101-individual-controller-frontend-runtime.test.mjs)
+   First pragmatic frontend wrapper over the generic profile runtime for the
+   current individual-controller baseline.
 1. [docs/101-SDK_INTEGRATION.md](./docs/101-SDK_INTEGRATION.md)
   Real frontend/native setup, imports, `new ClientSDK(...)`,
   `initializeCommunicationIdentity(...)`, provider discovery, and

@@ -11,6 +11,8 @@ This repository is the canonical place for:
 - frontend runtime orchestration
 - frontend runtime integration contracts
 - actor/profile runtimes when they depend on frontend execution context
+- frontend-generic profile loading, trusted-device, and subject-index runtime implementations
+- frontend queue/outbox/vault implementations for confidential or offline-first runtimes
 
 This repository is not the place for:
 
@@ -27,6 +29,7 @@ Put code here when it:
 - depends on frontend/runtime concerns
 - implements actor-profile runtime concerns such as local profile state,
   unlock/trust flows, or frontend execution context
+- implements concrete frontend queue, outbox, and vault behavior
 
 Do not put code here when it:
 
@@ -60,6 +63,28 @@ The difference is runtime environment:
 
 Both may materialize actor profiles and operate on behalf of concrete users.
 
+The intended frontend runtime decomposition is:
+
+- `loadProfile(...)`
+- `closeProfile(...)`
+- `JobManager`
+- frontend `Outbox`
+- frontend `Queue`
+- frontend `Vault...` adapter
+
+Rules:
+
+- `JobManager` remains the common orchestration concept across runtimes
+- frontend specialization happens in adapters/factories such as:
+  - `createJobManagerInMemory(...)`
+  - future `createJobManagerSqlite(...)`
+  - `VaultMemory`
+  - future `VaultSqlite`
+- offline-first persistence is an adapter choice, not a rename of the
+  `JobManager` abstraction
+- the queue is the frontend runtime execution layer; the outbox is the logical
+  pending work owned by the profile/session; the vault is persistence
+
 ## Naming Rules
 
 When a method prepares a helper for a later operation, keep the operation
@@ -80,6 +105,7 @@ minimal plumbing and shared fixtures.
 
 Preferred anchors:
 
+- [tests/101-frontend-profile-runtime.test.mjs](/Users/fernando/GITS/gdc-workspace/gdc-sdk-front-ts/tests/101-frontend-profile-runtime.test.mjs:1)
 - [tests/session-descriptor.test.mjs](/Users/fernando/GITS/gdc-workspace/gdc-sdk-front-ts/tests/session-descriptor.test.mjs:1)
 - [tests/actor-session.test.mjs](/Users/fernando/GITS/gdc-workspace/gdc-sdk-front-ts/tests/actor-session.test.mjs:1)
 - [tests/orchestration.test.mjs](/Users/fernando/GITS/gdc-workspace/gdc-sdk-front-ts/tests/orchestration.test.mjs:1)

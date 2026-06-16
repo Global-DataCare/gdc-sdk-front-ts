@@ -4,6 +4,45 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Added the first frontend-generic profile runtime slice on top of the shared
+  v2 `sdk-core` contracts so frontend consumers can converge on one actor-aware
+  flow for:
+  - `loadProfile(...)`
+  - `registerTrustedDevice(...)`
+  - `connectToSubjectIndex(...)`
+  - `getSubjectIndexComposition(...)`
+  in:
+  - `src/frontend-profile-runtime.ts`
+  - `tests/101-frontend-profile-runtime.test.mjs`
+- Added the first frontend individual-controller use-case wrapper on top of the
+  generic profile runtime, covering:
+  - `loadProfile(...)`
+  - `startIndividualOrganization(...)`
+  - `confirmIndividualOrganizationOrder(...)`
+  - `searchClinicalBundle(...)`
+  - `getLatestIps(...)`
+  in:
+  - `src/individual-controller-frontend-runtime.ts`
+  - `tests/101-individual-controller-frontend-runtime.test.mjs`
+
+### Changed
+- Bumped the package patch version from `2.0.0` to `2.0.1`.
+- Updated dependency targets to:
+  - `gdc-common-utils-ts@^2.0.2`
+  - `gdc-sdk-core-ts@^2.0.1`
+- Exported the new frontend profile-runtime entry points from the package root
+  and documented the v2 actor-aware runtime split more explicitly in package
+  guidance:
+  - `src/index.ts`
+  - `ARCHITECTURE.md`
+  - `CONTRIBUTING.md`
+  - `README.md`
+
+### Testing
+- `npm run type-check`
+- `npm test`
+
 ## [2.0.0] - 2026-06-15
 
 ### Added
