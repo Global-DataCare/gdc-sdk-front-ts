@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Updated the shared dependency target to `gdc-common-utils-ts@^2.0.6`.
+- Updated the shared dependency target to `gdc-sdk-core-ts@^2.0.4`.
 
 ## [2.0.2] - 2026-06-18
 
