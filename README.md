@@ -654,6 +654,15 @@ const otpStartInput: RelationshipChannelOtpStartInput = {
 const otpStart = createRelationshipChannelOtpStartInput(otpStartInput);
 ```
 
+Route naming rule:
+
+- the example above is tenant-scoped, so `jurisdiction + sector` belongs to the
+  tenant route context
+- host onboarding is different: host routes use `host coverage jurisdiction +
+  hostNetwork`
+- if you later call a host route like `/host/cds-EU/v1/test/...`, that `test`
+  is the host runtime/network segment, not the tenant sector
+
 ### Build permission-request communication
 
 ```ts

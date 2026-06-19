@@ -6,10 +6,30 @@ import type {
   PollOptions,
   SubmitAndPollResult,
 } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontEmployeeDeviceActivationRequestInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontOrganizationEmployeeCreationInput, type FrontOrganizationEmployeeLifecycleInput, type FrontOrganizationEmployeeSearchInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import { requireClientMethod, type FrontEmployeeDeviceActivationRequestInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontOrganizationDidBindingInput, type FrontOrganizationEmployeeCreationInput, type FrontOrganizationEmployeeLifecycleInput, type FrontOrganizationEmployeeSearchInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class OrganizationControllerSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
+
+  /**
+   * Binds the current tenant organization DID document to one public alias
+   * view.
+   *
+   * Alias contract:
+   * - the current tenant path identifies the organization
+   * - `organization.url` carries the public alias/domain list
+   * - `controller.sameAs` is optional corroborating identity evidence
+   *
+   * Current version limits:
+   * - this binding flow does not accept new organization public keys
+   */
+  public submitOrganizationDidBinding(
+    ctx: FrontRouteContext,
+    input: FrontOrganizationDidBindingInput,
+    pollOptions?: PollOptions,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'submitOrganizationDidBinding')(ctx, input, pollOptions);
+  }
 
   public createOrganizationEmployee(
     ctx: FrontRouteContext,
