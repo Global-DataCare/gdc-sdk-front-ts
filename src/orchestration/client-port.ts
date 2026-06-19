@@ -14,6 +14,7 @@ import type {
   HostLifecycleInput,
   HostRouteContext,
   HostedTenantLifecycleInput,
+  OrganizationDidBindingInput,
   LegalOrganizationOrderInput,
   PollOptions,
   SubmitAndPollResult,
@@ -42,6 +43,8 @@ export type FrontOrganizationActivationInput = {
   service?: Record<string, unknown>;
   additionalClaims?: Record<string, unknown>;
 };
+
+export type FrontOrganizationDidBindingInput = OrganizationDidBindingInput;
 
 export type FrontLegalOrganizationOrderInput = {
   offerId: string;
@@ -237,6 +240,11 @@ export type FrontRuntimeClient = {
   createOrganizationEmployee?: (
     ctx: FrontRouteContext,
     input: FrontOrganizationEmployeeCreationInput,
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  submitOrganizationDidBinding?: (
+    ctx: FrontRouteContext,
+    input: FrontOrganizationDidBindingInput,
     pollOptions?: PollOptions,
   ) => Promise<SubmitAndPollResult>;
   disableEmployee?: (

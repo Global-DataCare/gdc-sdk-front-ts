@@ -549,6 +549,14 @@ Usually the frontend starts from:
 - tenant/jurisdiction/sector
 - local wallet or secure device storage
 
+Important route naming rule:
+
+- `tenant/jurisdiction/sector` belongs to tenant-scoped application flows
+- host onboarding routes use the separate host pair:
+  `host coverage jurisdiction + hostNetwork`
+- if the host path contains `.../v1/test/...`, that `test` is the host
+  network/runtime segment, not the tenant business sector
+
 It should not start from:
 
 - raw `_activate` JSON

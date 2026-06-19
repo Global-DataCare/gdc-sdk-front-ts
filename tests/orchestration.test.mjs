@@ -218,3 +218,27 @@ test('professional session materializes the professional facade without employee
   assert.equal(typeof ProfessionalSdk.prototype.createOrganizationEmployee, 'undefined');
   assert.equal(typeof ProfessionalSdk.prototype.activateEmployeeDeviceWithActivationRequest, 'undefined');
 });
+
+test('OrganizationControllerSdk delegates organization DID binding to the frontend runtime client', async () => {
+  const calls = [];
+  const sdk = new OrganizationControllerSdk({
+    submitOrganizationDidBinding: async (...args) => {
+      calls.push(args);
+      return { submit: { status: 202, body: {} }, poll: { status: 200, body: {}, attempts: 1 } };
+    },
+  });
+
+  const result = await sdk.submitOrganizationDidBinding(
+    { providerDid: 'did:web:org.example', idToken: 'id-token' },
+    {
+      organization: {
+        url: ['https://provider.example.org'],
+      },
+    },
+  );
+
+  assert.equal(result.poll.status, 200);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][0].providerDid, 'did:web:org.example');
+  assert.equal(calls[0][1].organization.url[0], 'https://provider.example.org');
+});

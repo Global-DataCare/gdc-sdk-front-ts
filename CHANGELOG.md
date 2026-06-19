@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.3] - 2026-06-19
+
+### Changed
+- Updated the shared dependency target to `gdc-common-utils-ts@^2.0.6`.
+- Updated the shared dependency target to `gdc-sdk-core-ts@^2.0.4`.
+
+## [2.0.2] - 2026-06-18
+
 ### Added
 - Added the first frontend-generic profile runtime slice on top of the shared
   v2 `sdk-core` contracts so frontend consumers can converge on one actor-aware
@@ -27,10 +35,10 @@ All notable changes to this project will be documented in this file.
   - `tests/101-individual-controller-frontend-runtime.test.mjs`
 
 ### Changed
-- Bumped the package patch version from `2.0.0` to `2.0.1`.
+- Bumped the package patch version from `2.0.1` to `2.0.2`.
 - Updated dependency targets to:
-  - `gdc-common-utils-ts@^2.0.2`
-  - `gdc-sdk-core-ts@^2.0.1`
+  - `gdc-common-utils-ts@^2.0.4`
+  - `gdc-sdk-core-ts@^2.0.3`
 - Exported the new frontend profile-runtime entry points from the package root
   and documented the v2 actor-aware runtime split more explicitly in package
   guidance:
