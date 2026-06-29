@@ -38,17 +38,10 @@ If you are integrating this package for the first time, open these in order:
 1. [gdc-sdk-core-ts/docs/101-SDK_PACKAGE_BOUNDARIES.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_PACKAGE_BOUNDARIES.md)
    Why `core`, `node`, and `front` are separate packages, what each one owns,
    and why frontend facades should mirror backend actor boundaries.
-1. [tests/101-frontend-profile-runtime.test.mjs](./tests/101-frontend-profile-runtime.test.mjs)
-   Minimal frontend-generic walkthrough for loading one actor profile,
-   registering one trusted device/runtime context, connecting to one subject
-   index, and reading one subject index composition.
-1. [tests/101-individual-controller-frontend-runtime.test.mjs](./tests/101-individual-controller-frontend-runtime.test.mjs)
-   First pragmatic frontend wrapper over the generic profile runtime for the
-   current individual-controller baseline.
 1. [docs/101-SDK_INTEGRATION.md](./docs/101-SDK_INTEGRATION.md)
   Real frontend/native setup, imports, `new ClientSDK(...)`,
-  `initializeCommunicationIdentity(...)`, provider discovery, and
-   `initializeSession(...)`.
+  `initializeCommunicationIdentity(...)`, `initializeSession(...)`, and the
+  public actor entrypoints exposed by `ProfileManager.asXxx()`.
 2. [docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md](./docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md)
    Frontend discovery guide for BFF-first provider/operator discovery, UI card
    mapping, and copy/paste backend DTO consumption.
@@ -64,6 +57,12 @@ If you are integrating this package for the first time, open these in order:
    Shared profile/session payload source of truth.
 7. [gdc-common-utils-ts/docs/101-LIFECYCLE.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-LIFECYCLE.md)
    Canonical lifecycle semantics and reusable placeholders for UI and portal flows.
+8. [tests/101-frontend-profile-runtime.test.mjs](./tests/101-frontend-profile-runtime.test.mjs)
+   Technical frontend runtime slice for profile/device/session wiring.
+   Read this after the public actor-session guides, not before them.
+9. [tests/101-individual-controller-frontend-runtime.test.mjs](./tests/101-individual-controller-frontend-runtime.test.mjs)
+   Technical wrapper slice around the generic runtime for the current
+   individual-controller baseline.
 
 If you need the shortest path:
 
@@ -76,6 +75,9 @@ If you need the shortest path:
   [`ClientSDK`](src/ClientSDK.ts)
 - profile/session bootstrap:
   [`initializeSession(...)`](./docs/101-SDK_INTEGRATION.md)
+- first public actor entrypoints:
+  `session.asHostOnboarding()`, `session.asOrganizationController()`,
+  `session.asIndividualController()`, `session.asProfessional()`
 
 ## Frontend Runtime Modes
 

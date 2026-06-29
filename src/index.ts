@@ -12,6 +12,7 @@ export * from './capabilityMapper.js';
 export * from './VerifierService.js';
 export * from './ProfileManager.js';
 export * from './ProfileRegistry.js';
+export * from './UserProfileIndexStore.js';
 export * from './ClientSDK.js';
 export * from './frontend-profile-runtime.js';
 export * from './individual-controller-frontend-runtime.js';

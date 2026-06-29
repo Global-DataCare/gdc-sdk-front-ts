@@ -42,6 +42,96 @@ This document should answer only these questions:
 - which concepts belong to UI/session state
 - which concepts belong to shared activation/discovery contracts
 
+First actor-scoped entrypoints after session bootstrap:
+
+- `session.asHostOnboarding()`
+- `session.asOrganizationController()`
+- `session.asOrganizationEmployee()`
+- `session.asIndividualController()`
+- `session.asIndividualMember()`
+- `session.asPersonal()`
+- `session.asProfessional()`
+
+Research-access teaching rule:
+
+- for developer-facing 101 material, call the twin-search consumer surface
+  `DigitalTwinSdk`
+- current frontend session/runtime entrypoint is still
+  `session.asProfessional()` and `ProfessionalSdk`
+- do not teach `DigitalTwinControllerSdk`
+
+Teaching rule:
+
+- teach the actor-scoped session methods before generic runtime helpers
+- teach shared/core editors before any GW route or envelope detail
+
+## Inter-Tenant Research Access For Frontend Teams
+
+Use this product-facing split:
+
+- `OrganizationControllerSdk`
+  - organization admin/controller flow
+  - contract/governance preparation
+  - researcher/member authorization administration
+- `DigitalTwinSdk`
+  - researcher search flow
+  - SMART token request
+  - digital twin listing
+  - IPS open/download flow
+
+Current implementation honesty:
+
+- in frontend code today, the callable actor/session surface is still
+  `session.asProfessional()`
+- the 101 should nevertheless explain the business capability as
+  `DigitalTwinSdk`
+- this keeps the documentation understandable for product/frontend developers
+  while the public façade naming converges
+
+Canonical UI sequence for a junior developer:
+
+1. organization controller screen
+   - choose provider tenant `acme`
+   - choose consumer tenant `lab`
+   - review/sign/send contract data
+2. researcher access screen
+   - obtain or receive the contract VC / VP proof
+   - request SMART access token
+3. digital twin search screen
+   - type free text such as `ibuprofen` or `paracetamol`
+   - choose clinical section
+   - list matching digital twins
+4. results screen
+   - open one IPS
+   - or select several results and download multiple IPS bundles
+
+Canonical teaching example:
+
+- `Doraemon`
+  - one imported IPS
+- `Novita`
+  - one `ibuprofen` medication demo bundle
+  - one `paracetamol` medication demo bundle
+
+Expected UX behavior:
+
+- searching `ibuprofen` shows one digital twin
+- searching `paracetamol` shows one digital twin
+- both results point to `Novita`
+
+Frontend responsibility boundary:
+
+- collect form input
+- manage local session/profile state
+- build or forward the VP/contract input expected by the backend
+- render search results and IPS actions
+
+Do not put these concerns in the frontend:
+
+- GW queue polling internals
+- ledger/smart-contract persistence
+- direct GW storage assumptions
+
 Canonical portal/BFF functional mapping over GW CORE lives in:
 
 - [gwtemplate-node-ts/docs/PORTAL_API_TO_GW_CORE.md](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/docs/PORTAL_API_TO_GW_CORE.md)
@@ -561,6 +651,8 @@ It should not start from:
 
 - raw `_activate` JSON
 - nested GW `body.data[0].resource.meta.claims`
+  Prefer the shared readers exported by `gdc-common-utils-ts` for claim access
+  and VC extraction.
 - hardcoded consent claim keys
 
 ## Flow Map

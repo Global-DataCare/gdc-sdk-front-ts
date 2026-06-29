@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.9] - 2026-06-29
+
+- Added a frontend `UserProfileIndexStore` on top of the shared
+  `gdc-sdk-core-ts` `UserProfileIndex` contract so app/web runtimes can persist
+  and resolve hashed local profile selectors before PIN unlock:
+  - `src/UserProfileIndexStore.ts`
+  - `tests/user-profile-index-store.test.mjs`
+- Clarified the frontend 101 so inter-tenant research search is taught under
+  the product-facing name `DigitalTwinSdk`, while the current callable session
+  surface remains `session.asProfessional()` / `ProfessionalSdk` until the
+  public façade naming converges:
+  - `docs/101-SDK_INTEGRATION.md`
+
 ## [2.0.8] - 2026-06-24
 
 - Updated dependency target to gdc-common-utils-ts@^2.0.11.

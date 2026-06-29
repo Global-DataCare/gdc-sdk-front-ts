@@ -12,11 +12,13 @@ import type {
   DateRange,
   Profile,
   ProfileRegistryEntry,
+  UserProfileIndex,
+  UserProfileLookupKey,
   VaultQuery,
   VaultQueryCondition,
 } from 'gdc-sdk-core-ts';
 
-export type { AppInfo, ResolvedAppInfo, InitializeSessionParams, Profile, ProfileRegistryEntry, VaultQueryCondition, VaultQuery, IVaultRepository, IApiConfig, INetwork, IVerifier } from 'gdc-sdk-core-ts';
+export type { AppInfo, ResolvedAppInfo, InitializeSessionParams, Profile, ProfileRegistryEntry, UserProfileIndex, UserProfileLookupKey, VaultQueryCondition, VaultQuery, IVaultRepository, IApiConfig, INetwork, IVerifier } from 'gdc-sdk-core-ts';
 
 export type SdkConfig = {
   crypto?: unknown;

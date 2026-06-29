@@ -77,13 +77,28 @@ Rules:
 - `JobManager` remains the common orchestration concept across runtimes
 - frontend specialization happens in adapters/factories such as:
   - `createJobManagerInMemory(...)`
-  - future `createJobManagerSqlite(...)`
+  - future durable or device-backed `createJobManager...(...)`
   - `VaultMemory`
-  - future `VaultSqlite`
+  - future durable or device-backed `Vault...`
 - offline-first persistence is an adapter choice, not a rename of the
   `JobManager` abstraction
 - the queue is the frontend runtime execution layer; the outbox is the logical
   pending work owned by the profile/session; the vault is persistence
+
+Current frontend implementation guidance:
+
+- a confidential app such as Expo typically has one active user/profile at a
+  time
+- because of that, the runtime often does not need a separate multi-user queue
+  adapter process
+- instead, the app commonly uses:
+  - one `ProfileManager`-owned `JobManager`
+  - one local `Vault...` adapter per profile
+  - one local outbox cache updated immediately as the user edits or submits
+  - direct `sync(...)` calls from the foreground app when online
+- if a frontend later needs a stronger offline-first or background execution
+  strategy, that is still an adapter/factory decision, not a change to the
+  shared `JobManager` concept
 
 ## Naming Rules
 
