@@ -9,6 +9,8 @@ import assert from 'node:assert/strict';
  * - no ad hoc literals when one shared fixture/type already exists
  * - prefer reusable examples from `gdc-common-utils-ts`
  * - keep the flow step by step and didactic
+ * - treat this file as one technical runtime slice, not the first public
+ *   actor-session tutorial for new frontend integrators
  */
 import {
   EXAMPLE_DEVICE_CLIENT_ID,

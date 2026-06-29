@@ -28,9 +28,24 @@ the end of the name, for example:
 - future `createJobManagerSqlite(...)`
 - `VaultMemory`
 - future `VaultSqlite`
+- `UserProfileIndexStoreInMemory`
+- `UserProfileIndexStoreSecureStorage`
+- `UserProfileVaultSecureStorage`
+- future `UserProfileIndexStoreIndexedDb`
 
 Do not rename the common abstraction itself as if offline/storage were its
 primary identity.
+
+Programming/autocomplete rule:
+
+- start all specialized implementations with the same shared concept
+- end the name with the concrete specialization
+- prefer:
+  - `UserProfileIndexStoreSecureStorage`
+  - `UserProfileIndexStoreIndexedDb`
+- avoid:
+  - `SecureStorageUserProfileIndexStore`
+  - `IndexedDbUserProfileIndexStore`
 
 ## Test Rule
 
