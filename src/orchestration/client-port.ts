@@ -17,6 +17,7 @@ import type {
   OrganizationDidBindingInput,
   LegalOrganizationOrderInput,
   PollOptions,
+  SmartTokenRequestContract,
   SubmitAndPollResult,
   SubmitPayload,
 } from 'gdc-sdk-core-ts';
@@ -102,16 +103,7 @@ export type FrontEmployeeDeviceActivationRequestInput = {
   dcrPayload?: Record<string, unknown>;
 };
 
-export type FrontSmartTokenRequestInput = {
-  idToken: string;
-  scopes: string[];
-  actorDid?: string;
-  subjectDid?: string;
-  clientId?: string;
-  issuer?: string;
-  audience?: string;
-  additionalClaims?: Record<string, unknown>;
-};
+export type FrontSmartTokenRequestInput = SmartTokenRequestContract;
 
 export type FrontSmartTokenExchangeResult = {
   status: 'fetched' | 'failed';
