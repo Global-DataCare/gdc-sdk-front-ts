@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-06-30
+
+### Changed
+- Updated published shared dependency targets to:
+  - `gdc-common-utils-ts@^2.1.0`
+  - `gdc-sdk-core-ts@^2.1.0`
+- Replaced the frontend-local `file:../gdc-sdk-core-ts` dependency with the
+  published npm range so the frontend package resolves correctly outside the
+  monorepo workspace.
+- Removed repository-local backlog/TODO documents and their README references:
+  - `TODO.md`
+  - `docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md`
+  - `README.md`
+
 ## [2.0.9] - 2026-06-29
 
 - Added a frontend `UserProfileIndexStore` on top of the shared

@@ -42,25 +42,22 @@ If you are integrating this package for the first time, open these in order:
   Real frontend/native setup, imports, `new ClientSDK(...)`,
   `initializeCommunicationIdentity(...)`, `initializeSession(...)`, and the
   public actor entrypoints exposed by `ProfileManager.asXxx()`.
-2. [docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md](./docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md)
-   Frontend discovery guide for BFF-first provider/operator discovery, UI card
-   mapping, and copy/paste backend DTO consumption.
-3. [gdc-sdk-core-ts/docs/101-SDK_FLOWS.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_FLOWS.md)
+2. [gdc-sdk-core-ts/docs/101-SDK_FLOWS.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_FLOWS.md)
    Shared business-flow map by actor family.
-4. [gdc-sdk-node-ts/docs/101-LIVE_GW_LOCAL.md](https://github.com/Global-DataCare/gdc-sdk-node-ts/blob/main/docs/101-LIVE_GW_LOCAL.md)
+3. [gdc-sdk-node-ts/docs/101-LIVE_GW_LOCAL.md](https://github.com/Global-DataCare/gdc-sdk-node-ts/blob/main/docs/101-LIVE_GW_LOCAL.md)
    Canonical local/TTY/Docker GW reference when the frontend team also needs a
    real local GW running for end-to-end checks.
-5. [gwtemplate-node-ts/docs/PORTAL_API_TO_GW_CORE.md](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/docs/PORTAL_API_TO_GW_CORE.md)
+4. [gwtemplate-node-ts/docs/PORTAL_API_TO_GW_CORE.md](https://github.com/Global-DataCare/gwtemplate-node-ts/blob/main/docs/PORTAL_API_TO_GW_CORE.md)
    Canonical portal/BFF functional map over GW CORE, including the separation
    between `related persons`, invited `members`, and effective `consents`.
-6. [gdc-common-utils-ts/src/examples/frontend-session.ts](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/src/examples/frontend-session.ts)
+5. [gdc-common-utils-ts/src/examples/frontend-session.ts](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/src/examples/frontend-session.ts)
    Shared profile/session payload source of truth.
-7. [gdc-common-utils-ts/docs/101-LIFECYCLE.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-LIFECYCLE.md)
+6. [gdc-common-utils-ts/docs/101-LIFECYCLE.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-LIFECYCLE.md)
    Canonical lifecycle semantics and reusable placeholders for UI and portal flows.
-8. [tests/101-frontend-profile-runtime.test.mjs](./tests/101-frontend-profile-runtime.test.mjs)
+7. [tests/101-frontend-profile-runtime.test.mjs](./tests/101-frontend-profile-runtime.test.mjs)
    Technical frontend runtime slice for profile/device/session wiring.
    Read this after the public actor-session guides, not before them.
-9. [tests/101-individual-controller-frontend-runtime.test.mjs](./tests/101-individual-controller-frontend-runtime.test.mjs)
+8. [tests/101-individual-controller-frontend-runtime.test.mjs](./tests/101-individual-controller-frontend-runtime.test.mjs)
    Technical wrapper slice around the generic runtime for the current
    individual-controller baseline.
 
@@ -469,7 +466,6 @@ Preferred model:
 
 Primary references:
 
-- [docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md](./docs/DATASPACE_DISCOVERY_FRONTEND_TODO.md)
 - [tests/dataspace-discovery-client.test.mjs](tests/dataspace-discovery-client.test.mjs)
 
 Copy/paste starting point:
