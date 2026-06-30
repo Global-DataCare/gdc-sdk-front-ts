@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-06-30
+
+### Changed
+- Updated the frontend SMART token request input to reuse the runtime-neutral
+  `SmartTokenRequestContract` from `gdc-sdk-core-ts` instead of maintaining an
+  independent local request shape:
+  - `src/orchestration/client-port.ts`
+- Added one professional identity helper surface on the frontend facade so app
+  and browser runtimes can build employee VC/VP material for SMART/OpenID4VP
+  flows from the same published common-utils helpers used by Node:
+  - `ProfessionalSdk.getIdentitySameAs(...)`
+  - `ProfessionalSdk.getIdentityVC(...)`
+  - `ProfessionalSdk.buildIdentityVpPayload(...)`
+  - `ProfessionalSdk.buildUnsignedIdentityVpJwt(...)`
+  in:
+  - `src/orchestration/professional-sdk.ts`
+  - `tests/orchestration.test.mjs`
+- Updated the published shared dependency targets to:
+  - `gdc-common-utils-ts@^2.1.2`
+  - `gdc-sdk-core-ts@^2.1.1`
+
 ## [2.1.0] - 2026-06-30
 
 ### Changed
