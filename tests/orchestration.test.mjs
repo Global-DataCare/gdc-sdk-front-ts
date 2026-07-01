@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   ClaimsPersonSchemaorg,
   EXAMPLE_PROFESSIONAL_IDENTITY,
+  IndividualOrganizationLifecycleEditor,
   ProfessionalCredentialTypes,
   W3cCredentialTypes,
   normalizeSameAsHash,
@@ -205,6 +206,22 @@ test('family controller session materializes individual and personal facades', a
   );
   assert.equal(orderList.poll.status, 200);
   assert.equal(orderList.poll.body.request.entry[0].type, 'Order-search-request-v1.0');
+
+  const individualEditor = new IndividualOrganizationLifecycleEditor()
+    .setIdentifier('did:web:subject.example')
+    .setAlternateName('ana')
+    .setOwnerEmail('family@example.org');
+  const disabled = await session.asIndividualController().disableIndividual(
+    { providerDid: 'did:web:family.example', idToken: 'id-token' },
+    { individualEditor },
+  );
+  assert.equal(disabled.poll.status, 200);
+
+  const purged = await session.asIndividualController().purgeIndividual(
+    { providerDid: 'did:web:family.example', idToken: 'id-token' },
+    { organizationEditor: individualEditor },
+  );
+  assert.equal(purged.poll.status, 200);
 });
 
 test('professional session materializes the professional facade without employee helpers', async () => {

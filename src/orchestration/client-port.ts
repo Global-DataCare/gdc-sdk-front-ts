@@ -3,6 +3,7 @@
 import type { DeviceAppType, DeviceUserClass } from 'gdc-common-utils-ts/constants';
 import type { LicenseListSearchState } from 'gdc-common-utils-ts/utils/license-list-search';
 import type { LicenseOfferSearchState, LicenseOrderSearchState } from 'gdc-common-utils-ts/utils/license-commercial-search';
+import type { IndividualOrganizationLifecycleEditor } from 'gdc-common-utils-ts/utils/individual-organization-lifecycle';
 import type {
   IndividualOnboardingDraftInput,
   IndividualOnboardingDraftResult,
@@ -134,7 +135,13 @@ export type FrontIndividualOrganizationConfirmOrderInput = {
 
 export type FrontIndividualOrganizationLifecycleInput = {
   organizationClaims?: Record<string, unknown>;
+  individualEditor?: IndividualOrganizationLifecycleEditor;
+  /**
+   * @deprecated Use `individualEditor`.
+   */
+  organizationEditor?: IndividualOrganizationLifecycleEditor;
   resourceId?: string;
+  dataType?: string;
 };
 
 export type FrontIndividualMemberLifecycleInput = {

@@ -17,6 +17,7 @@ import {
   type FrontLicenseListSearchInput,
   type FrontLicenseOfferSearchInput,
   type FrontLicenseOrderSearchInput,
+  type FrontIndividualOrganizationLifecycleInput,
   type FrontOrganizationEmployeeSearchInput,
   type FrontGrantProfessionalAccessResult,
   type FrontSmartTokenExchangeResult,
@@ -297,10 +298,7 @@ export class FamilyAdminService {
   public async disableIndividual(
     _providerDid: string,
     _idToken: string,
-    _input: {
-      organizationClaims?: Record<string, unknown>;
-      resourceId?: string;
-    },
+    _input: FrontIndividualOrganizationLifecycleInput,
   ): Promise<SubmitAndPollResult> {
     return createSyntheticSubmitAndPollResult(runtimeThid('individual-disable'));
   }
@@ -308,10 +306,7 @@ export class FamilyAdminService {
   public async purgeIndividual(
     _providerDid: string,
     _idToken: string,
-    _input: {
-      organizationClaims?: Record<string, unknown>;
-      resourceId?: string;
-    },
+    _input: FrontIndividualOrganizationLifecycleInput,
   ): Promise<SubmitAndPollResult> {
     return createSyntheticSubmitAndPollResult(runtimeThid('individual-purge'));
   }
