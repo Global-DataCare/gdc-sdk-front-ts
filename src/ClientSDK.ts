@@ -12,6 +12,10 @@ import type {
   SdkConfig,
 } from './types.js';
 import {
+  StaticAuthorityResolver,
+  type AuthorityResolution,
+  type AuthorityResolutionInput,
+  type AuthorityResolver,
   buildAppHeaders,
   resolveAppInfo,
   type ResolvedAppInfo,
@@ -182,6 +186,22 @@ export class ClientSDK {
    */
   public shutdownSession(): void {
     this.currentSession = null;
+  }
+
+  /**
+   * Resolves one technical host/authority descriptor from business tenant
+   * context or one already-known subject/public identifier.
+   *
+   * Convenience rule:
+   * - browser/native callers should not have to handcraft `did:web`
+   * - pass a shared resolver when your app already preloaded one
+   * - without a resolver, the SDK falls back to the shared static/legacy rules
+   */
+  public async resolveAuthority(
+    input: AuthorityResolutionInput,
+    resolver: AuthorityResolver = new StaticAuthorityResolver(),
+  ): Promise<AuthorityResolution> {
+    return resolver.resolveAuthority(input);
   }
 
   private async resolveBaseUrl(source: string): Promise<URL> {

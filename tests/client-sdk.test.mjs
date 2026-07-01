@@ -190,3 +190,21 @@ test('ClientSDK sends AppId and AppVersion headers in provider discovery request
     AppVersion: 'v3.2.1',
   });
 });
+
+test('ClientSDK.resolveAuthority derives one hosted tenant DID from one base URL without requiring caller-side did:web knowledge', async () => {
+  const sdk = createSdk();
+
+  const resolved = await sdk.resolveAuthority({
+    authorityBaseUrl: 'https://gw.example.org',
+    tenantId: 'acme-id',
+    jurisdiction: 'ES',
+    sector: 'health-care',
+    subjectSameAs: 'UHC-724-0000-111-222-333-444',
+  });
+
+  assert.equal(resolved.authorityDidWeb, 'did:web:gw.example.org');
+  assert.equal(resolved.authorityBaseUrl, 'https://gw.example.org/');
+  assert.equal(resolved.tenantDidWeb, 'did:web:gw.example.org:acme-id:cds-ES:v1:health-care');
+  assert.equal(resolved.source, 'legacy');
+  assert.equal(resolved.matchedBy, 'subject-same-as');
+});

@@ -795,6 +795,7 @@ Use shared references instead of restating the full tutorial here.
 Prefer these shared helpers:
 
 - `initializeCommunicationIdentity(...)`
+- `StaticAuthorityResolver.resolveAuthority(...)`
 - `buildOrganizationDidWeb(...)`
 - `buildProfessionalDidWeb(...)`
 - `buildIndividualDidWeb(...)`
@@ -813,6 +814,7 @@ What is still converging:
 
 - first-class ICA discovery
 - first-class operator discovery
+- shared authority catalogs that hide most `did:web` routing details from app code
 - first-class DSP frontend discovery helpers for optional direct mode
 - a single activation helper that hides most onboarding assembly
 
