@@ -2,6 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 /**
+ * 101 note:
+ * - `gdc-common-utils-ts` owns the canonical step-by-step editors/readers and payload examples.
+ * - This file starts at `ProfileRuntime -> loadProfile(...) -> workspace/session -> actor facade` and teaches the highest-level `sdk-front` runtime surface for this topic.
+ * - Reuse `sdk-core` and `common-utils` contracts instead of re-teaching raw claims or low-level editors here.
+ * - Read `docs/101-README.md` for the ordered path and keep login/session bootstrap explicit.
+ */
+
+/**
  * Repo convention reminder:
  * read `ARCHITECTURE.md` and `CONTRIBUTING.md` before reshaping this test.
  *
@@ -42,11 +50,12 @@ const EXAMPLE_FRONT_ROUTE_CONTEXT = Object.freeze({
 /**
  * Teaching goal:
  * show the first pragmatic frontend use-case wrapper on top of the generic v2
- * profile runtime:
- * 1. load the frontend individual-controller profile,
- * 2. start individual registration,
- * 3. confirm the returned order,
- * 4. search the subject index.
+ * profile runtime after login/profile load:
+ * 1. load the frontend individual-controller profile into one workspace/session,
+ * 2. materialize the actor-scoped facade from that loaded workspace,
+ * 3. start individual registration,
+ * 4. confirm the returned order,
+ * 5. search the subject index.
  */
 test('101: frontend individual-controller runtime wraps the current frontend baseline', async () => {
   const loadRequest = prepareLoadProfile({
@@ -180,6 +189,8 @@ test('101: frontend individual-controller runtime wraps the current frontend bas
   );
 
   assert.equal(profile.profile.descriptor.profileId, EXAMPLE_PROFILE_ID);
+  assert.equal(profile.actorSession.profile.providerDid, EXAMPLE_PROFILE_PROVIDER_DID);
+  assert.equal(profile.workspace.profile.actorSession.profile.id, EXAMPLE_PROFILE_ID);
   assert.equal(startResult.registrationThid, 'frontend-registration-thid-1');
   assert.equal(orderResult.poll.status, 200);
   assert.equal(searchResult.thid, 'frontend-clinical-search-thid-1');

@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Added one canonical `ProfileRuntime` plus loaded profile workspace so
+  web/native consumers
+  can inject runtime adapters once, call `loadProfile(...)`, and then keep
+  working from one loaded workspace/session plus actor-scoped facade entrypoint
+  instead of isolated helper calls:
+  - `src/frontend-profile-workspace.ts`
+  - `src/index.ts`
+
+### Changed
+- Reworked the frontend `101` runtime path so it teaches the canonical
+  orchestration shape `runtime adapters -> ProfileRuntime -> loadProfile ->
+  workspace/session -> actor facade`, instead of a purely procedural sequence
+  of standalone helper calls:
+  - `src/individual-controller-frontend-runtime.ts`
+  - `tests/101-frontend-profile-runtime.test.mjs`
+  - `tests/101-individual-controller-frontend-runtime.test.mjs`
+  - `docs/101-README.md`
+  - `docs/101-SDK_INTEGRATION.md`
+  - `README.md`
+
 ## [2.1.1] - 2026-06-30
 
 ### Changed

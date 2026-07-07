@@ -7,8 +7,11 @@ profile/session runtime logic, or orchestration tests.
 Short rule:
 
 - `101` tests must stay didactic and step by step
-- reusable fixtures/types must come from `gdc-common-utils-ts` instead of
-  being repeated as frontend-local literals
+- `gdc-common-utils-ts` owns the canonical step-by-step editors/readers,
+  shared fixtures, and reusable payload examples
+- `gdc-sdk-front-ts` starts at `ProfileRuntime -> loadProfile(...) ->
+  workspace/session -> actor facade` and only then handles frontend runtime
+  orchestration
 
 Frontend runtime package for consuming the shared GDC SDK contracts in web or
 mobile apps.
@@ -39,7 +42,8 @@ If you are integrating this package for the first time, open these in order:
    Why `core`, `node`, and `front` are separate packages, what each one owns,
    and why frontend facades should mirror backend actor boundaries.
 1. [docs/101-SDK_INTEGRATION.md](./docs/101-SDK_INTEGRATION.md)
-  Real frontend/native setup, imports, `new ClientSDK(...)`,
+  Real frontend/native setup, injected runtime adapters, `loadProfile(...)`
+  into one loaded workspace/session, `new ClientSDK(...)`,
   `initializeCommunicationIdentity(...)`, `initializeSession(...)`, and the
   public actor entrypoints exposed by `ProfileManager.asXxx()`.
 2. [gdc-sdk-core-ts/docs/101-SDK_FLOWS.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_FLOWS.md)
@@ -72,6 +76,8 @@ If you need the shortest path:
   [`ClientSDK`](src/ClientSDK.ts)
 - profile/session bootstrap:
   [`initializeSession(...)`](./docs/101-SDK_INTEGRATION.md)
+- loaded profile workspace bootstrap:
+  `new ProfileRuntime(...).loadProfile(...)`
 - first public actor entrypoints:
   `session.asHostOnboarding()`, `session.asOrganizationController()`,
   `session.asIndividualController()`, `session.asProfessional()`

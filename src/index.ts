@@ -15,6 +15,7 @@ export * from './ProfileRegistry.js';
 export * from './UserProfileIndexStore.js';
 export * from './ClientSDK.js';
 export * from './frontend-profile-runtime.js';
+export * from './frontend-profile-workspace.js';
 export * from './individual-controller-frontend-runtime.js';
 export * from './discovery/index.js';
 export * from './orchestration/client-port.js';

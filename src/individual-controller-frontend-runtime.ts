@@ -3,11 +3,13 @@
 import { ActorKinds } from 'gdc-common-utils-ts/constants/actor-session';
 import type { SubmitAndPollResult } from 'gdc-sdk-core-ts';
 import type { ProfileLoadRequest } from 'gdc-sdk-core-ts';
+import type { ProfileManager } from './ProfileManager.js';
 import {
-  loadFrontendProfile,
-  type FrontendProfileRuntimeClient,
-} from './frontend-profile-runtime.js';
-import { IndividualControllerSdk } from './orchestration/individual-controller-sdk.js';
+  ProfileRuntime,
+  type LoadedProfileWorkspace,
+} from './frontend-profile-workspace.js';
+import type { FrontendProfileRuntimeClient } from './frontend-profile-runtime.js';
+import type { IndividualControllerSdk } from './orchestration/individual-controller-sdk.js';
 import type {
   FrontClinicalBundleSearchInput,
   FrontIndividualOrganizationBootstrapInput,
@@ -19,7 +21,9 @@ import type {
 import type { LoadedActorProfile } from 'gdc-sdk-core-ts';
 
 export type FrontendIndividualControllerProfile = {
-  profile: LoadedActorProfile;
+  profile: LoadedActorProfile & { actorSession: ProfileManager };
+  workspace: LoadedProfileWorkspace;
+  actorSession: ProfileManager;
   sdk: IndividualControllerSdk;
 };
 
@@ -44,13 +48,18 @@ export class IndividualControllerFrontendRuntime {
   public async loadProfile(
     input: ProfileLoadRequest,
   ): Promise<FrontendIndividualControllerProfile> {
-    const profile = await loadFrontendProfile(this.profileRuntime, input);
-    if (!profile.session.actorKinds.includes(ActorKinds.IndividualController)) {
+    const workspace = await new ProfileRuntime(
+      this.profileRuntime,
+      this.facadeClient,
+    ).loadProfile(input);
+    if (!workspace.profile.session.actorKinds.includes(ActorKinds.IndividualController)) {
       throw new Error('Loaded frontend profile does not expose actor kind \'individual_controller\'.');
     }
     return {
-      profile,
-      sdk: new IndividualControllerSdk(this.facadeClient),
+      profile: workspace.profile,
+      workspace,
+      actorSession: workspace.actorSession,
+      sdk: workspace.asIndividualController(),
     };
   }
 

@@ -2,6 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 /**
+ * 101 note:
+ * - `gdc-common-utils-ts` owns the canonical step-by-step editors/readers and payload examples.
+ * - This file starts at `ProfileRuntime -> loadProfile(...) -> workspace/session -> actor facade` and teaches the highest-level `sdk-front` runtime surface for this topic.
+ * - Reuse `sdk-core` and `common-utils` contracts instead of re-teaching raw claims or low-level editors here.
+ * - Read `docs/101-README.md` for the ordered path and keep login/session bootstrap explicit.
+ */
+
+/**
  * Repo convention reminder:
  * read `ARCHITECTURE.md` and `CONTRIBUTING.md` before reshaping this test.
  *
@@ -31,26 +39,37 @@ import {
 import {
   ActorKinds,
   FrontendProfileRuntime,
+  ProfileRuntime,
+  ProfileManager,
   buildActorSessionDescriptorFromActorFlags,
-  connectFrontendToSubjectIndex,
   expandActorSessionDescriptorToFacades,
-  getFrontendSubjectIndexComposition,
-  loadFrontendProfile,
   prepareConnectToSubjectIndex,
   prepareGetSubjectIndexComposition,
   prepareLoadedActorProfile,
   prepareLoadProfile,
   prepareRegisterTrustedDevice,
-  registerFrontendTrustedDevice,
 } from '../dist/index.js';
 
 /**
  * Teaching goal:
- * show the frontend-generic runtime flow for:
- * 1. loading one actor profile,
- * 2. registering one trusted device/runtime context,
- * 3. connecting that actor to one subject index, and
- * 4. reading one subject index composition.
+ * show the canonical frontend runtime orchestration:
+ * 1. inject runtime adapters once,
+ * 2. load one protected profile into one workspace/session,
+ * 3. register one trusted device/runtime context,
+ * 4. connect that actor to one subject index, and
+ * 5. read one subject index composition from the same loaded workspace.
+ *
+ * Runtime ownership rule:
+ * - the unlocked user profile remains the normal crypto owner for user
+ *   messages and replies
+ * - when one reply arrives, the app reads it as:
+ *   `DIDComm/plain -> Communication -> attached document bundle`
+ * - the canonical lower-layer example for that payload shape lives in:
+ *   `gdc-common-utils-ts/__tests__/101-communication-medication-document.test.ts`
+ * - backend search is a separate story taught with public FHIR search params
+ *   such as `Composition.section`
+ * - a web/native BFF may orchestrate several such profiles and their outboxes
+ * - do not confuse that app/service layer with GW server-side processing
  */
 test('101: frontend profile runtime stays generic across frontend consumers', async () => {
   const loadRequest = prepareLoadProfile({
@@ -172,13 +191,16 @@ test('101: frontend profile runtime stays generic across frontend consumers', as
     },
   });
 
-  const actualLoadedProfile = await loadFrontendProfile(runtimeClient, loadRequest);
-  const trustedDevice = await registerFrontendTrustedDevice(runtimeClient, trustedDeviceRequest);
-  const connection = await connectFrontendToSubjectIndex(runtimeClient, subjectConnectionRequest);
-  const composition = await getFrontendSubjectIndexComposition(runtimeClient, compositionRequest);
+  const workspaceRuntime = new ProfileRuntime(runtimeClient);
+  const workspace = await workspaceRuntime.loadProfile(loadRequest);
+  const trustedDevice = await workspace.registerTrustedDevice(trustedDeviceRequest);
+  const connection = await workspace.connectToSubjectIndex(subjectConnectionRequest);
+  const composition = await workspace.getSubjectIndexComposition(compositionRequest);
 
-  assert.equal(actualLoadedProfile.descriptor.profileId, EXAMPLE_PROFILE_ID);
-  assert.equal(actualLoadedProfile.descriptor.runtimeClass, 'frontend');
+  assert.equal(workspace.profile.descriptor.profileId, EXAMPLE_PROFILE_ID);
+  assert.ok(workspace.actorSession instanceof ProfileManager);
+  assert.equal(workspace.actorSession.profile.providerDid, EXAMPLE_PROFILE_PROVIDER_DID);
+  assert.equal(workspace.profile.descriptor.runtimeClass, 'frontend');
   assert.equal(trustedDevice.status, 'registered');
   assert.equal(connection.status, 'connected');
   assert.deepEqual(composition.composition, {

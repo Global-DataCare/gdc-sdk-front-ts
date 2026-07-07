@@ -1,6 +1,13 @@
 # SDK Integration 101 for Frontend / Native Apps
 
-This file is the short frontend integration map.
+> 101 note
+> - Teach here: the highest-level `sdk-front` session/profile/runtime surface after shared authoring in `gdc-common-utils-ts`.
+> - Reuse lower-layer contracts and shared authoring helpers from `sdk-core` and `common-utils` instead of re-teaching raw claims or low-level editors.
+> - Read [101-README.md](./101-README.md) for the ordered path and keep login/session bootstrap explicit.
+
+This file is the short frontend integration map. It starts after the shared
+authoring step and at the runtime boundary where `ProfileRuntime` loads one
+workspace/session and exposes one actor facade.
 
 If you want the business-flow overview first, start here:
 
@@ -38,9 +45,31 @@ use:
 This document should answer only these questions:
 
 - which package/class should the frontend instantiate
-- which helper should the frontend call next
+- which frontend runtime entrypoint should the frontend call next
 - which concepts belong to UI/session state
 - which concepts belong to shared activation/discovery contracts
+
+Current canonical user-story start for frontend/native teams:
+
+1. authenticate the user
+2. load/unlock one protected profile
+3. materialize one loaded frontend profile workspace/session
+4. assume or bootstrap the actor state already owned by that user
+5. only then create/read/edit/search business data
+
+Canonical runtime shape:
+
+1. inject runtime adapters such as `fetch`, crypto, secure storage, wallet, or outbox
+2. build one `ProfileRuntime`
+3. call `loadProfile(...)`
+4. use the returned workspace/session
+5. materialize one actor facade such as `asIndividualController()`
+
+Naming rule:
+
+- do not rename the unlocked user profile runtime by platform
+- keep `frontend`, `node`, `expo`, or `web` only in adapters/factories
+- keep service-tenant wallets separate from the end-user `ProfileRuntime`
 
 First actor-scoped entrypoints after session bootstrap:
 
@@ -173,7 +202,7 @@ Teaching rule for this `101`:
 
 ## Choose The Frontend Mode First
 
-Before choosing a class or helper, decide which frontend mode you are building.
+Before choosing a class or runtime entrypoint, decide which frontend mode you are building.
 
 ### Portal web / non confidential app
 
@@ -193,6 +222,9 @@ Start from shared editors/builders instead:
 - `createConsentAccessEditor(...)`
 
 Then send the resulting payload or bundle to the portal backend.
+
+The runtime boundary still stays the same elsewhere in this repo:
+`ProfileRuntime -> loadProfile(...) -> workspace/session -> actor facade`.
 
 Use these references first:
 
