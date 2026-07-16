@@ -11,6 +11,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-07-17
+
+### Changed
+- Updated the frontend SDK dependency chain to `gdc-common-utils-ts@^2.3.1`
+  and `gdc-sdk-core-ts@~2.3.1`.
+
 ## [2.3.0] - 2026-07-16
 
 ### Added
