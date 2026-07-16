@@ -23,9 +23,9 @@ import {
   OrganizationEmployeeSdk,
   PersonalSdk,
   ProfessionalSdk,
-  addFhirResourceToDraft,
-  createCommunicationDraft,
-  createOutboxJobFromDraft,
+  attachFhirResourceAsAttachmentToCommMsgExtendedDraft,
+  createCommunicationOutboxJobFromCommMsgExtendedDraft,
+  createCommMsgExtendedDraft,
 } from '../dist/index.js';
 
 test('frontend individual facade accepts the same canonical clinical outbox as the Node facade', async () => {
@@ -36,11 +36,11 @@ test('frontend individual facade accepts the same canonical clinical outbox as t
       return { submit: { status: 202, body: {} }, poll: { status: 200, body: {}, attempts: 1 } };
     },
   });
-  const draft = addFhirResourceToDraft(
-    createCommunicationDraft({ subject: FAMILY_SUBJECT_DID }),
+  const draft = attachFhirResourceAsAttachmentToCommMsgExtendedDraft(
+    createCommMsgExtendedDraft({ subject: FAMILY_SUBJECT_DID }),
     { resourceType: 'Observation', status: 'final', code: { text: 'Heart rate' } },
   );
-  const job = createOutboxJobFromDraft(draft);
+  const job = createCommunicationOutboxJobFromCommMsgExtendedDraft(draft);
 
   await facade.ingestCommunicationAndUpdateIndex(
     { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' },
@@ -48,7 +48,7 @@ test('frontend individual facade accepts the same canonical clinical outbox as t
   );
 
   assert.equal(calls[0][1].communicationJob.id, job.id);
-  assert.equal(calls[0][1].communicationJob.payload.resourceType, 'Communication');
+  assert.equal(calls[0][1].communicationJob.payload.body.data[0].resource.resourceType, 'Communication');
 });
 
 test('frontend individual-member facade exposes the same consent-scoped clinical operations', async () => {

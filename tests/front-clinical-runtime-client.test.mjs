@@ -4,9 +4,9 @@ import assert from 'node:assert/strict';
 import {
   FrontClinicalRuntimeClient,
   TransportProfiles,
-  addFhirResourceToDraft,
-  createCommunicationDraft,
-  createOutboxJobFromDraft,
+  attachFhirResourceAsAttachmentToCommMsgExtendedDraft,
+  createCommunicationOutboxJobFromCommMsgExtendedDraft,
+  createCommMsgExtendedDraft,
 } from '../dist/index.js';
 
 /**
@@ -20,10 +20,14 @@ import {
  */
 
 function createJob() {
-  return createOutboxJobFromDraft(addFhirResourceToDraft(
-    createCommunicationDraft({ subject: 'did:web:subject.example' }),
+  const draft = attachFhirResourceAsAttachmentToCommMsgExtendedDraft(
+    createCommMsgExtendedDraft({
+      thid: 'clinical-thread-1',
+      subject: 'did:web:subject.example',
+    }),
     { resourceType: 'Observation', status: 'final', code: { text: 'Heart rate' } },
-  ), { batchOptions: { thid: 'clinical-thread-1' } });
+  );
+  return createCommunicationOutboxJobFromCommMsgExtendedDraft(draft);
 }
 
 const ctx = {

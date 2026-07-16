@@ -7,6 +7,7 @@ import {
   renderGatewayMessageRequest,
   renderTransportPollRequest,
   type RenderedTransportRequest,
+  type CommunicationClinicalFormatRenderers,
   type SecureDidcommTransportAdapter,
   type SubmitAndPollResult,
   type TransportProfile,
@@ -45,6 +46,8 @@ export type FrontClinicalRuntimeClientOptions = Readonly<{
   carrier: FrontClinicalCarrier;
   transportProfile?: TransportProfile;
   secureTransportAdapter?: SecureDidcommTransportAdapter;
+  /** Product-supplied projections not owned by the generic frontend runtime. */
+  communicationFormatRenderers?: CommunicationClinicalFormatRenderers;
   accessToken?: string;
   pollIntervalMs?: number;
   pollTimeoutMs?: number;
@@ -78,12 +81,16 @@ export class FrontClinicalRuntimeClient implements FrontRuntimeClient {
       throw new Error('Direct clinical ingestion requires communicationJob.');
     }
     const route = requireDirectRoute(ctx);
-    const format = normalizeFormat(input.pathFormatSegment);
+    const format = normalizeFormat(input.clinicalFormat || input.pathFormatSegment);
     const profile = input.transportProfile || this.profile;
     const submit = await renderCommunicationOutboxRequest(
       input.communicationJob,
       profile,
       this.options.secureTransportAdapter,
+      {
+        clinicalFormat: input.clinicalFormat || input.pathFormatSegment || 'api',
+        formatRenderers: this.options.communicationFormatRenderers,
+      },
     );
     return this.sendAndPoll(
       ctx,
@@ -248,8 +255,12 @@ function resourcePath(
   return `/${encodeURIComponent(route.tenantId)}/cds-${encodeURIComponent(route.jurisdiction)}/v1/${encodeURIComponent(route.sector)}/individual/${encodeURIComponent(format)}/${encodeURIComponent(resourceType)}/${encodeURIComponent(action)}`;
 }
 
-function normalizeFormat(value?: string): 'org.hl7.fhir.r4' | 'org.hl7.fhir.api' {
-  return value === 'org.hl7.fhir.api' ? value : 'org.hl7.fhir.r4';
+function normalizeFormat(value?: string): string {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized || normalized === 'api' || normalized === 'org.hl7.fhir.api') return 'org.hl7.fhir.api';
+  if (normalized === 'r4' || normalized === 'fhir.r4' || normalized === 'org.hl7.fhir.r4') return 'org.hl7.fhir.r4';
+  if (/^org\.hl7\.fhir\.[a-z0-9.-]+$/.test(normalized)) return normalized;
+  throw new Error(`Unsupported Communication clinical format '${String(value || '')}'.`);
 }
 
 function buildBundleSearchQuery(input: FrontClinicalBundleSearchInput): string {

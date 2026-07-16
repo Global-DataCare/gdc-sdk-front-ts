@@ -10,6 +10,7 @@ import type {
 } from 'gdc-common-utils-ts/models/individual-onboarding';
 import type {
   BundleSearchQuery,
+  CommMsgExtendedCommunicationOutboxJob,
   CommunicationOutboxJob,
   CommunicationInput,
   EmployeeSearchValue,
@@ -167,10 +168,13 @@ export type FrontRelatedPersonUpsertInput = {
 };
 
 export type FrontCommunicationIngestionInput = {
-  /** Preferred canonical job created by `createOutboxJobFromDraft(...)`. */
-  communicationJob?: CommunicationOutboxJob;
+  /** Preferred claims-first job created by `createCommunicationOutboxJobFromCommMsgExtendedDraft(...)`. */
+  communicationJob?: CommunicationOutboxJob | CommMsgExtendedCommunicationOutboxJob;
   /** Compatibility escape hatch for an already-rendered channel payload. */
   communicationPayload?: CommunicationInput & Record<string, unknown>;
+  /** Claims-first representation rendered before transport. */
+  clinicalFormat?: string;
+  /** @deprecated Use `clinicalFormat`. */
   pathFormatSegment?: 'org.hl7.fhir.r4' | 'org.hl7.fhir.api';
   transportProfile?: TransportProfile;
   pollOptions?: PollOptions;

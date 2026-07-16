@@ -11,7 +11,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-07-16
+
 ### Added
+- Front clinical runtimes now accept claims-first `CommMsgExtended` outbox jobs
+  and injectable sector clinical-format renderers independently of transport.
 - Added `FrontClinicalRuntimeClient` and the carrier-neutral
   `FrontClinicalCarrier` for direct HTTP, Expo offline or Bluetooth delivery of
   the same protected clinical outbox; direct transport requires a SMART access
