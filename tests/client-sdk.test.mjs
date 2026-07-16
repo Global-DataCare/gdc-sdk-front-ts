@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { EXAMPLE_PROFILE_SESSION_INPUT } from 'gdc-common-utils-ts/examples';
+import { EXAMPLE_DEFAULT_ICA_DID, EXAMPLE_PROFILE_SESSION_INPUT, EXAMPLE_TENANT_IDENTIFIER } from 'gdc-common-utils-ts/examples';
 
 import { ClientSDK, ProfileManager, ProfileRegistry } from '../dist/index.js';
 
@@ -65,7 +65,7 @@ function createSdk() {
       verifyCredential: async () => true,
       verifyPresentation: async () => true,
     },
-    'did:web:ica.example',
+    EXAMPLE_DEFAULT_ICA_DID,
   );
 }
 
@@ -99,17 +99,17 @@ test('ClientSDK.initializeSession creates the current session and persists the p
   assert.equal(session.profile.id, 'profile-1');
   assert.equal(session.profile.email, 'user@example.com');
   assert.equal(session.profile.role, 'controller');
-  assert.equal(session.profile.providerDid, 'did:web:org.example');
+  assert.equal(session.profile.providerDid, EXAMPLE_PROFILE_SESSION_INPUT.providerDid.trim());
   assert.equal(session.profile.appType, 'Family');
   assert.equal(typeof session.profile.createdAt, 'string');
-  assert.equal(session.orgDidDoc.id, 'did:web:org.example');
+  assert.equal(session.orgDidDoc.id, EXAMPLE_PROFILE_SESSION_INPUT.providerDid.trim());
   assert.deepEqual(calls.put, [[
     'profile',
     {
       id: 'profile-1',
       email: 'user@example.com',
       role: 'controller',
-      providerDid: 'did:web:org.example',
+      providerDid: EXAMPLE_PROFILE_SESSION_INPUT.providerDid.trim(),
       appType: 'Family',
       createdAt: session.profile.createdAt,
     },
@@ -196,7 +196,7 @@ test('ClientSDK.resolveAuthority derives one hosted tenant DID from one base URL
 
   const resolved = await sdk.resolveAuthority({
     authorityBaseUrl: 'https://gw.example.org',
-    tenantId: 'acme-id',
+    tenantId: EXAMPLE_TENANT_IDENTIFIER,
     jurisdiction: 'ES',
     sector: 'health-care',
     subjectSameAs: 'UHC-724-0000-111-222-333-444',
@@ -204,7 +204,7 @@ test('ClientSDK.resolveAuthority derives one hosted tenant DID from one base URL
 
   assert.equal(resolved.authorityDidWeb, 'did:web:gw.example.org');
   assert.equal(resolved.authorityBaseUrl, 'https://gw.example.org/');
-  assert.equal(resolved.tenantDidWeb, 'did:web:gw.example.org:acme-id:cds-ES:v1:health-care');
+  assert.equal(resolved.tenantDidWeb, `did:web:gw.example.org:${EXAMPLE_TENANT_IDENTIFIER}:cds-ES:v1:health-care`);
   assert.equal(resolved.source, 'legacy');
   assert.equal(resolved.matchedBy, 'subject-same-as');
 });

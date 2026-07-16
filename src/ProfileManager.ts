@@ -203,9 +203,11 @@ export class ProfileManager {
         );
       },
       ingestCommunicationAndUpdateIndex: (ctx, input) => {
+        const communicationInput = input.communicationJob || input.communicationPayload;
+        if (!communicationInput) throw new Error('Clinical ingestion requires communicationJob.');
         if (this.professional?.physician) {
           return this.professional.physician.ingestCommunicationAndUpdateIndex(
-            input.communicationPayload,
+            communicationInput,
             ctx.providerDid,
             ctx.requiredScope || '',
             ctx.idToken,
@@ -214,7 +216,7 @@ export class ProfileManager {
         }
         if (this.professional?.paramedic) {
           return this.professional.paramedic.ingestCommunicationAndUpdateIndex(
-            input.communicationPayload,
+            communicationInput,
             ctx.providerDid,
             ctx.requiredScope || '',
             ctx.idToken,
@@ -223,7 +225,7 @@ export class ProfileManager {
         }
         if (!this.individual?.service) throw new Error('individual.service is not available for this profile.');
         return this.individual.service.ingestCommunicationAndUpdateIndex(
-          input.communicationPayload,
+          communicationInput,
           ctx.providerDid,
           ctx.requiredScope || '',
           ctx.idToken,

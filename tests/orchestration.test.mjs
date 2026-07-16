@@ -3,6 +3,10 @@ import assert from 'node:assert/strict';
 
 import {
   ClaimsPersonSchemaorg,
+  EXAMPLE_GENERIC_SUBJECT_DID,
+  EXAMPLE_PROFILE_ORGANIZATION_DID,
+  EXAMPLE_PROFILE_PROVIDER_DID,
+  EXAMPLE_PROFILE_SESSION_INPUT,
   EXAMPLE_PROFESSIONAL_IDENTITY,
   IndividualOrganizationLifecycleEditor,
   ProfessionalCredentialTypes,
@@ -14,11 +18,57 @@ import {
   ClientSDK,
   HostOnboardingSdk,
   IndividualControllerSdk,
+  IndividualMemberSdk,
   OrganizationControllerSdk,
   OrganizationEmployeeSdk,
   PersonalSdk,
   ProfessionalSdk,
+  addFhirResourceToDraft,
+  createCommunicationDraft,
+  createOutboxJobFromDraft,
 } from '../dist/index.js';
+
+test('frontend individual facade accepts the same canonical clinical outbox as the Node facade', async () => {
+  const calls = [];
+  const facade = new IndividualControllerSdk({
+    async ingestCommunicationAndUpdateIndex(...args) {
+      calls.push(args);
+      return { submit: { status: 202, body: {} }, poll: { status: 200, body: {}, attempts: 1 } };
+    },
+  });
+  const draft = addFhirResourceToDraft(
+    createCommunicationDraft({ subject: FAMILY_SUBJECT_DID }),
+    { resourceType: 'Observation', status: 'final', code: { text: 'Heart rate' } },
+  );
+  const job = createOutboxJobFromDraft(draft);
+
+  await facade.ingestCommunicationAndUpdateIndex(
+    { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' },
+    { communicationJob: job },
+  );
+
+  assert.equal(calls[0][1].communicationJob.id, job.id);
+  assert.equal(calls[0][1].communicationJob.payload.resourceType, 'Communication');
+});
+
+test('frontend individual-member facade exposes the same consent-scoped clinical operations', async () => {
+  const calls = [];
+  const facade = new IndividualMemberSdk({
+    async ingestCommunicationAndUpdateIndex(...args) { calls.push(['ingest', args]); return { submit: {}, poll: {} }; },
+    async searchClinicalBundle(...args) { calls.push(['search', args]); return { thid: 'search-1' }; },
+    async getLatestIps(...args) { calls.push(['latest', args]); return { thid: 'latest-1' }; },
+  });
+  const ctx = { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' };
+  await facade.ingestCommunicationAndUpdateIndex(ctx, { communicationPayload: { subject: FAMILY_SUBJECT_DID } });
+  await facade.searchClinicalBundle(ctx, { subject: FAMILY_SUBJECT_DID });
+  await facade.getLatestIps(ctx, FAMILY_SUBJECT_DID);
+  assert.deepEqual(calls.map(([name]) => name), ['ingest', 'search', 'latest']);
+});
+
+const ORG_PROFILE_DID = EXAMPLE_PROFILE_ORGANIZATION_DID;
+const FAMILY_PROFILE_DID = EXAMPLE_PROFILE_PROVIDER_DID;
+const FAMILY_SUBJECT_DID = EXAMPLE_GENERIC_SUBJECT_DID;
+const PROFILE_ID = EXAMPLE_PROFILE_SESSION_INPUT.profileId.trim();
 
 const HOST_ROUTE_CONTEXT = Object.freeze({
   jurisdiction: 'ES',
@@ -61,10 +111,10 @@ test('organization controller session materializes host and organization facades
   const sdk = createSdk('Organization');
   const session = await sdk.initializeSession(
     {
-      profileId: 'profile-org-controller',
+      profileId: PROFILE_ID,
       email: 'controller@example.org',
       role: 'controller',
-      providerDid: 'did:web:org.example',
+      providerDid: ORG_PROFILE_DID,
       appType: 'Organization',
     },
     () => createVaultStub(),
@@ -87,13 +137,13 @@ test('organization controller session materializes host and organization facades
   assert.equal(tenantDisable.poll.status, 200);
 
   const created = await session.asOrganizationController().createOrganizationEmployee(
-    { providerDid: 'did:web:org.example', idToken: 'id-token' },
+    { providerDid: ORG_PROFILE_DID, idToken: 'id-token' },
     { email: 'doctor@example.org', role: 'physician' },
   );
   assert.equal(created.poll.status, 200);
 
   const search = await session.searchOrganizationEmployees({
-    providerDid: 'did:web:org.example',
+    providerDid: ORG_PROFILE_DID,
     idToken: 'id-token',
     employeeClaims: {
       'org.schema.Person.email': 'doctor@example.org',
@@ -104,7 +154,7 @@ test('organization controller session materializes host and organization facades
   assert.equal(search.poll.body.request.entry[0].request.url, 'Employee/_search');
 
   const facadeSearch = await session.asOrganizationController().searchOrganizationEmployees(
-    { providerDid: 'did:web:org.example', idToken: 'id-token' },
+    { providerDid: ORG_PROFILE_DID, idToken: 'id-token' },
     {
       employeeClaims: {
         'org.schema.Person.memberOf.taxID': '12345678',
@@ -114,26 +164,26 @@ test('organization controller session materializes host and organization facades
   assert.equal(facadeSearch.poll.status, 200);
 
   const licenseSearch = await session.asOrganizationController().searchLicenses(
-    { providerDid: 'did:web:org.example', idToken: 'id-token' },
+    { providerDid: ORG_PROFILE_DID, idToken: 'id-token' },
     { licenseQuery: { active: true } },
   );
   assert.equal(licenseSearch.poll.status, 200);
   assert.equal(licenseSearch.poll.body.request.entry[0].type, 'License-search-request-v1.0');
 
   const licenseList = await session.asOrganizationController().listLicenses(
-    { providerDid: 'did:web:org.example', idToken: 'id-token' },
+    { providerDid: ORG_PROFILE_DID, idToken: 'id-token' },
   );
   assert.equal(licenseList.poll.status, 200);
 
   const offerSearch = await session.asOrganizationController().searchLicenseOffers(
-    { providerDid: 'did:web:org.example', idToken: 'id-token' },
+    { providerDid: ORG_PROFILE_DID, idToken: 'id-token' },
     { offerQuery: { active: true } },
   );
   assert.equal(offerSearch.poll.status, 200);
   assert.equal(offerSearch.poll.body.request.entry[0].type, 'Offer-search-request-v1.0');
 
   const orderList = await session.asOrganizationController().listLicenseOrders(
-    { providerDid: 'did:web:org.example', idToken: 'id-token' },
+    { providerDid: ORG_PROFILE_DID, idToken: 'id-token' },
   );
   assert.equal(orderList.poll.status, 200);
   assert.equal(orderList.poll.body.request.entry[0].type, 'Order-search-request-v1.0');
@@ -143,10 +193,10 @@ test('family controller session materializes individual and personal facades', a
   const sdk = createSdk('Family');
   const session = await sdk.initializeSession(
     {
-      profileId: 'profile-family-controller',
+      profileId: PROFILE_ID,
       email: 'family@example.org',
       role: 'controller',
-      providerDid: 'did:web:family.example',
+      providerDid: FAMILY_PROFILE_DID,
       appType: 'Family',
     },
     () => createVaultStub(),
@@ -165,60 +215,60 @@ test('family controller session materializes individual and personal facades', a
 
   const clinicalSearch = await session.asIndividualController().searchClinicalBundle(
     {
-      providerDid: 'did:web:family.example',
+      providerDid: FAMILY_PROFILE_DID,
       idToken: 'id-token',
       requiredScope: 'individual.index.read',
     },
-    { subject: 'did:web:subject.example' },
+    { subject: FAMILY_SUBJECT_DID },
   );
   assert.match(clinicalSearch.thid, /^thid-/);
 
   const latestIps = await session.asIndividualController().getLatestIps(
     {
-      providerDid: 'did:web:family.example',
+      providerDid: FAMILY_PROFILE_DID,
       idToken: 'id-token',
       requiredScope: 'individual.index.read',
     },
-    'did:web:subject.example',
+    FAMILY_SUBJECT_DID,
   );
   assert.match(latestIps.thid, /^thid-/);
 
   const licenseSearch = await session.asIndividualController().searchLicenses(
-    { providerDid: 'did:web:family.example', idToken: 'id-token' },
-    { licenseQuery: { subjectId: 'did:web:subject.example' } },
+    { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' },
+    { licenseQuery: { subjectId: FAMILY_SUBJECT_DID } },
   );
   assert.equal(licenseSearch.poll.status, 200);
 
   const personalLicenseList = await session.asPersonal().listLicenses(
-    { providerDid: 'did:web:family.example', idToken: 'id-token' },
+    { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' },
   );
   assert.equal(personalLicenseList.poll.status, 200);
 
   const offerSearch = await session.asIndividualController().searchLicenseOffers(
-    { providerDid: 'did:web:family.example', idToken: 'id-token' },
-    { offerQuery: { subjectIds: ['did:web:subject.example'] } },
+    { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' },
+    { offerQuery: { subjectIds: [FAMILY_SUBJECT_DID] } },
   );
   assert.equal(offerSearch.poll.status, 200);
   assert.equal(offerSearch.poll.body.request.entry[0].type, 'Offer-search-request-v1.0');
 
   const orderList = await session.asPersonal().listLicenseOrders(
-    { providerDid: 'did:web:family.example', idToken: 'id-token' },
+    { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' },
   );
   assert.equal(orderList.poll.status, 200);
   assert.equal(orderList.poll.body.request.entry[0].type, 'Order-search-request-v1.0');
 
   const individualEditor = new IndividualOrganizationLifecycleEditor()
-    .setIdentifier('did:web:subject.example')
+    .setIdentifier(FAMILY_SUBJECT_DID)
     .setAlternateName('ana')
     .setOwnerEmail('family@example.org');
   const disabled = await session.asIndividualController().disableIndividual(
-    { providerDid: 'did:web:family.example', idToken: 'id-token' },
+    { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' },
     { individualEditor },
   );
   assert.equal(disabled.poll.status, 200);
 
   const purged = await session.asIndividualController().purgeIndividual(
-    { providerDid: 'did:web:family.example', idToken: 'id-token' },
+    { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' },
     { organizationEditor: individualEditor },
   );
   assert.equal(purged.poll.status, 200);
@@ -228,10 +278,10 @@ test('professional session materializes the professional facade without employee
   const sdk = createSdk('Organization');
   const session = await sdk.initializeSession(
     {
-      profileId: 'profile-professional',
+      profileId: PROFILE_ID,
       email: 'physician@example.org',
       role: 'physician',
-      providerDid: 'did:web:org.example',
+      providerDid: ORG_PROFILE_DID,
       appType: 'Organization',
     },
     () => createVaultStub(),
@@ -286,7 +336,7 @@ test('OrganizationControllerSdk delegates organization DID binding to the fronte
   });
 
   const result = await sdk.submitOrganizationDidBinding(
-    { providerDid: 'did:web:org.example', idToken: 'id-token' },
+    { providerDid: ORG_PROFILE_DID, idToken: 'id-token' },
     {
       organization: {
         url: ['https://provider.example.org'],
@@ -296,6 +346,6 @@ test('OrganizationControllerSdk delegates organization DID binding to the fronte
 
   assert.equal(result.poll.status, 200);
   assert.equal(calls.length, 1);
-  assert.equal(calls[0][0].providerDid, 'did:web:org.example');
+  assert.equal(calls[0][0].providerDid, ORG_PROFILE_DID);
   assert.equal(calls[0][1].organization.url[0], 'https://provider.example.org');
 });

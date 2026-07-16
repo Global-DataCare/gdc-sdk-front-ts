@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ActorCapabilities, ActorKinds } from 'gdc-common-utils-ts/constants/actor-session';
+import { EXAMPLE_PROFILE_ORGANIZATION_DID, EXAMPLE_PROFILE_SESSION_INPUT } from 'gdc-common-utils-ts/examples';
 
 import {
   expandActorSessionDescriptorToFacades,
@@ -19,8 +20,8 @@ test('gdc-sdk-front-ts reuses core facade expansion for Family sessions', () => 
       ActorCapabilities.ConsentGrantProfessionalAccess,
     ],
     appType: 'Family',
-    profileId: 'profile-family-1',
-    profileDid: 'did:web:family:controller',
+    profileId: EXAMPLE_PROFILE_SESSION_INPUT.profileId.trim(),
+    profileDid: EXAMPLE_PROFILE_ORGANIZATION_DID,
   });
 
   assert.deepEqual(facades, [
@@ -35,8 +36,8 @@ test('gdc-sdk-front-ts reuses core facade expansion for Family sessions', () => 
         ActorCapabilities.ConsentGrantProfessionalAccess,
       ],
       appType: 'Family',
-      profileId: 'profile-family-1',
-      profileDid: 'did:web:family:controller',
+      profileId: EXAMPLE_PROFILE_SESSION_INPUT.profileId.trim(),
+      profileDid: EXAMPLE_PROFILE_ORGANIZATION_DID,
       role: undefined,
     },
     {
@@ -47,8 +48,8 @@ test('gdc-sdk-front-ts reuses core facade expansion for Family sessions', () => 
         ActorCapabilities.IndividualGenerateDigitalTwin,
       ],
       appType: 'Family',
-      profileId: 'profile-family-1',
-      profileDid: 'did:web:family:controller',
+      profileId: EXAMPLE_PROFILE_SESSION_INPUT.profileId.trim(),
+      profileDid: EXAMPLE_PROFILE_ORGANIZATION_DID,
       role: undefined,
     },
   ]);

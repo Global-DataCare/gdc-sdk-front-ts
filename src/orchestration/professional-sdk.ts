@@ -9,7 +9,7 @@ import {
   type ProfessionalSmartVpPayloadInput,
 } from 'gdc-common-utils-ts';
 import type { PollOptions, SubmitAndPollResult, SubmitPayload } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontCommunicationIngestionInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontCommunicationIngestionInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class ProfessionalSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
@@ -65,6 +65,17 @@ export class ProfessionalSdk {
     input: FrontGrantProfessionalAccessInput,
   ): Promise<FrontGrantProfessionalAccessResult> {
     return requireClientMethod(this.client, 'grantProfessionalAccess')(ctx, input);
+  }
+
+  public searchClinicalBundle(
+    ctx: FrontRouteContext,
+    input: FrontClinicalBundleSearchInput,
+  ): Promise<{ thid: string }> {
+    return requireClientMethod(this.client, 'searchClinicalBundle')(ctx, input);
+  }
+
+  public getLatestIps(ctx: FrontRouteContext, subject: string): Promise<{ thid: string }> {
+    return requireClientMethod(this.client, 'getLatestIps')(ctx, subject);
   }
 
   public submitAndPoll(

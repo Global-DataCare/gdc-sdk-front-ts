@@ -10,6 +10,7 @@ import type {
 } from 'gdc-common-utils-ts/models/individual-onboarding';
 import type {
   BundleSearchQuery,
+  CommunicationOutboxJob,
   CommunicationInput,
   EmployeeSearchValue,
   HostLifecycleInput,
@@ -21,11 +22,18 @@ import type {
   SmartTokenRequestContract,
   SubmitAndPollResult,
   SubmitPayload,
+  TransportProfile,
 } from 'gdc-sdk-core-ts';
 
 export type FrontRouteContext = {
   providerDid: string;
   idToken: string;
+  /** Direct-to-GW runtimes use the SMART access token, never the login token. */
+  accessToken?: string;
+  /** Direct mobile/browser runtimes require explicit GW routing. */
+  tenantId?: string;
+  jurisdiction?: string;
+  sector?: string;
   requiredScope?: string;
   format?: 'org.hl7.fhir.r4' | 'org.hl7.fhir.api';
 };
@@ -159,12 +167,21 @@ export type FrontRelatedPersonUpsertInput = {
 };
 
 export type FrontCommunicationIngestionInput = {
-  communicationPayload: CommunicationInput & Record<string, unknown>;
+  /** Preferred canonical job created by `createOutboxJobFromDraft(...)`. */
+  communicationJob?: CommunicationOutboxJob;
+  /** Compatibility escape hatch for an already-rendered channel payload. */
+  communicationPayload?: CommunicationInput & Record<string, unknown>;
   pathFormatSegment?: 'org.hl7.fhir.r4' | 'org.hl7.fhir.api';
+  transportProfile?: TransportProfile;
+  pollOptions?: PollOptions;
 };
 
-export type FrontClinicalBundleSearchInput = BundleSearchQuery & {
+export type FrontClinicalBundleSearchInput = Omit<BundleSearchQuery, 'section' | 'searchParams'> & {
+  section?: string | string[];
+  extraSearchParams?: BundleSearchQuery['searchParams'];
   requestThid?: string;
+  transportProfile?: TransportProfile;
+  pollOptions?: PollOptions;
 };
 
 export type FrontGrantProfessionalAccessInput = {

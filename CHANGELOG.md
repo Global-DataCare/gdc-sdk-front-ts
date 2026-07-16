@@ -2,9 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.1] - 2026-07-13
+
+### Changed
+- Bumped the frontend runtime package for the hosted `did:web` routing
+  compatibility release and aligned the shared package dependencies with the
+  published `gdc-common-utils-ts@^2.2.2` and `gdc-sdk-core-ts@~2.2.1` line.
+
 ## [Unreleased]
 
 ### Added
+- Added `FrontClinicalRuntimeClient` and the carrier-neutral
+  `FrontClinicalCarrier` for direct HTTP, Expo offline or Bluetooth delivery of
+  the same protected clinical outbox; direct transport requires a SMART access
+  token and never substitutes the login ID token.
+- Added consent-scoped clinical ingestion, Bundle search and latest IPS reads
+  to `IndividualMemberSdk`.
+- Frontend actor facades now accept the same `CommunicationOutboxJob` contract
+  as the Node actor facades, leaving wire-profile rendering to the injected
+  runtime adapter.
 - Added one canonical `ProfileRuntime` plus loaded profile workspace so
   web/native consumers
   can inject runtime adapters once, call `loadProfile(...)`, and then keep
@@ -14,6 +30,8 @@ All notable changes to this project will be documented in this file.
   - `src/index.ts`
 
 ### Changed
+- Documented the native confidential-client boundary: PIN-plus-device envelope,
+  wallet-backed secure adapter and byte-preserving offline/Bluetooth outbox.
 - Reworked the frontend `101` runtime path so it teaches the canonical
   orchestration shape `runtime adapters -> ProfileRuntime -> loadProfile ->
   workspace/session -> actor facade`, instead of a purely procedural sequence

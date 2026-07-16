@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ActorCapabilities, ActorKinds } from 'gdc-common-utils-ts/constants/actor-session';
+import { EXAMPLE_PROFILE_ORGANIZATION_DID, EXAMPLE_PROFILE_SESSION_INPUT } from 'gdc-common-utils-ts/examples';
 
 import {
   describeFrontActorFacades,
@@ -10,8 +11,8 @@ import {
 test('describeFrontActorSession builds a composite Family descriptor from actor flags', () => {
   const descriptor = describeFrontActorSession({
     appType: 'Family',
-    profileId: 'profile-family-1',
-    profileDid: 'did:web:family:controller',
+    profileId: EXAMPLE_PROFILE_SESSION_INPUT.profileId.trim(),
+    profileDid: EXAMPLE_PROFILE_ORGANIZATION_DID,
     role: 'controller',
     actorFlags: {
       individualController: true,
@@ -34,8 +35,8 @@ test('describeFrontActorSession builds a composite Family descriptor from actor 
       ActorCapabilities.IndividualGenerateDigitalTwin,
     ],
     appType: 'Family',
-    profileId: 'profile-family-1',
-    profileDid: 'did:web:family:controller',
+    profileId: EXAMPLE_PROFILE_SESSION_INPUT.profileId.trim(),
+    profileDid: EXAMPLE_PROFILE_ORGANIZATION_DID,
     role: 'controller',
   });
 });
@@ -43,8 +44,8 @@ test('describeFrontActorSession builds a composite Family descriptor from actor 
 test('describeFrontActorFacades splits Family descriptor into scoped facades', () => {
   const facades = describeFrontActorFacades({
     appType: 'Family',
-    profileId: 'profile-family-1',
-    profileDid: 'did:web:family:controller',
+    profileId: EXAMPLE_PROFILE_SESSION_INPUT.profileId.trim(),
+    profileDid: EXAMPLE_PROFILE_ORGANIZATION_DID,
     actorFlags: {
       individualController: true,
       individualMember: true,
@@ -67,8 +68,8 @@ test('describeFrontActorFacades splits Family descriptor into scoped facades', (
         ActorCapabilities.IndividualGenerateDigitalTwin,
       ],
       appType: 'Family',
-      profileId: 'profile-family-1',
-      profileDid: 'did:web:family:controller',
+      profileId: EXAMPLE_PROFILE_SESSION_INPUT.profileId.trim(),
+      profileDid: EXAMPLE_PROFILE_ORGANIZATION_DID,
       role: undefined,
     },
     {
@@ -79,8 +80,8 @@ test('describeFrontActorFacades splits Family descriptor into scoped facades', (
         ActorCapabilities.IndividualGenerateDigitalTwin,
       ],
       appType: 'Family',
-      profileId: 'profile-family-1',
-      profileDid: 'did:web:family:controller',
+      profileId: EXAMPLE_PROFILE_SESSION_INPUT.profileId.trim(),
+      profileDid: EXAMPLE_PROFILE_ORGANIZATION_DID,
       role: undefined,
     },
   ]);
