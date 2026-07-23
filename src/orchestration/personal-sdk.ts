@@ -1,6 +1,12 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
-import type { PollOptions, SubmitAndPollResult, SubmitPayload } from 'gdc-sdk-core-ts';
+import type {
+  ClinicalSummaryReadResult,
+  ClinicalSummaryRequestInput,
+  PollOptions,
+  SubmitAndPollResult,
+  SubmitPayload,
+} from 'gdc-sdk-core-ts';
 import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class PersonalSdk {
@@ -32,6 +38,14 @@ export class PersonalSdk {
     input: FrontCommunicationIngestionInput,
   ): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'ingestCommunicationAndUpdateIndex')(ctx, input);
+  }
+
+  /** Reads the person's own `$summary` document without invoking ingestion. */
+  public requestClinicalSummary(
+    ctx: FrontRouteContext,
+    input: ClinicalSummaryRequestInput,
+  ): Promise<ClinicalSummaryReadResult> {
+    return requireClientMethod(this.client, 'requestClinicalSummary')(ctx, input);
   }
 
   public generateDigitalTwinFromSubjectData(

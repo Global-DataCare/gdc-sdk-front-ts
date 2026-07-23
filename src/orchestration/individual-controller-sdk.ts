@@ -1,6 +1,11 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
-import type { PollOptions, SubmitAndPollResult } from 'gdc-sdk-core-ts';
+import type {
+  ClinicalSummaryReadResult,
+  ClinicalSummaryRequestInput,
+  PollOptions,
+  SubmitAndPollResult,
+} from 'gdc-sdk-core-ts';
 import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualMemberLifecycleInput, type FrontIndividualOnboardingPdfDraftInput, type FrontIndividualOnboardingPdfDraftResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationConfirmOrderInput, type FrontIndividualOrganizationLifecycleInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class IndividualControllerSdk {
@@ -73,6 +78,11 @@ export class IndividualControllerSdk {
     return requireClientMethod(this.client, 'importIpsOrFhirAndUpdateIndex')(ctx, input);
   }
 
+  /**
+   * @deprecated Compatibility adapter for the older direct RelatedPerson
+   * route. Author a typed Bundle and use
+   * `ingestCommunicationAndUpdateIndex(...)` for new flows.
+   */
   public upsertRelatedPersonAndPoll(
     ctx: FrontRouteContext,
     input: FrontRelatedPersonUpsertInput,
@@ -85,6 +95,14 @@ export class IndividualControllerSdk {
     input: FrontCommunicationIngestionInput,
   ): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'ingestCommunicationAndUpdateIndex')(ctx, input);
+  }
+
+  /** Reads the current `$summary` document and exposes section/type/date readers. */
+  public requestClinicalSummary(
+    ctx: FrontRouteContext,
+    input: ClinicalSummaryRequestInput,
+  ): Promise<ClinicalSummaryReadResult> {
+    return requireClientMethod(this.client, 'requestClinicalSummary')(ctx, input);
   }
 
   public generateDigitalTwinFromSubjectData(

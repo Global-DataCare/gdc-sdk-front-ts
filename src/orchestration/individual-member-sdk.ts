@@ -1,11 +1,20 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
-import type { SubmitAndPollResult } from 'gdc-sdk-core-ts';
+import type {
+  ClinicalSummaryReadResult,
+  ClinicalSummaryRequestInput,
+  SubmitAndPollResult,
+} from 'gdc-sdk-core-ts';
 import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontCommunicationIngestionInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class IndividualMemberSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
 
+  /**
+   * @deprecated Compatibility adapter for the older direct RelatedPerson
+   * route. Author a typed Bundle and use
+   * `ingestCommunicationAndUpdateIndex(...)` for new flows.
+   */
   public upsertRelatedPersonAndPoll(
     ctx: FrontRouteContext,
     input: FrontRelatedPersonUpsertInput,
@@ -23,6 +32,14 @@ export class IndividualMemberSdk {
     input: FrontCommunicationIngestionInput,
   ): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'ingestCommunicationAndUpdateIndex')(ctx, input);
+  }
+
+  /** Reads the member-authorized `$summary` document without mutating the index. */
+  public requestClinicalSummary(
+    ctx: FrontRouteContext,
+    input: ClinicalSummaryRequestInput,
+  ): Promise<ClinicalSummaryReadResult> {
+    return requireClientMethod(this.client, 'requestClinicalSummary')(ctx, input);
   }
 
   /** Reads clinical documents under the member's accepted consent and SMART scopes. */

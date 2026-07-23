@@ -94,6 +94,91 @@ Teaching rule:
 - teach the actor-scoped session methods before generic runtime helpers
 - teach shared/core editors before any GW route or envelope detail
 
+## Author First, Deliver Later
+
+For medications, permissions, contacts and other individual-index data, the
+frontend contract is always:
+
+1. use typed `BundleEditor` entries from `gdc-common-utils-ts`;
+2. let the screen decide whether to finish after one entry or after several;
+3. attach the completed Bundle to one claims-first Communication draft;
+4. freeze one outbox job;
+5. let the runtime select API/FHIR projection and FHIR/DIDComm carrier.
+
+Do not call `upsert*` route helpers from authoring components. Those methods
+are compatibility plumbing. A contact list, permission set, clinical section
+or complete history differs by Bundle contents and commit timing, not by a new
+transport contract.
+
+## Keep Remote Submission Separate From The Subject Working Copy
+
+The screen's current subject Bundle/ViewModels are a disposable local
+projection, not the backend record. The frontend flow is:
+
+1. build the command Bundle;
+2. call `SubjectBundleWorkingCopy.applyOptimisticBundle(...)` to update the
+   visible local copy;
+3. independently wrap and submit the command Bundle through Communication;
+4. pass the per-entry GW operation response to `reconcileSubmission(...)`;
+5. show every returned notice and remove rejected resources from the local
+   copy;
+6. run the read operation for the aggregate shown by that screen and pass its
+   result to the matching `replaceFromClinicalCompositionSearch(...)`,
+   `replaceFromConsentSearch(...)` or `replaceFromRelatedPersonSearch(...)`
+   method.
+
+There is no generic reconciliation endpoint:
+
+- clinical history/sections: `requestClinicalSummary(...)`, which sends an
+  auditable Communication to `Subject/$summary` with attached FHIR Parameters;
+- permissions: subject-scoped `Consent/_search` returning the full permission
+  list required by that screen;
+- contacts/related entities: subject-scoped `RelatedPerson/_search` returning
+  the full related-person list.
+
+A response entry that is absent is ambiguous and stays pending until the
+corresponding authoritative aggregate readback.
+A definite transport rejection can use `rejectSubmission(...)` to remove the
+whole optimistic command. The executable contract is
+`tests/101-subject-bundle-working-copy.test.mjs`.
+
+## Read The Clinical Summary, Do Not Ingest It
+
+The canonical frontend read is:
+
+```ts
+const summary = await profile.sdk.requestClinicalSummary(ctx, {
+  subjectId,
+  requesterId: actorDid,
+  filterSections: [HealthcareBasicSections.AllergiesAndIntolerances.attributeValue],
+});
+
+const sectionCount = summary.reader.getDocumentSectionResourceCount(
+  HealthcareBasicSections.AllergiesAndIntolerances.attributeValue,
+);
+const recentAllergies = summary.document.getResourcesByFilter({
+  sections: [HealthcareBasicSections.AllergiesAndIntolerances.attributeValue],
+  types: [ResourceTypesFhirR4.AllergyIntolerance],
+  date: { start: '2026-01-01', end: '2026-12-31' },
+});
+```
+
+- `summary.reader` is the shared `BundleReader` for generic document structure,
+  sections, counts, references and entries.
+- `summary.document` is the SDK Core `FhirDocumentFacade` for clinical
+  resources and combined section/type/date filters.
+- `LifecycleResultReader` analyzes operation outcomes and issues; it does not
+  navigate the returned clinical document.
+- `ingestCommunicationAndUpdateIndex(...)` is write-only.
+- UHC frontend extensions reuse the same readers and add only product formats
+  such as R5.
+
+Executable references:
+
+- [gdc-common-utils-ts/__tests__/101-bundle-communication-authoring.test.ts](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/__tests__/101-bundle-communication-authoring.test.ts)
+- [gdc-sdk-core-ts/tests/101-bundle-communication-delivery.test.mjs](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/tests/101-bundle-communication-delivery.test.mjs)
+- [gdc-sdk-front-ts/tests/101-subject-bundle-working-copy.test.mjs](https://github.com/Global-DataCare/gdc-sdk-front-ts/blob/main/tests/101-subject-bundle-working-copy.test.mjs)
+
 ## Inter-Tenant Research Access For Frontend Teams
 
 Use this product-facing split:
@@ -217,9 +302,11 @@ consent payload authoring.
 
 Start from shared editors/builders instead:
 
-- `BundleEditor` plus `EmployeeEntryEditor`
-- `CommunicationAttachedBundleSession`
-- `createConsentAccessEditor(...)`
+- typed `BundleEditor` entry editors for Employee, Consent, RelatedPerson and
+  clinical resources
+- `CommunicationEditor` for attaching the completed Bundle
+- `createConsentAccessEditor(...)` for reading/editing returned permission
+  ViewModels
 
 Then send the resulting payload or bundle to the portal backend.
 
@@ -238,8 +325,9 @@ Use these references first:
 Practical rule:
 
 - `BundleEditor` plus `EmployeeEntryEditor` for employee create/search/disable/purge
-- `CommunicationAttachedBundleSession` for `Communication`-carried bundles
-- `createConsentAccessEditor(...)` for editing one consent inside that bundle
+- `CommunicationEditor` for the completed Bundle attachment boundary
+- `createConsentAccessEditor(...)` for returned permission ViewModels; its
+  lower-level session/upsert methods are not the initial authoring path
 
 Controller-only portal-web employee flow:
 

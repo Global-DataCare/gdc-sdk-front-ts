@@ -13,6 +13,8 @@ import type {
   CommMsgExtendedCommunicationOutboxJob,
   CommunicationOutboxJob,
   CommunicationInput,
+  ClinicalSummaryReadResult,
+  ClinicalSummaryRequestInput,
   EmployeeSearchValue,
   HostLifecycleInput,
   HostRouteContext,
@@ -394,6 +396,10 @@ export type FrontRuntimeClient = {
     ctx: FrontRouteContext,
     input: FrontCommunicationIngestionInput,
   ) => Promise<SubmitAndPollResult>;
+  requestClinicalSummary?: (
+    ctx: FrontRouteContext,
+    input: ClinicalSummaryRequestInput,
+  ) => Promise<ClinicalSummaryReadResult>;
   generateDigitalTwinFromSubjectData?: (
     ctx: FrontRouteContext,
     input: FrontDigitalTwinGenerationInput,
