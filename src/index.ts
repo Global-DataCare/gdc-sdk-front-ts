@@ -18,6 +18,7 @@ export * from './frontend-profile-runtime.js';
 export * from './frontend-profile-workspace.js';
 export * from './individual-controller-frontend-runtime.js';
 export * from './front-clinical-runtime-client.js';
+export * from './subject-bundle-working-copy.js';
 export * from './discovery/index.js';
 export * from './orchestration/client-port.js';
 export * from './orchestration/host-onboarding-sdk.js';

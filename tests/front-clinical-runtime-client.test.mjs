@@ -2,6 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  EXAMPLE_SUBJECT_DID,
+  HealthcareBasicSections,
+  ResourceTypesFhirR4,
+} from 'gdc-common-utils-ts';
+import {
   FrontClinicalRuntimeClient,
   TransportProfiles,
   attachFhirResourceAsAttachmentToCommMsgExtendedDraft,
@@ -91,4 +96,60 @@ test('direct Front runtime never substitutes the login ID token for SMART author
     client.ingestCommunicationAndUpdateIndex({ ...ctx, accessToken: undefined }, { communicationJob: createJob() }),
     /requires a SMART access token/,
   );
+});
+
+test('direct Front runtime reads $summary and returns section/type/date facades', async () => {
+  const section = HealthcareBasicSections.AllergiesAndIntolerances.attributeValue;
+  const bundle = {
+    resourceType: ResourceTypesFhirR4.Bundle,
+    type: 'document',
+    entry: [{
+      resource: {
+        resourceType: ResourceTypesFhirR4.Composition,
+        section: [{
+          code: { coding: [{
+            system: HealthcareBasicSections.AllergiesAndIntolerances.system,
+            code: HealthcareBasicSections.AllergiesAndIntolerances.code,
+          }] },
+          entry: [{ reference: 'AllergyIntolerance/allergy-front-1' }],
+        }],
+      },
+    }, {
+      resource: {
+        resourceType: ResourceTypesFhirR4.AllergyIntolerance,
+        id: 'allergy-front-1',
+        recordedDate: '2026-07-20T10:00:00Z',
+      },
+    }],
+  };
+  const client = new FrontClinicalRuntimeClient({
+    carrier: {
+      async send(request) {
+        return request.phase === 'submit'
+          ? { status: 202, body: { accepted: true } }
+          : {
+            status: 200,
+            body: {
+              data: [{
+                type: 'Bundle-summary-response-v1.0',
+                resource: bundle,
+              }],
+            },
+          };
+      },
+    },
+  });
+
+  const result = await client.requestClinicalSummary(ctx, {
+    subjectId: EXAMPLE_SUBJECT_DID,
+    requesterId: EXAMPLE_SUBJECT_DID,
+    filterSections: [section],
+  });
+
+  assert.equal(result.reader.getDocumentSectionResourceCount(section), 1);
+  assert.equal(result.document.getResourceCount({
+    sections: [section],
+    types: [ResourceTypesFhirR4.AllergyIntolerance],
+    date: { start: '2026-07-01', end: '2026-07-31' },
+  }), 1);
 });

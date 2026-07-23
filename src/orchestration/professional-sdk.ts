@@ -8,7 +8,13 @@ import {
   type ProfessionalEmployeeCredentialInput,
   type ProfessionalSmartVpPayloadInput,
 } from 'gdc-common-utils-ts';
-import type { PollOptions, SubmitAndPollResult, SubmitPayload } from 'gdc-sdk-core-ts';
+import type {
+  ClinicalSummaryReadResult,
+  ClinicalSummaryRequestInput,
+  PollOptions,
+  SubmitAndPollResult,
+  SubmitPayload,
+} from 'gdc-sdk-core-ts';
 import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontCommunicationIngestionInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class ProfessionalSdk {
@@ -58,6 +64,14 @@ export class ProfessionalSdk {
     input: FrontCommunicationIngestionInput,
   ): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'ingestCommunicationAndUpdateIndex')(ctx, input);
+  }
+
+  /** Reads the consent-authorized `$summary` document without ingestion. */
+  public requestClinicalSummary(
+    ctx: FrontRouteContext,
+    input: ClinicalSummaryRequestInput,
+  ): Promise<ClinicalSummaryReadResult> {
+    return requireClientMethod(this.client, 'requestClinicalSummary')(ctx, input);
   }
 
   public grantProfessionalAccess(

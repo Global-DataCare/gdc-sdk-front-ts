@@ -2,7 +2,9 @@
 
 import {
   TransportProfiles,
+  buildClinicalSummaryCommunicationJob,
   decodeTransportResponse,
+  readClinicalSummaryOperationResult,
   renderCommunicationOutboxRequest,
   renderGatewayMessageRequest,
   renderTransportPollRequest,
@@ -11,6 +13,8 @@ import {
   type SecureDidcommTransportAdapter,
   type SubmitAndPollResult,
   type TransportProfile,
+  type ClinicalSummaryReadResult,
+  type ClinicalSummaryRequestInput,
 } from 'gdc-sdk-core-ts';
 import type {
   FrontClinicalBundleSearchInput,
@@ -80,11 +84,43 @@ export class FrontClinicalRuntimeClient implements FrontRuntimeClient {
     if (!input.communicationJob) {
       throw new Error('Direct clinical ingestion requires communicationJob.');
     }
+    return this.submitCommunicationJobAndPoll(ctx, input.communicationJob, input);
+  }
+
+  /**
+   * Reads `Subject/$summary` through an auditable Communication and returns the
+   * authoritative Bundle with neutral section/type/date readers.
+   *
+   * This is a read lifecycle; it does not ingest resources or update indexes.
+   */
+  public async requestClinicalSummary(
+    ctx: FrontRouteContext,
+    input: ClinicalSummaryRequestInput,
+  ): Promise<ClinicalSummaryReadResult> {
+    const communicationJob = buildClinicalSummaryCommunicationJob(input);
+    const operation = await this.submitCommunicationJobAndPoll(
+      ctx,
+      communicationJob,
+      input,
+    );
+    return readClinicalSummaryOperationResult(operation);
+  }
+
+  private async submitCommunicationJobAndPoll(
+    ctx: FrontRouteContext,
+    communicationJob: NonNullable<FrontCommunicationIngestionInput['communicationJob']>,
+    input: Readonly<{
+      clinicalFormat?: string;
+      transportProfile?: TransportProfile;
+      pollOptions?: { timeoutMs?: number; intervalMs?: number };
+      pathFormatSegment?: string;
+    }>,
+  ): Promise<SubmitAndPollResult> {
     const route = requireDirectRoute(ctx);
     const format = normalizeFormat(input.clinicalFormat || input.pathFormatSegment);
     const profile = input.transportProfile || this.profile;
     const submit = await renderCommunicationOutboxRequest(
-      input.communicationJob,
+      communicationJob,
       profile,
       this.options.secureTransportAdapter,
       {
