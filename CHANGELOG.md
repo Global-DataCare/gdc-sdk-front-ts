@@ -2,19 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.2.1] - 2026-07-13
+## [Unreleased]
+
+## [2.3.2] - 2026-07-24
 
 ### Changed
 - Added Node-parity `requestClinicalSummary(...)` actor/runtime reads with the
   shared Bundle and clinical document readers; frontend reads no longer need
   to masquerade as Communication ingestion.
-- Bumped the frontend runtime package for the hosted `did:web` routing
-  compatibility release and aligned the shared package dependencies with the
-  published `gdc-common-utils-ts@^2.2.2` and `gdc-sdk-core-ts@~2.2.1` line.
-
-## [Unreleased]
-
-### Changed
+- Aligned the shared package dependencies with the published
+  `gdc-common-utils-ts@^2.3.6` and `gdc-sdk-core-ts@~2.3.3` line.
 - Made Bundle authoring the frontend 101 contract for clinical data,
   permissions and contacts: the UI chooses one-entry or grouped commit timing,
   then sends one Communication outbox job. Direct RelatedPerson `upsert*`
