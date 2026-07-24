@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.3] - 2026-07-24
+
+- Added `updateClinicalSection(...)` and `updateClinicalSummary(...)` to the
+  direct clinical runtime and actor facades, matching the Node SDK write
+  boundaries.
+- Raised the Core SDK dependency baseline to `gdc-sdk-core-ts@~2.3.4`.
+
 ## [2.3.2] - 2026-07-24
 
 ### Changed

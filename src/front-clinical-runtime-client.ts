@@ -3,6 +3,8 @@
 import {
   TransportProfiles,
   buildClinicalSummaryCommunicationJob,
+  createClinicalSectionUpdateOutboxJob,
+  createClinicalSummaryUpdateOutboxJob,
   decodeTransportResponse,
   readClinicalSummaryOperationResult,
   renderCommunicationOutboxRequest,
@@ -18,6 +20,8 @@ import {
 } from 'gdc-sdk-core-ts';
 import type {
   FrontClinicalBundleSearchInput,
+  FrontClinicalSectionUpdateInput,
+  FrontClinicalSummaryUpdateInput,
   FrontCommunicationIngestionInput,
   FrontRouteContext,
   FrontRuntimeClient,
@@ -85,6 +89,35 @@ export class FrontClinicalRuntimeClient implements FrontRuntimeClient {
       throw new Error('Direct clinical ingestion requires communicationJob.');
     }
     return this.submitCommunicationJobAndPoll(ctx, input.communicationJob, input);
+  }
+
+  /**
+   * Updates exactly one clinical section from a batch/collection whose exact
+   * section is carried on the outer Communication.
+   */
+  public async updateClinicalSection(
+    ctx: FrontRouteContext,
+    input: FrontClinicalSectionUpdateInput,
+  ): Promise<SubmitAndPollResult> {
+    return this.submitCommunicationJobAndPoll(
+      ctx,
+      createClinicalSectionUpdateOutboxJob(input),
+      input,
+    );
+  }
+
+  /**
+   * Updates one or several clinical sections as a Composition-first document.
+   */
+  public async updateClinicalSummary(
+    ctx: FrontRouteContext,
+    input: FrontClinicalSummaryUpdateInput,
+  ): Promise<SubmitAndPollResult> {
+    return this.submitCommunicationJobAndPoll(
+      ctx,
+      createClinicalSummaryUpdateOutboxJob(input),
+      input,
+    );
   }
 
   /**
