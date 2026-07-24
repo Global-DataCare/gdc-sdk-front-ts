@@ -15,7 +15,7 @@ import type {
   SubmitAndPollResult,
   SubmitPayload,
 } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontCommunicationIngestionInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class ProfessionalSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
@@ -64,6 +64,16 @@ export class ProfessionalSdk {
     input: FrontCommunicationIngestionInput,
   ): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'ingestCommunicationAndUpdateIndex')(ctx, input);
+  }
+
+  /** Updates one consent-authorized clinical section through a scoped batch/collection. */
+  public updateClinicalSection(ctx: FrontRouteContext, input: FrontClinicalSectionUpdateInput): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'updateClinicalSection')(ctx, input);
+  }
+
+  /** Updates a consent-authorized multi-section summary document. */
+  public updateClinicalSummary(ctx: FrontRouteContext, input: FrontClinicalSummaryUpdateInput): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'updateClinicalSummary')(ctx, input);
   }
 
   /** Reads the consent-authorized `$summary` document without ingestion. */

@@ -13,8 +13,10 @@ import type {
   CommMsgExtendedCommunicationOutboxJob,
   CommunicationOutboxJob,
   CommunicationInput,
+  ClinicalSectionUpdateCommunicationInput,
   ClinicalSummaryReadResult,
   ClinicalSummaryRequestInput,
+  ClinicalUpdateCommunicationInput,
   EmployeeSearchValue,
   HostLifecycleInput,
   HostRouteContext,
@@ -181,6 +183,20 @@ export type FrontCommunicationIngestionInput = {
   transportProfile?: TransportProfile;
   pollOptions?: PollOptions;
 };
+
+type FrontClinicalUpdateRuntimeOptions = {
+  clinicalFormat?: string;
+  transportProfile?: TransportProfile;
+  pollOptions?: PollOptions;
+};
+
+/** Front runtime input for updating exactly one clinical section. */
+export type FrontClinicalSectionUpdateInput =
+  ClinicalSectionUpdateCommunicationInput & FrontClinicalUpdateRuntimeOptions;
+
+/** Front runtime input for updating one Composition-first summary document. */
+export type FrontClinicalSummaryUpdateInput =
+  ClinicalUpdateCommunicationInput & FrontClinicalUpdateRuntimeOptions;
 
 export type FrontClinicalBundleSearchInput = Omit<BundleSearchQuery, 'section' | 'searchParams'> & {
   section?: string | string[];
@@ -395,6 +411,14 @@ export type FrontRuntimeClient = {
   ingestCommunicationAndUpdateIndex?: (
     ctx: FrontRouteContext,
     input: FrontCommunicationIngestionInput,
+  ) => Promise<SubmitAndPollResult>;
+  updateClinicalSection?: (
+    ctx: FrontRouteContext,
+    input: FrontClinicalSectionUpdateInput,
+  ) => Promise<SubmitAndPollResult>;
+  updateClinicalSummary?: (
+    ctx: FrontRouteContext,
+    input: FrontClinicalSummaryUpdateInput,
   ) => Promise<SubmitAndPollResult>;
   requestClinicalSummary?: (
     ctx: FrontRouteContext,

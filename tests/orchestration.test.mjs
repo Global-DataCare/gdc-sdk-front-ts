@@ -51,6 +51,33 @@ test('frontend individual facade accepts the same canonical clinical outbox as t
   assert.equal(calls[0][1].communicationJob.payload.body.data[0].resource.resourceType, 'Communication');
 });
 
+test('frontend actor facade exposes separate section and summary update methods', async () => {
+  const calls = [];
+  const facade = new IndividualControllerSdk({
+    async updateClinicalSection(...args) { calls.push(['section', args]); return { submit: {}, poll: {} }; },
+    async updateClinicalSummary(...args) { calls.push(['summary', args]); return { submit: {}, poll: {} }; },
+  });
+  const ctx = { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' };
+
+  // Step 1: one section is an explicit batch/collection operation.
+  await facade.updateClinicalSection(ctx, {
+    subject: FAMILY_SUBJECT_DID,
+    section: 'LOINC|8716-3',
+    bundle: { resourceType: 'Bundle', type: 'collection', data: [{}] },
+  });
+
+  // Step 2: several sections remain a Composition-first document operation.
+  await facade.updateClinicalSummary(ctx, {
+    subject: FAMILY_SUBJECT_DID,
+    bundle: {
+      resourceType: 'Bundle',
+      type: 'document',
+      entry: [{ resource: { resourceType: 'Composition' } }],
+    },
+  });
+  assert.deepEqual(calls.map(([name]) => name), ['section', 'summary']);
+});
+
 test('frontend individual-member facade exposes the same consent-scoped clinical operations', async () => {
   const calls = [];
   const facade = new IndividualMemberSdk({

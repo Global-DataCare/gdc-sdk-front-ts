@@ -1,7 +1,11 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
 import type { DeviceAppType, DeviceUserClass } from 'gdc-common-utils-ts/constants';
-import type { SubmitAndPollResult } from 'gdc-sdk-core-ts';
+import {
+  createClinicalSectionUpdateOutboxJob,
+  createClinicalSummaryUpdateOutboxJob,
+  type SubmitAndPollResult,
+} from 'gdc-sdk-core-ts';
 import type { Profile } from './types.js';
 import type {
   CommonServices,
@@ -231,6 +235,26 @@ export class ProfileManager {
           ctx.idToken,
           input.pathFormatSegment,
         );
+      },
+      updateClinicalSection: (ctx, input) => {
+        const ingest = this.runtimeClient.ingestCommunicationAndUpdateIndex;
+        if (!ingest) throw new Error('Clinical ingestion is not available for this profile.');
+        return ingest(ctx, {
+          communicationJob: createClinicalSectionUpdateOutboxJob(input),
+          clinicalFormat: input.clinicalFormat,
+          transportProfile: input.transportProfile,
+          pollOptions: input.pollOptions,
+        });
+      },
+      updateClinicalSummary: (ctx, input) => {
+        const ingest = this.runtimeClient.ingestCommunicationAndUpdateIndex;
+        if (!ingest) throw new Error('Clinical ingestion is not available for this profile.');
+        return ingest(ctx, {
+          communicationJob: createClinicalSummaryUpdateOutboxJob(input),
+          clinicalFormat: input.clinicalFormat,
+          transportProfile: input.transportProfile,
+          pollOptions: input.pollOptions,
+        });
       },
       generateDigitalTwinFromSubjectData: (ctx, input) => {
         if (!this.individual?.service) throw new Error('individual.service is not available for this profile.');

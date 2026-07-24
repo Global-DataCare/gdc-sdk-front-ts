@@ -65,6 +65,44 @@ test('direct Front runtime sends the canonical outbox through an injected carrie
   assert.equal(requests[1].message.thid, 'clinical-thread-1');
 });
 
+test('direct Front runtime keeps section and summary updates as distinct contracts', async () => {
+  const requests = [];
+  const client = new FrontClinicalRuntimeClient({
+    carrier: {
+      async send(request) {
+        requests.push(request);
+        return request.phase === 'submit'
+          ? { status: 202, body: { accepted: true } }
+          : { status: 200, body: { completed: true } };
+      },
+    },
+  });
+
+  // Step 1: a one-section batch carries the explicit section through the
+  // canonical Communication builder.
+  await client.updateClinicalSection(ctx, {
+    thid: 'front-section-update-1',
+    subject: EXAMPLE_SUBJECT_DID,
+    section: HealthcareBasicSections.VitalSigns.attributeValue,
+    bundle: {
+      resourceType: 'Bundle',
+      type: 'batch',
+      data: [{ resource: { resourceType: 'Observation', id: 'front-vital-1' } }],
+    },
+  });
+  assert.equal(requests[0].message.thid, 'front-section-update-1');
+
+  // Step 2: a summary write rejects anything other than a Composition-first
+  // document before the carrier can report a false success.
+  await assert.rejects(
+    client.updateClinicalSummary(ctx, {
+      subject: EXAMPLE_SUBJECT_DID,
+      bundle: { resourceType: 'Bundle', type: 'batch', data: [] },
+    }),
+    /Bundle\.type=document/i,
+  );
+});
+
 test('offline or Bluetooth carrier receives the unchanged protected JWE form body', async () => {
   const transferred = [];
   const secure = {
