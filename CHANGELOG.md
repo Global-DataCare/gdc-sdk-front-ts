@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.4] - 2026-07-28
+
+### Changed
+
+- Clarify professional SMART facade parity: Consent, VP and SMART reuse one
+  actor DID, while provider endpoint/audience resolution belongs to the runtime
+  rather than browser product code.
+- Raise dependencies to `gdc-common-utils-ts@^2.3.8` and
+  `gdc-sdk-core-ts@~2.3.5`.
+
 ## [2.3.3] - 2026-07-24
 
 - Added `updateClinicalSection(...)` and `updateClinicalSummary(...)` to the

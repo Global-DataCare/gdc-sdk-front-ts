@@ -20,6 +20,13 @@ import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontCli
 export class ProfessionalSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
 
+  /**
+   * Requests subject-scoped SMART material for the same professional DID used
+   * by the consent grant and VP credential subject.
+   *
+   * Browser/product code should omit `audience`; its runtime client owns
+   * provider discovery and concrete endpoint selection.
+   */
   public requestSmartToken(input: FrontSmartTokenRequestInput): Promise<FrontSmartTokenExchangeResult> {
     return requireClientMethod(this.client, 'requestSmartToken')(input);
   }
