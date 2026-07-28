@@ -1,3 +1,8 @@
+/**
+ * Flow contract: frontend actor facades preserve the same role-scoped public
+ * operations as Node while leaving provider discovery, audience selection and
+ * authorization decisions to trusted runtime adapters.
+ */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
