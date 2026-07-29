@@ -26,6 +26,7 @@ export class PersonalSdk {
     return requireClientMethod(this.client, 'grantProfessionalAccess')(ctx, input);
   }
 
+  /** @deprecated Browser UI submits the IPS Bundle to its authenticated BFF. */
   public importIpsOrFhirAndUpdateIndex(
     ctx: FrontRouteContext,
     input: FrontIpsOrFhirImportInput,
@@ -33,6 +34,7 @@ export class PersonalSdk {
     return requireClientMethod(this.client, 'importIpsOrFhirAndUpdateIndex')(ctx, input);
   }
 
+  /** @deprecated Backend/BFF compatibility surface; never call from browser UI. */
   public ingestCommunicationAndUpdateIndex(
     ctx: FrontRouteContext,
     input: FrontCommunicationIngestionInput,
@@ -40,12 +42,12 @@ export class PersonalSdk {
     return requireClientMethod(this.client, 'ingestCommunicationAndUpdateIndex')(ctx, input);
   }
 
-  /** Updates exactly one clinical section through a scoped batch/collection. */
+  /** @deprecated Browser UI submits its section command Bundle to its BFF. */
   public updateClinicalSection(ctx: FrontRouteContext, input: FrontClinicalSectionUpdateInput): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'updateClinicalSection')(ctx, input);
   }
 
-  /** Updates the multi-section summary through a Composition-first document. */
+  /** @deprecated Browser UI submits its Composition-first Bundle to its BFF. */
   public updateClinicalSummary(ctx: FrontRouteContext, input: FrontClinicalSummaryUpdateInput): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'updateClinicalSummary')(ctx, input);
   }

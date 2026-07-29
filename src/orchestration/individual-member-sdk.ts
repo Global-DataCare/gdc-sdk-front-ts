@@ -12,8 +12,7 @@ export class IndividualMemberSdk {
 
   /**
    * @deprecated Compatibility adapter for the older direct RelatedPerson
-   * route. Author a typed Bundle and use
-   * `ingestCommunicationAndUpdateIndex(...)` for new flows.
+   * route. Browser UI authors a typed Bundle and submits it to its BFF.
    */
   public upsertRelatedPersonAndPoll(
     ctx: FrontRouteContext,
@@ -26,7 +25,7 @@ export class IndividualMemberSdk {
     return requireClientMethod(this.client, 'requestSmartToken')(input);
   }
 
-  /** Delegates a permitted member write to the same canonical clinical outbox. */
+  /** @deprecated Backend/BFF compatibility surface; never call from browser UI. */
   public ingestCommunicationAndUpdateIndex(
     ctx: FrontRouteContext,
     input: FrontCommunicationIngestionInput,
@@ -34,12 +33,12 @@ export class IndividualMemberSdk {
     return requireClientMethod(this.client, 'ingestCommunicationAndUpdateIndex')(ctx, input);
   }
 
-  /** Updates one authorized clinical section through a scoped batch/collection. */
+  /** @deprecated Browser UI submits its section command Bundle to its BFF. */
   public updateClinicalSection(ctx: FrontRouteContext, input: FrontClinicalSectionUpdateInput): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'updateClinicalSection')(ctx, input);
   }
 
-  /** Updates an authorized multi-section summary document. */
+  /** @deprecated Browser UI submits its Composition-first Bundle to its BFF. */
   public updateClinicalSummary(ctx: FrontRouteContext, input: FrontClinicalSummaryUpdateInput): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'updateClinicalSummary')(ctx, input);
   }

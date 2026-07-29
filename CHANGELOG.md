@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.6] - 2026-07-29
+
+- Make the frontend 101 boundary explicit: browser UI authors and renders a
+  disposable optimistic Bundle, submits it to its authenticated BFF and never
+  calls `ingestCommunicationAndUpdateIndex(...)`.
+- Mark direct frontend ingestion/update methods as backend compatibility
+  surfaces and teach per-entry reconciliation through
+  `SubjectBundleWorkingCopy`.
+- Consume Common Utils 2.3.10 for locale-aware complete IPS section cards.
+
 ## [2.3.5] - 2026-07-29
 
 - Re-export the canonical coded clinical authoring/display contract from Core:
