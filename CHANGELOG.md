@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.8] - 2026-07-30
+
+- Add `ClinicalDocumentWorkingCopy` for the complete browser IPS lifecycle:
+  optimistic native-FHIR import, all-section projection, optimistic section
+  updates, definite-failure rollback and authoritative `$summary` replacement.
+- Teach one continuous UI/BFF flow and typed allergy/medication additions.
+- Consume Common Utils 2.3.11 for explicit Composition section assignment
+  through `setSectionList(...)`.
+- Consume Core 2.3.8 so complete IPS documents and section commands can be
+  authored entirely from the public `gdc-sdk-front-ts` barrel.
+
 ## [2.3.7] - 2026-07-29
 
 - Document the framework/component boundary with a complete

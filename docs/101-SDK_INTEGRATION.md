@@ -114,6 +114,220 @@ are compatibility plumbing. A contact list, permission set, clinical section
 or complete history differs by Bundle contents and commit timing, not by a new
 transport contract.
 
+## Complete IPS Screen Flow: Import, Render, Submit, Edit
+
+This is the complete browser flow for a screen that owns its own React/Vue/Expo
+components. `ClinicalDocumentWorkingCopy` is for native FHIR IPS documents
+with `entry[]`; do not confuse it with `SubjectBundleWorkingCopy`, which owns
+JSON-API-like command Bundles with `data[]`.
+
+### 1. Keep one working copy beside component state
+
+```tsx
+import {
+  ClinicalDocumentWorkingCopy,
+  toClinicalSectionViews,
+} from 'gdc-sdk-front-ts';
+
+const clinicalCopy = useRef(new ClinicalDocumentWorkingCopy()).current;
+const [bundleInMemory, setBundleInMemory] = useState();
+
+const sections = bundleInMemory
+  ? toClinicalSectionViews(bundleInMemory, {
+      locale: currentUserLocale,
+      translateCode: terminology.translate,
+    })
+  : [];
+```
+
+`bundleInMemory` is the only Bundle rendered by the screen. `sections` is
+derived every render; do not keep a second hand-built section/card cache.
+
+### 2. Apply locally and send the same command immediately
+
+```ts
+async function applyAndSubmitClinicalDocument(commandBundle, kind) {
+  const optimisticBundle = kind === 'import'
+    ? clinicalCopy.importDocumentOptimistically(commandBundle)
+    : clinicalCopy.applyDocumentUpdateOptimistically(commandBundle);
+
+  // React/Vue/Expo can paint every affected section before network completion.
+  setBundleInMemory(optimisticBundle);
+
+  let response;
+  try {
+    response = await fetch('/api/clinical-document', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/fhir+json',
+        authorization: `Bearer ${firebaseIdToken}`,
+      },
+      body: JSON.stringify({
+        subjectDid,
+        kind,
+        bundle: commandBundle, // exact import/update command
+      }),
+    });
+  } catch (ambiguousNetworkFailure) {
+    // Timeout/offline is ambiguous: keep the optimistic Bundle visibly
+    // pending until an authoritative refresh resolves it.
+    throw ambiguousNetworkFailure;
+  }
+
+  const body = await response.json();
+  if (response.status === 202 && body.pending === true) {
+    // Accepted by the BFF/outbox, not confirmed by the GW.
+    return;
+  }
+  if (response.status >= 400 && response.status < 500) {
+    // Definite validation/policy rejection: remove the optimistic change.
+    setBundleInMemory(clinicalCopy.rejectPendingChange());
+    throw new Error(body.message ?? 'Clinical change rejected');
+  }
+  if (!response.ok || !body.bundle) {
+    // Server failure or missing readback is ambiguous. Keep pending.
+    throw new Error('Clinical change still requires authoritative readback');
+  }
+
+  // The BFF has already ingested and called requestClinicalSummary(...).
+  setBundleInMemory(
+    clinicalCopy.replaceFromClinicalSummary(body.bundle),
+  );
+}
+```
+
+The order is intentional:
+
+1. validate/merge the Bundle in memory;
+2. call `setBundleInMemory(...)`;
+3. send the exact command Bundle to the BFF in the same handler;
+4. retain it as unconfirmed for ambiguous/queued outcomes;
+5. roll it back only for a definite rejection;
+6. replace it with the complete authoritative `$summary` Bundle on success.
+
+The UI never builds a Communication and never calls
+`ingestCommunicationAndUpdateIndex(...)`.
+
+### 3. Import a JSON IPS file
+
+```ts
+async function importIpsFile(file) {
+  if (!file.name.toLowerCase().endsWith('.json')) {
+    throw new TypeError('Select one JSON FHIR document');
+  }
+  const importedBundle = JSON.parse(await file.text());
+  await applyAndSubmitClinicalDocument(importedBundle, 'import');
+}
+```
+
+`importDocumentOptimistically(...)` runs the shared document validation. A
+malformed/non-document Bundle fails before UI state or network submission is
+changed. The official all-sections IPS fixture is published at
+`gdc-common-utils-ts/fixtures/fhir-ips-bundle-all-sections.json`.
+
+### 4. Add an allergy through the same flow
+
+```ts
+const allergySection = [
+  HealthcareIpsSectionResourceProfiles.AllergiesAndIntolerances.section.system,
+  HealthcareIpsSectionResourceProfiles.AllergiesAndIntolerances.section.code,
+].join('|');
+const allergyId = crypto.randomUUID();
+
+const allergyCommand = new BundleEditor()
+  .setBundleOperation(BundleOperations.create)
+  .setBundleType(BundleTypes.document)
+  .setCompositionSubject(subjectDid)
+  .setCompositionType(HealthcareDocumentTypes.IPS.attributeValue)
+  .setCompositionTitle('Allergy update')
+  .setCompositionDate(new Date().toISOString())
+  .setCompositionAuthorList([actorDid])
+  .newEntryAs(
+    BundleEditableResourceTypes.allergyIntolerance,
+    allergyId,
+  )
+  .setIdentifier(allergyId)
+  .setSubject(subjectDid)
+  .setSectionList([allergySection])
+  .setLanguage('es')
+  .setCode('http://snomed.info/sct|373270004')
+  .setCodeTextLocal('Penicilina')
+  .setCodeDisplay('Penicillin')
+  .setClinicalStatus('active')
+  .setVerificationStatus('confirmed')
+  .doneEntry()
+  .buildDocument();
+
+await applyAndSubmitClinicalDocument(allergyCommand, 'section-update');
+```
+
+### 5. Add a medication through the same flow
+
+```ts
+const medicationSection = [
+  HealthcareIpsSectionResourceProfiles.HistoryOfMedicationUse.section.system,
+  HealthcareIpsSectionResourceProfiles.HistoryOfMedicationUse.section.code,
+].join('|');
+const medicationId = crypto.randomUUID();
+
+const medicationCommand = new BundleEditor()
+  .setBundleOperation(BundleOperations.create)
+  .setBundleType(BundleTypes.document)
+  .setCompositionSubject(subjectDid)
+  .setCompositionType(HealthcareDocumentTypes.IPS.attributeValue)
+  .setCompositionTitle('Medication update')
+  .setCompositionDate(new Date().toISOString())
+  .setCompositionAuthorList([actorDid])
+  .newEntryAs(
+    BundleEditableResourceTypes.medicationStatement,
+    medicationId,
+  )
+  .setIdentifier(medicationId)
+  .setSubject(subjectDid)
+  .setSectionList([medicationSection])
+  .setLanguage('es')
+  .setStatus('active')
+  .setCode('http://snomed.info/sct|387207008')
+  .setCodeTextLocal('Ibuprofeno 400 mg')
+  .setCodeDisplay('Ibuprofen 400 mg')
+  .setEffective(new Date().toISOString())
+  .doneEntry()
+  .buildDocument();
+
+await applyAndSubmitClinicalDocument(medicationCommand, 'section-update');
+```
+
+`setSectionList(...)` controls `Composition.section.entry` placement. It is not
+the same as `setCategory(...)`: category remains clinical data and must never
+be overloaded to decide where the UI places a card.
+
+### 6. Render with their own components
+
+```tsx
+return sections.map((section, sectionIndex) => (
+  <TheirSection
+    key={section.code ?? `${section.title}:${sectionIndex}`}
+    code={section.code}
+    title={section.title}
+    pending={clinicalCopy.hasPendingChange()}
+  >
+    {section.resources.map((card, resourceIndex) => (
+      <TheirClinicalCard
+        key={card.fullUrl ?? `${card.resourceType}:${resourceIndex}`}
+        title={card.title}
+        resourceType={card.resourceType}
+        date={card.date}
+      />
+    ))}
+  </TheirSection>
+));
+```
+
+Their component owns markup, interaction, styling and form controls. The
+shared SDK owns document validation, section placement, claims/native-FHIR
+reading, language resolution, optimistic Bundle merging and rollback/readback
+state.
+
 ## Keep Remote Submission Separate From The Subject Working Copy
 
 The screen's current subject Bundle/ViewModels are a disposable local

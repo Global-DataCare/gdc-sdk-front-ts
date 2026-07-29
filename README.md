@@ -45,7 +45,10 @@ If you are integrating this package for the first time, open these in order:
   Real frontend/native setup, injected runtime adapters, `loadProfile(...)`
   into one loaded workspace/session, `new ClientSDK(...)`,
   `initializeCommunicationIdentity(...)`, `initializeSession(...)`, and the
-  public actor entrypoints exposed by `ProfileManager.asXxx()`.
+  public actor entrypoints exposed by `ProfileManager.asXxx()`. Its complete
+  IPS screen flow shows JSON import, immediate in-memory section/card updates,
+  BFF submission, pending/rejection/readback reconciliation, and typed allergy
+  and medication additions.
 2. [gdc-sdk-core-ts/docs/101-SDK_FLOWS.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_FLOWS.md)
    Shared business-flow map by actor family.
 3. [gdc-sdk-node-ts/docs/101-LIVE_GW_LOCAL.md](https://github.com/Global-DataCare/gdc-sdk-node-ts/blob/main/docs/101-LIVE_GW_LOCAL.md)
