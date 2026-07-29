@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.7] - 2026-07-29
+
+- Document the framework/component boundary with a complete
+  `toClinicalSectionViews(...)` example: applications keep their own
+  components while the SDK owns IPS section placement and card projection.
+- Add an executable public-barrel test proving that one Composition section
+  produces the correctly localized card without rendering `system|code`.
+
 ## [2.3.6] - 2026-07-29
 
 - Make the frontend 101 boundary explicit: browser UI authors and renders a

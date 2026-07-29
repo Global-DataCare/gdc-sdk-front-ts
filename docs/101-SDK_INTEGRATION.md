@@ -174,12 +174,83 @@ const recentAllergies = summary.document.getResourcesByFilter({
 - `LifecycleResultReader` analyzes operation outcomes and issues; it does not
   navigate the returned clinical document.
 
+### Render every section with your own components
+
+Applications do not need to use a GDC or UHC React component. They must,
+however, consume the shared projection instead of rebuilding FHIR/claims
+mapping inside their components:
+
+```tsx
+import { toClinicalSectionViews } from 'gdc-sdk-front-ts';
+
+function TheirClinicalSummary({ bundle, locale, translateCode }) {
+  const sections = toClinicalSectionViews(bundle, {
+    locale,
+    translateCode,
+  });
+
+  return sections.map((section, sectionIndex) => (
+    <TheirSection
+      key={section.code ?? `${section.title}:${sectionIndex}`}
+      code={section.code}
+      title={section.title}
+      unresolvedReferences={section.unresolvedReferences}
+    >
+      {section.resources.map((card, resourceIndex) => (
+        <TheirClinicalCard
+          key={card.fullUrl ?? `${card.resourceType}:${resourceIndex}`}
+          title={card.title}
+          resourceType={card.resourceType}
+          date={card.date}
+        />
+      ))}
+    </TheirSection>
+  ));
+}
+```
+
+The ownership boundary is exact:
+
+- their component owns layout, interaction, styling, filters and editors;
+- `toClinicalSectionViews(...)` owns all-section traversal, placement through
+  `Composition.section.entry`, native-FHIR/`meta.claims` reading and card DTOs;
+- `section.resources` is already the card list for that section;
+- do not group by `resourceType`, inspect raw claim keys or manufacture a title
+  in JSX;
+- pass `locale` and `translateCode` once at the projection boundary so every
+  card follows the same language rule.
+
 When a form authors a coded name, store the manual label with
 `setCodeTextLocal(...)`, its resource language with `setLanguage(...)`, and the
 English/international label with `setCodeDisplay(...)`. `setCode(...)` carries
 only the `system|code` terminology identity. Pass the UI locale and an optional
 terminology resolver to `toClinicalResourceCardView(...)`; never use that token
 as a visible title or write it back into the manual-name field.
+
+For example, their own allergy form should write through the typed entry
+editor, not mutate `meta.claims` directly:
+
+```ts
+const commandBundle = new BundleEditor()
+  .setBundleOperation(BundleOperations.create)
+  .setBundleType(BundleTypes.batch)
+  .setAllowedResourceType(BundleEditableResourceTypes.allergyIntolerance)
+  .newEntry('AllergyIntolerance/penicillin')
+  .asAllergy()
+  .setIdentifier('AllergyIntolerance/penicillin')
+  .setSubject(subjectDid)
+  .setLanguage('es')
+  .setCode('http://snomed.info/sct|373270004')
+  .setCodeTextLocal('Penicilina')
+  .setCodeDisplay('Penicillin')
+  .doneEntry()
+  .buildJsonApi();
+```
+
+The component applies `commandBundle` to `SubjectBundleWorkingCopy`, renders
+the resulting snapshot immediately and posts the command Bundle to its BFF.
+It does not call ingestion.
+
 - `ingestCommunicationAndUpdateIndex(...)` is backend/BFF-only. Browser
   components never call it.
 - UHC frontend extensions reuse the same readers and add only product formats
