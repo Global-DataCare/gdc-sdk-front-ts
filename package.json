@@ -1,6 +1,6 @@
 {
   "name": "gdc-sdk-front-ts",
-  "version": "2.3.8",
+  "version": "2.3.9",
   "description": "Next-generation frontend runtime package for the GDC SDK family",
   "license": "Apache-2.0",
   "author": "Antifraud Services Inc.",
@@ -14,12 +14,13 @@
     "build": "tsc -p tsconfig.json",
     "type-check": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test tests/*.test.mjs",
-    "prepublishOnly": "npm run type-check && npm test"
+    "check:product-neutrality": "node scripts/check-product-neutrality.mjs",
+    "prepublishOnly": "npm run check:product-neutrality && npm run type-check && npm test"
   },
   "dependencies": {
     "@babel/runtime": "^7.28.4",
-    "gdc-common-utils-ts": "^2.3.11",
-    "gdc-sdk-core-ts": "~2.3.8"
+    "gdc-common-utils-ts": "^2.3.12",
+    "gdc-sdk-core-ts": "~2.3.9"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",

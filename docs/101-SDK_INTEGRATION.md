@@ -125,12 +125,21 @@ JSON-API-like command Bundles with `data[]`.
 
 ```tsx
 import {
+  ClinicalDocumentBffFlow,
   ClinicalDocumentWorkingCopy,
   toClinicalSectionViews,
 } from 'gdc-sdk-front-ts';
 
 const clinicalCopy = useRef(new ClinicalDocumentWorkingCopy()).current;
 const [bundleInMemory, setBundleInMemory] = useState();
+const clinicalFlow = useMemo(() => new ClinicalDocumentBffFlow({
+  workingCopy: clinicalCopy,
+  // Inject a Next.js, Vite, native or other application BFF adapter.
+  // Its backend owns the durable outbox and GW submit/poll.
+  transport: clinicalDocumentBffTransport,
+  onSnapshot: setBundleInMemory,
+  pollTimeoutMs: 30_000,
+}), [clinicalCopy, clinicalDocumentBffTransport]);
 
 const sections = bundleInMemory
   ? toClinicalSectionViews(bundleInMemory, {
@@ -143,69 +152,48 @@ const sections = bundleInMemory
 `bundleInMemory` is the only Bundle rendered by the screen. `sections` is
 derived every render; do not keep a second hand-built section/card cache.
 
-### 2. Apply locally and send the same command immediately
+### 2. Apply, submit and wait through the BFF flow
 
 ```ts
 async function applyAndSubmitClinicalDocument(commandBundle, kind) {
-  const optimisticBundle = kind === 'import'
-    ? clinicalCopy.importDocumentOptimistically(commandBundle)
-    : clinicalCopy.applyDocumentUpdateOptimistically(commandBundle);
-
-  // React/Vue/Expo can paint every affected section before network completion.
-  setBundleInMemory(optimisticBundle);
-
-  let response;
-  try {
-    response = await fetch('/api/clinical-document', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/fhir+json',
-        authorization: `Bearer ${firebaseIdToken}`,
-      },
-      body: JSON.stringify({
-        subjectDid,
-        kind,
-        bundle: commandBundle, // exact import/update command
-      }),
-    });
-  } catch (ambiguousNetworkFailure) {
-    // Timeout/offline is ambiguous: keep the optimistic Bundle visibly
-    // pending until an authoritative refresh resolves it.
-    throw ambiguousNetworkFailure;
-  }
-
-  const body = await response.json();
-  if (response.status === 202 && body.pending === true) {
-    // Accepted by the BFF/outbox, not confirmed by the GW.
-    return;
-  }
-  if (response.status >= 400 && response.status < 500) {
-    // Definite validation/policy rejection: remove the optimistic change.
-    setBundleInMemory(clinicalCopy.rejectPendingChange());
-    throw new Error(body.message ?? 'Clinical change rejected');
-  }
-  if (!response.ok || !body.bundle) {
-    // Server failure or missing readback is ambiguous. Keep pending.
-    throw new Error('Clinical change still requires authoritative readback');
-  }
-
-  // The BFF has already ingested and called requestClinicalSummary(...).
-  setBundleInMemory(
-    clinicalCopy.replaceFromClinicalSummary(body.bundle),
-  );
+  return clinicalFlow.execute({
+    kind,
+    bundle: commandBundle,
+  });
 }
 ```
 
-The order is intentional:
+`clinicalDocumentBffTransport` implements only two application-facing methods:
+
+```ts
+const clinicalDocumentBffTransport = {
+  submit(command) {
+    return bffClient.submitClinicalDocument(command);
+  },
+  readJob(jobId) {
+    return bffClient.readClinicalDocumentJob(jobId);
+  },
+};
+```
+
+Both methods return the typed `ClinicalDocumentBffResult` union:
+`accepted`, `pending`, `completed` with authoritative `bundle`, or `rejected`.
+The adapter may use `fetch`, a query library or a native HTTP client. HTTP
+status parsing, authentication headers and BFF route layout stay in that
+adapter, outside clinical components.
+
+The flow performs this order:
 
 1. validate/merge the Bundle in memory;
-2. call `setBundleInMemory(...)`;
+2. notify `onSnapshot(...)` so the component paints immediately;
 3. send the exact command Bundle to the BFF in the same handler;
-4. retain it as unconfirmed for ambiguous/queued outcomes;
-5. roll it back only for a definite rejection;
-6. replace it with the complete authoritative `$summary` Bundle on success.
+4. wait for an accepted BFF job through `readJob(jobId)`;
+5. retain it as unconfirmed for network failures or local wait timeout;
+6. roll it back only for a definite BFF rejection;
+7. replace it with the complete authoritative `$summary` Bundle on success.
 
-The UI never builds a Communication and never calls
+The durable outbox/job manager remains in the BFF. The frontend only consumes
+its typed submit/job API. It never builds a Communication and never calls
 `ingestCommunicationAndUpdateIndex(...)`.
 
 ### 3. Import a JSON IPS file
@@ -390,7 +378,7 @@ const recentAllergies = summary.document.getResourcesByFilter({
 
 ### Render every section with your own components
 
-Applications do not need to use a GDC or UHC React component. They must,
+Applications do not need to use a React component. They must,
 however, consume the shared projection instead of rebuilding FHIR/claims
 mapping inside their components:
 
@@ -467,7 +455,7 @@ It does not call ingestion.
 
 - `ingestCommunicationAndUpdateIndex(...)` is backend/BFF-only. Browser
   components never call it.
-- UHC frontend extensions reuse the same readers and add only product formats
+- frontend extensions reuse the same readers and add only product formats
   such as R5.
 
 Executable references:

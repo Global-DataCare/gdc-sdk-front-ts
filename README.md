@@ -593,7 +593,7 @@ Use this package when the frontend needs to:
 
 - canonical shared invitation/consent contract definitions
 - Node GW runtime execution
-- UNID-specific reminder/task runtime
+- application-specific reminder/task runtime
 
 Those belong to:
 
@@ -777,4 +777,4 @@ The runtime-facing meaning of these exports is:
 
 - README should explain app flows first.
 - Shared contract definitions should stay in `gdc-sdk-core-ts`.
-- Frontend consumers should not need UNID runtime knowledge to understand this package.
+- Frontend consumers should not need product runtime knowledge to understand this package.

@@ -199,7 +199,7 @@ test('ClientSDK.resolveAuthority derives one hosted tenant DID from one base URL
     tenantId: EXAMPLE_TENANT_IDENTIFIER,
     jurisdiction: 'ES',
     sector: 'health-care',
-    subjectSameAs: 'UHC-724-0000-111-222-333-444',
+    subjectSameAs: 'CARD-724-0000-111-222-333-444',
   });
 
   assert.equal(resolved.authorityDidWeb, 'did:web:gw.example.org');
