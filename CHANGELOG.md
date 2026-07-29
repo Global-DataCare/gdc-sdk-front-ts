@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.5] - 2026-07-29
+
+- Re-export the canonical coded clinical authoring/display contract from Core:
+  local `code-text`, international `code-display`, resource language and
+  terminology translation without ever rendering `system|code` as a name.
+
 ## [2.3.4] - 2026-07-28
 
 ### Changed
