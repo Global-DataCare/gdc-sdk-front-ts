@@ -169,6 +169,13 @@ const recentAllergies = summary.document.getResourcesByFilter({
   resources and combined section/type/date filters.
 - `LifecycleResultReader` analyzes operation outcomes and issues; it does not
   navigate the returned clinical document.
+
+When a form authors a coded name, store the manual label with
+`setCodeTextLocal(...)`, its resource language with `setLanguage(...)`, and the
+English/international label with `setCodeDisplay(...)`. `setCode(...)` carries
+only the `system|code` terminology identity. Pass the UI locale and an optional
+terminology resolver to `toClinicalResourceCardView(...)`; never use that token
+as a visible title or write it back into the manual-name field.
 - `ingestCommunicationAndUpdateIndex(...)` is write-only.
 - UHC frontend extensions reuse the same readers and add only product formats
   such as R5.
