@@ -66,6 +66,7 @@ export class ProfessionalSdk {
     return buildUnsignedProfessionalIdentityVpJwt(input, options);
   }
 
+  /** @deprecated Backend/BFF compatibility surface; never call from browser UI. */
   public ingestCommunicationAndUpdateIndex(
     ctx: FrontRouteContext,
     input: FrontCommunicationIngestionInput,
@@ -73,12 +74,12 @@ export class ProfessionalSdk {
     return requireClientMethod(this.client, 'ingestCommunicationAndUpdateIndex')(ctx, input);
   }
 
-  /** Updates one consent-authorized clinical section through a scoped batch/collection. */
+  /** @deprecated Browser UI submits its section command Bundle to its BFF. */
   public updateClinicalSection(ctx: FrontRouteContext, input: FrontClinicalSectionUpdateInput): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'updateClinicalSection')(ctx, input);
   }
 
-  /** Updates a consent-authorized multi-section summary document. */
+  /** @deprecated Browser UI submits its Composition-first Bundle to its BFF. */
   public updateClinicalSummary(ctx: FrontRouteContext, input: FrontClinicalSummaryUpdateInput): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'updateClinicalSummary')(ctx, input);
   }

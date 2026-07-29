@@ -81,6 +81,10 @@ export class FrontClinicalRuntimeClient implements FrontRuntimeClient {
     this.profile = options.transportProfile || TransportProfiles.DidcommPlainJson;
   }
 
+  /**
+   * @deprecated Backend/BFF compatibility surface. Browser UI code must submit
+   * its command Bundle to the authenticated application BFF instead.
+   */
   public async ingestCommunicationAndUpdateIndex(
     ctx: FrontRouteContext,
     input: FrontCommunicationIngestionInput,

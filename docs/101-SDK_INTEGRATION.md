@@ -101,9 +101,13 @@ frontend contract is always:
 
 1. use typed `BundleEditor` entries from `gdc-common-utils-ts`;
 2. let the screen decide whether to finish after one entry or after several;
-3. attach the completed Bundle to one claims-first Communication draft;
-4. freeze one outbox job;
-5. let the runtime select API/FHIR projection and FHIR/DIDComm carrier.
+3. apply the completed Bundle to `SubjectBundleWorkingCopy`;
+4. render that disposable in-memory projection immediately;
+5. submit the command Bundle to the authenticated portal BFF.
+
+The browser stops there. The backend/BFF attaches the Bundle to a claims-first
+Communication, freezes the outbox job and calls
+`ingestCommunicationAndUpdateIndex(...)`.
 
 Do not call `upsert*` route helpers from authoring components. Those methods
 are compatibility plumbing. A contact list, permission set, clinical section
@@ -118,7 +122,7 @@ projection, not the backend record. The frontend flow is:
 1. build the command Bundle;
 2. call `SubjectBundleWorkingCopy.applyOptimisticBundle(...)` to update the
    visible local copy;
-3. independently wrap and submit the command Bundle through Communication;
+3. submit the command Bundle to the authenticated BFF;
 4. pass the per-entry GW operation response to `reconcileSubmission(...)`;
 5. show every returned notice and remove rejected resources from the local
    copy;
@@ -176,7 +180,8 @@ English/international label with `setCodeDisplay(...)`. `setCode(...)` carries
 only the `system|code` terminology identity. Pass the UI locale and an optional
 terminology resolver to `toClinicalResourceCardView(...)`; never use that token
 as a visible title or write it back into the manual-name field.
-- `ingestCommunicationAndUpdateIndex(...)` is write-only.
+- `ingestCommunicationAndUpdateIndex(...)` is backend/BFF-only. Browser
+  components never call it.
 - UHC frontend extensions reuse the same readers and add only product formats
   such as R5.
 
