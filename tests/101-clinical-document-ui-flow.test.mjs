@@ -16,6 +16,8 @@ import {
   BundleEditor,
   BundleOperations,
   BundleTypes,
+  ClinicalDocumentBffFlow,
+  ClinicalDocumentBffPendingError,
   ClinicalDocumentWorkingCopy,
   HealthcareDocumentTypes,
   HealthcareIpsSectionResourceProfiles,
@@ -169,4 +171,91 @@ test('101: import, optimistic render, BFF readback, then allergy and medication 
   workingCopy.rejectPendingChange();
   assert.ok(findSection(workingCopy.getSectionViews(), allergySection)
     .resources.every((card) => card.title !== 'No debe persistir'));
+});
+
+test('101: frontend waits for the application BFF job and reconciles authoritative readback', async () => {
+  const importedIps = JSON.parse(await readFile(fixtureUrl, 'utf8'));
+  const workingCopy = new ClinicalDocumentWorkingCopy();
+  const snapshots = [];
+  const submitted = [];
+  const jobStates = [
+    { state: 'pending', jobId: 'clinical-job-1', retryAfterMs: 0 },
+    { state: 'completed', jobId: 'clinical-job-1', bundle: importedIps },
+  ];
+  const flow = new ClinicalDocumentBffFlow({
+    workingCopy,
+    pollIntervalMs: 0,
+    transport: {
+      async submit(command) {
+        submitted.push(command);
+        return { state: 'accepted', jobId: 'clinical-job-1', retryAfterMs: 0 };
+      },
+      async readJob() {
+        return jobStates.shift();
+      },
+    },
+    onSnapshot(snapshot) {
+      snapshots.push(snapshot);
+    },
+  });
+
+  const result = await flow.execute({ kind: 'import', bundle: importedIps });
+
+  assert.deepEqual(submitted, [{ kind: 'import', bundle: importedIps }]);
+  assert.equal(snapshots.length, 2);
+  assert.equal(snapshots[0].entry.length, importedIps.entry.length);
+  assert.equal(result.bundle.entry.length, importedIps.entry.length);
+  assert.equal(result.jobId, 'clinical-job-1');
+  assert.equal(workingCopy.hasPendingChange(), false);
+});
+
+test('101: BFF rejection rolls back, while an unconfirmed job remains pending', async () => {
+  const importedIps = JSON.parse(await readFile(fixtureUrl, 'utf8'));
+  const rejectedCopy = new ClinicalDocumentWorkingCopy();
+  const rejectedSnapshots = [];
+  const rejectedFlow = new ClinicalDocumentBffFlow({
+    workingCopy: rejectedCopy,
+    transport: {
+      async submit() {
+        return { state: 'rejected', message: 'Policy rejected the document.' };
+      },
+      async readJob() {
+        throw new Error('must not poll');
+      },
+    },
+    onSnapshot(snapshot) {
+      rejectedSnapshots.push(snapshot);
+    },
+  });
+
+  await assert.rejects(
+    rejectedFlow.execute({ kind: 'import', bundle: importedIps }),
+    /Policy rejected/,
+  );
+  assert.equal(rejectedSnapshots.length, 2);
+  assert.equal(rejectedSnapshots[1], undefined);
+  assert.equal(rejectedCopy.hasPendingChange(), false);
+
+  const pendingCopy = new ClinicalDocumentWorkingCopy();
+  const pendingFlow = new ClinicalDocumentBffFlow({
+    workingCopy: pendingCopy,
+    pollIntervalMs: 0,
+    pollTimeoutMs: 0,
+    transport: {
+      async submit() {
+        return { state: 'accepted', jobId: 'clinical-job-pending', retryAfterMs: 0 };
+      },
+      async readJob() {
+        return { state: 'pending', jobId: 'clinical-job-pending', retryAfterMs: 0 };
+      },
+    },
+    onSnapshot() {},
+  });
+
+  await assert.rejects(
+    pendingFlow.execute({ kind: 'import', bundle: importedIps }),
+    (error) => error instanceof ClinicalDocumentBffPendingError
+      && error.jobId === 'clinical-job-pending',
+  );
+  assert.equal(pendingCopy.hasPendingChange(), true);
 });

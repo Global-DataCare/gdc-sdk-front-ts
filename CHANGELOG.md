@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.9] - 2026-07-30
+
+- Add `ClinicalDocumentBffFlow`, a typed frontend coordinator that applies an
+  IPS command optimistically, submits the exact command to an application BFF,
+  waits for its asynchronous job and reconciles only from authoritative
+  clinical-summary readback.
+- Keep durable outbox ownership, authentication and HTTP status parsing out of
+  UI components while preserving pending state on ambiguous failures and
+  rolling back definite rejections.
+- Add an executable 101 covering accepted, pending, completed, rejected and
+  local-timeout outcomes.
+- Consume Common Utils 2.3.12 and Core 2.3.9.
+- Enforce product-neutral shared SDK source, tests and documentation before
+  publication.
+
 ## [2.3.8] - 2026-07-30
 
 - Add `ClinicalDocumentWorkingCopy` for the complete browser IPS lifecycle:
