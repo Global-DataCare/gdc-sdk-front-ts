@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.12] - 2026-07-30
+
+- Consume Common Utils 2.3.17 and SDK Core 2.3.12 so frontend clinical cards
+  use the complete resource-specific IPS code roundtrip contract without
+  translating local free text.
+
 ## [2.3.11] - 2026-07-30
 
 - Consume Common Utils 2.3.16 and SDK Core 2.3.11 so clinical document cards
