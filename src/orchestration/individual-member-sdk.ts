@@ -5,10 +5,26 @@ import type {
   ClinicalSummaryRequestInput,
   SubmitAndPollResult,
 } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontIndividualMemberLicenseTransitionInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class IndividualMemberSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
+
+  /**
+   * Accepts one controller-issued invitation using the authenticated member's
+   * verified actor identifier. Acceptance establishes the seat/relationship
+   * lifecycle; the later SMART request is still narrowed by active Consent.
+   */
+  public acceptMemberInvitation(
+    ctx: FrontRouteContext,
+    input: FrontIndividualMemberLicenseTransitionInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'transitionIndividualMemberLicense')(
+      ctx,
+      '_accept',
+      input,
+    );
+  }
 
   /**
    * @deprecated Compatibility adapter for the older direct RelatedPerson

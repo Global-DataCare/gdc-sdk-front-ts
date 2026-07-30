@@ -13,6 +13,10 @@ import {
   EXAMPLE_PROFILE_PROVIDER_DID,
   EXAMPLE_PROFILE_SESSION_INPUT,
   EXAMPLE_PROFESSIONAL_IDENTITY,
+  EXAMPLE_EMAIL_RELATED_PERSON,
+  EXAMPLE_OTP_CODE,
+  EXAMPLE_OTP_INVITATION_ID,
+  EXAMPLE_RELATED_PERSON_ROLE,
   IndividualOrganizationLifecycleEditor,
   ProfessionalCredentialTypes,
   W3cCredentialTypes,
@@ -83,18 +87,49 @@ test('frontend actor facade exposes separate section and summary update methods'
   assert.deepEqual(calls.map(([name]) => name), ['section', 'summary']);
 });
 
+test('frontend controller facade exposes the same member invitation seat lifecycle as Node', async () => {
+  const calls = [];
+  const facade = new IndividualControllerSdk({
+    async addFreeIndividualMemberLicenses(...args) { calls.push(['add', args]); return { submit: {}, poll: {} }; },
+    async issueIndividualMemberLicense(...args) { calls.push(['issue', args]); return { submit: {}, poll: {} }; },
+    async transitionIndividualMemberLicense(...args) { calls.push(['transition', args]); return { submit: {}, poll: {} }; },
+  });
+  const ctx = { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' };
+  await facade.addFreeMemberLicenses(ctx, {
+    ownerOrganizationId: FAMILY_SUBJECT_DID,
+    quantity: 1,
+  });
+  await facade.issueMemberInvitationLicense(ctx, {
+    ownerOrganizationId: FAMILY_SUBJECT_DID,
+    subjectDid: FAMILY_SUBJECT_DID,
+    relatedPersonId: 'related-person-1',
+    invitationId: EXAMPLE_OTP_INVITATION_ID,
+    role: EXAMPLE_RELATED_PERSON_ROLE,
+  });
+  await facade.transitionMemberLicense(ctx, '_accept', {
+    activationCode: EXAMPLE_OTP_CODE,
+    verifiedActorIdentifier: EXAMPLE_EMAIL_RELATED_PERSON,
+  });
+  assert.deepEqual(calls.map(([name]) => name), ['add', 'issue', 'transition']);
+});
+
 test('frontend individual-member facade exposes the same consent-scoped clinical operations', async () => {
   const calls = [];
   const facade = new IndividualMemberSdk({
+    async transitionIndividualMemberLicense(...args) { calls.push(['accept', args]); return { submit: {}, poll: {} }; },
     async ingestCommunicationAndUpdateIndex(...args) { calls.push(['ingest', args]); return { submit: {}, poll: {} }; },
     async searchClinicalBundle(...args) { calls.push(['search', args]); return { thid: 'search-1' }; },
     async getLatestIps(...args) { calls.push(['latest', args]); return { thid: 'latest-1' }; },
   });
   const ctx = { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' };
+  await facade.acceptMemberInvitation(ctx, {
+    activationCode: EXAMPLE_OTP_CODE,
+    verifiedActorIdentifier: EXAMPLE_EMAIL_RELATED_PERSON,
+  });
   await facade.ingestCommunicationAndUpdateIndex(ctx, { communicationPayload: { subject: FAMILY_SUBJECT_DID } });
   await facade.searchClinicalBundle(ctx, { subject: FAMILY_SUBJECT_DID });
   await facade.getLatestIps(ctx, FAMILY_SUBJECT_DID);
-  assert.deepEqual(calls.map(([name]) => name), ['ingest', 'search', 'latest']);
+  assert.deepEqual(calls.map(([name]) => name), ['accept', 'ingest', 'search', 'latest']);
 });
 
 const ORG_PROFILE_DID = EXAMPLE_PROFILE_ORGANIZATION_DID;

@@ -6,7 +6,7 @@ import type {
   PollOptions,
   SubmitAndPollResult,
 } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualMemberLifecycleInput, type FrontIndividualOnboardingPdfDraftInput, type FrontIndividualOnboardingPdfDraftResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationConfirmOrderInput, type FrontIndividualOrganizationLifecycleInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualMemberLifecycleInput, type FrontIndividualMemberLicenseAddInput, type FrontIndividualMemberLicenseInvitationInput, type FrontIndividualMemberLicenseTransitionInput, type FrontIndividualOnboardingPdfDraftInput, type FrontIndividualOnboardingPdfDraftResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationConfirmOrderInput, type FrontIndividualOrganizationLifecycleInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class IndividualControllerSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
@@ -153,6 +153,31 @@ export class IndividualControllerSdk {
     input: FrontLicenseListSearchInput = {},
   ): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'listIndividualLicenses')(ctx, input);
+  }
+
+  /** Adds zero-cost capacity before inviting a personal RelatedPerson member. */
+  public addFreeMemberLicenses(
+    ctx: FrontRouteContext,
+    input: FrontIndividualMemberLicenseAddInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'addFreeIndividualMemberLicenses')(ctx, input);
+  }
+
+  /** Reserves one member seat for an existing RelatedPerson invitation. */
+  public issueMemberInvitationLicense(
+    ctx: FrontRouteContext,
+    input: FrontIndividualMemberLicenseInvitationInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'issueIndividualMemberLicense')(ctx, input);
+  }
+
+  /** Accepts, deactivates or releases one member invitation seat. */
+  public transitionMemberLicense(
+    ctx: FrontRouteContext,
+    action: '_accept' | '_deactivate' | '_release',
+    input: FrontIndividualMemberLicenseTransitionInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'transitionIndividualMemberLicense')(ctx, action, input);
   }
 
   /** Searches subject-side commercial offer records that back portal list/detail views. */
