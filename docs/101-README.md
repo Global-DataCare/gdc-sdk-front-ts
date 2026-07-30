@@ -30,6 +30,7 @@ Current executable entrypoints:
 3. [101-SDK_INTEGRATION.md](./101-SDK_INTEGRATION.md)
 4. [gdc-sdk-core-ts/docs/101-SDK_FLOWS.md](https://github.com/Global-DataCare/gdc-sdk-core-ts/blob/main/docs/101-SDK_FLOWS.md)
 5. [gdc-common-utils-ts/docs/101-LIFECYCLE.md](https://github.com/Global-DataCare/gdc-common-utils-ts/blob/main/docs/101-LIFECYCLE.md)
+6. [101-INDIVIDUAL-MEMBER-AND-SCANNER-FLOW.md](./101-INDIVIDUAL-MEMBER-AND-SCANNER-FLOW.md)
 
 ## Boundary
 

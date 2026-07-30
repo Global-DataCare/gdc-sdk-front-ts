@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.10] - 2026-07-30
+
+- Add frontend parity for controller-managed individual-member licence
+  invitation lifecycle and an actor-correct
+  `IndividualMemberSdk.acceptMemberInvitation(...)` entrypoint.
+- Add an executable 101 covering controller invitation, member acceptance and
+  exact Consent-narrowed SMART scopes.
+- Document an actor-neutral scanner/access-request component boundary and the
+  `Communication.topic` contract for section batch/collection commands.
+- Consume Common Utils 2.3.15 and Core 2.3.10.
+
 ## [2.3.9] - 2026-07-30
 
 - Add `ClinicalDocumentBffFlow`, a typed frontend coordinator that applies an

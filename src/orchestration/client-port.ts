@@ -162,6 +162,38 @@ export type FrontIndividualMemberLifecycleInput = {
   resourceId?: string;
 };
 
+/** Adds zero-cost member seats to one individual organization. */
+export type FrontIndividualMemberLicenseAddInput = {
+  ownerOrganizationId: string;
+  quantity: number;
+  requestThid?: string;
+  pollOptions?: { timeoutMs?: number; intervalMs?: number };
+};
+
+/** Reserves one member seat for an existing RelatedPerson invitation. */
+export type FrontIndividualMemberLicenseInvitationInput = {
+  ownerOrganizationId: string;
+  subjectDid: string;
+  relatedPersonId: string;
+  invitationId: string;
+  role: string;
+  email?: string;
+  telephone?: string;
+  type?: DeviceAppType;
+  requestThid?: string;
+  pollOptions?: { timeoutMs?: number; intervalMs?: number };
+};
+
+/** Accepts, deactivates or releases one individual-member invitation. */
+export type FrontIndividualMemberLicenseTransitionInput = {
+  ownerOrganizationId?: string;
+  activationCode: string;
+  subjectId?: string;
+  verifiedActorIdentifier?: string;
+  requestThid?: string;
+  pollOptions?: { timeoutMs?: number; intervalMs?: number };
+};
+
 export type FrontIpsOrFhirImportInput = {
   compositionPayload: object;
   format?: 'org.hl7.fhir.r4' | 'org.hl7.fhir.api';
@@ -379,6 +411,19 @@ export type FrontRuntimeClient = {
   listIndividualLicenses?: (
     ctx: FrontRouteContext,
     input?: FrontLicenseListSearchInput,
+  ) => Promise<SubmitAndPollResult>;
+  addFreeIndividualMemberLicenses?: (
+    ctx: FrontRouteContext,
+    input: FrontIndividualMemberLicenseAddInput,
+  ) => Promise<SubmitAndPollResult>;
+  issueIndividualMemberLicense?: (
+    ctx: FrontRouteContext,
+    input: FrontIndividualMemberLicenseInvitationInput,
+  ) => Promise<SubmitAndPollResult>;
+  transitionIndividualMemberLicense?: (
+    ctx: FrontRouteContext,
+    action: '_accept' | '_deactivate' | '_release',
+    input: FrontIndividualMemberLicenseTransitionInput,
   ) => Promise<SubmitAndPollResult>;
   searchIndividualLicenseOffers?: (
     ctx: FrontRouteContext,
