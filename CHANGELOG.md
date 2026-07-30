@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.11] - 2026-07-30
+
+- Consume Common Utils 2.3.16 and SDK Core 2.3.11 so clinical document cards
+  translate every coded resource from its canonical claims token when summary
+  readback retains only the native display.
+
 ## [2.3.10] - 2026-07-30
 
 - Add frontend parity for controller-managed individual-member licence
