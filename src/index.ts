@@ -30,3 +30,4 @@ export * from './orchestration/individual-controller-sdk.js';
 export * from './orchestration/individual-member-sdk.js';
 export * from './orchestration/personal-sdk.js';
 export * from './orchestration/professional-sdk.js';
+export * from './offline-clinical-terminology.js';
