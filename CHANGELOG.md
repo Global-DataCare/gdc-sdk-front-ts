@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.13] - 2026-07-31
+
+- Add `OfflineClinicalTerminology` so browser/offline applications can search
+  loaded catalogs and translate clinical cards without network access.
+
 ## [2.3.12] - 2026-07-30
 
 - Consume Common Utils 2.3.17 and SDK Core 2.3.12 so frontend clinical cards

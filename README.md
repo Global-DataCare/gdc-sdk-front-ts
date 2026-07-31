@@ -707,6 +707,29 @@ Reusable payload examples:
 - `gdc-common-utils-ts/examples/lifecycle`
 - `gdc-common-utils-ts/examples/api-flow-examples`
 
+## Offline terminology fallback
+
+`OfflineClinicalTerminology` loads explicit local catalog subsets and exposes
+both a synchronous clinical-card translator and coded-option search:
+
+```ts
+const terminology = new OfflineClinicalTerminology(catalogs);
+
+const sections = toClinicalSectionViews(bundle, {
+  locale: 'es',
+  translateCode: terminology.translateCode,
+});
+
+const options = terminology.search({
+  text: 'diabetes',
+  language: 'es',
+  systems: ['http://snomed.info/sct'],
+});
+```
+
+Unknown codes return `undefined`, so the existing FHIR
+`Coding.display`/`CodeableConcept.text` fallback remains authoritative.
+
 ## API Index
 
 ## Full Public Surface
