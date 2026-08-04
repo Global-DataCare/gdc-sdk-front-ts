@@ -6,7 +6,7 @@ import type {
   PollOptions,
   SubmitAndPollResult,
 } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualMemberLifecycleInput, type FrontIndividualMemberLicenseAddInput, type FrontIndividualMemberLicenseInvitationInput, type FrontIndividualMemberLicenseTransitionInput, type FrontIndividualOnboardingPdfDraftInput, type FrontIndividualOnboardingPdfDraftResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationConfirmOrderInput, type FrontIndividualOrganizationLifecycleInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import { buildFrontProfessionalAccessRequestDecisionGrant, requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualMemberLifecycleInput, type FrontIndividualMemberLicenseAddInput, type FrontIndividualMemberLicenseInvitationInput, type FrontIndividualMemberLicenseTransitionInput, type FrontIndividualOnboardingPdfDraftInput, type FrontIndividualOnboardingPdfDraftResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationConfirmOrderInput, type FrontIndividualOrganizationLifecycleInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontProfessionalAccessRequestDecisionInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class IndividualControllerSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
@@ -69,6 +69,17 @@ export class IndividualControllerSdk {
     input: FrontGrantProfessionalAccessInput,
   ): Promise<FrontGrantProfessionalAccessResult> {
     return requireClientMethod(this.client, 'grantProfessionalAccess')(ctx, input);
+  }
+
+  /** Approves or denies a temporary access request while retaining correlation. */
+  public respondToProfessionalAccessRequest(
+    ctx: FrontRouteContext,
+    input: FrontProfessionalAccessRequestDecisionInput,
+  ): Promise<FrontGrantProfessionalAccessResult> {
+    return requireClientMethod(this.client, 'grantProfessionalAccess')(
+      ctx,
+      buildFrontProfessionalAccessRequestDecisionGrant(input),
+    );
   }
 
   /** @deprecated Browser UI submits the IPS Bundle to its authenticated BFF. */

@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.14] - 2026-08-04
+
+- Add `periodEnd` to professional Consent grants and correlated access-request
+  decisions, preserving the signed temporary-access expiry through frontend
+  actor facades.
+
 ## [2.3.13] - 2026-07-31
 
 - Add `OfflineClinicalTerminology` so browser/offline applications can search

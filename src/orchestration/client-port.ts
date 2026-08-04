@@ -267,7 +267,13 @@ export type FrontGrantProfessionalAccessInput = {
   actions: string[];
   consentIdentifier?: string;
   consentDate?: string;
+  /** ISO 8601 instant persisted as `Consent.period-end` for temporary access. */
+  periodEnd?: string;
   decision?: 'permit' | 'deny';
+  /** Permission-request Communication identifier or thread being answered. */
+  eventBasedOn?: string;
+  /** Canonical permission-request Communication reference. */
+  sourceReference?: string;
   attachmentContentType?: string;
   attachmentBase64?: string;
 };
@@ -280,6 +286,29 @@ export type FrontGrantProfessionalAccessResult = {
   consentClaims: Record<string, unknown>;
   claimsCid?: string;
 };
+
+/** Subject decision correlated to its originating professional access request. */
+export type FrontProfessionalAccessRequestDecisionInput = Readonly<FrontGrantProfessionalAccessInput & {
+  requestThid: string;
+  requestCommunicationIdentifier?: string;
+}>;
+
+/** Converts a frontend request decision into the canonical correlated grant. */
+export function buildFrontProfessionalAccessRequestDecisionGrant(
+  input: FrontProfessionalAccessRequestDecisionInput,
+): FrontGrantProfessionalAccessInput {
+  const requestThid = String(input.requestThid || '').trim();
+  if (!requestThid) throw new Error('Permission request decision requires requestThid.');
+  const communicationIdentifier = String(input.requestCommunicationIdentifier || '').trim();
+  const { requestThid: _requestThid, requestCommunicationIdentifier: _requestCommunicationIdentifier, ...grant } = input;
+  return {
+    ...grant,
+    eventBasedOn: communicationIdentifier || requestThid,
+    sourceReference: communicationIdentifier
+      ? `Communication?identifier=${encodeURIComponent(communicationIdentifier)}`
+      : `Communication?thid=${encodeURIComponent(requestThid)}`,
+  };
+}
 
 export type FrontDigitalTwinGenerationInput = {
   compositionPayload: object;
