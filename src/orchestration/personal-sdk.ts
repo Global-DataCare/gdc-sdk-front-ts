@@ -7,7 +7,7 @@ import type {
   SubmitAndPollResult,
   SubmitPayload,
 } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import { buildFrontProfessionalAccessRequestDecisionGrant, requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontProfessionalAccessRequestDecisionInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
 
 export class PersonalSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
@@ -24,6 +24,17 @@ export class PersonalSdk {
     input: FrontGrantProfessionalAccessInput,
   ): Promise<FrontGrantProfessionalAccessResult> {
     return requireClientMethod(this.client, 'grantProfessionalAccess')(ctx, input);
+  }
+
+  /** Approves or denies a temporary access request while retaining correlation. */
+  public respondToProfessionalAccessRequest(
+    ctx: FrontRouteContext,
+    input: FrontProfessionalAccessRequestDecisionInput,
+  ): Promise<FrontGrantProfessionalAccessResult> {
+    return requireClientMethod(this.client, 'grantProfessionalAccess')(
+      ctx,
+      buildFrontProfessionalAccessRequestDecisionGrant(input),
+    );
   }
 
   /** @deprecated Browser UI submits the IPS Bundle to its authenticated BFF. */

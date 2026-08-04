@@ -546,7 +546,11 @@ export class ProfileManager {
     idToken: string;
     consentIdentifier?: string;
     consentDate?: string;
+    /** ISO 8601 instant persisted as `Consent.period-end` for temporary access. */
+    periodEnd?: string;
     decision?: 'permit' | 'deny';
+    eventBasedOn?: string;
+    sourceReference?: string;
     attachmentContentType?: string;
     attachmentBase64?: string;
   }): Promise<{

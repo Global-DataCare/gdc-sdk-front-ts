@@ -60,6 +60,47 @@ test('frontend individual facade accepts the same canonical clinical outbox as t
   assert.equal(calls[0][1].communicationJob.payload.body.data[0].resource.resourceType, 'Communication');
 });
 
+test('frontend individual controller forwards a temporary professional grant expiry', async () => {
+  const calls = [];
+  const facade = new IndividualControllerSdk({
+    async grantProfessionalAccess(...args) {
+      calls.push(args);
+      return { thid: 'temporary-consent-1', consentClaims: {}, actorIdentifier: '', subjectIdentifier: '' };
+    },
+  });
+
+  await facade.grantProfessionalAccess(
+    { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' },
+    {
+      subjectDid: FAMILY_SUBJECT_DID,
+      actorId: 'did:web:clinic.example:member:zHash:ISCO-08|2211',
+      actorRole: 'ISCO-08|2211',
+      purpose: 'TREAT',
+      actions: ['organization/Composition.rs?section=LOINC|48765-2'],
+      periodEnd: '2026-08-31T18:30:00Z',
+    },
+  );
+
+  await facade.respondToProfessionalAccessRequest(
+    { providerDid: FAMILY_PROFILE_DID, idToken: 'id-token' },
+    {
+      subjectDid: FAMILY_SUBJECT_DID,
+      actorId: 'did:web:clinic.example:member:zHash:ISCO-08|2211',
+      actorRole: 'ISCO-08|2211',
+      purpose: 'TREAT',
+      actions: ['organization/Composition.rs?section=LOINC|48765-2'],
+      periodEnd: '2026-08-31T18:30:00Z',
+      requestThid: 'permission-request-thread-1',
+      requestCommunicationIdentifier: 'urn:uuid:permission-request-1',
+    },
+  );
+
+  assert.equal(calls[0][1].periodEnd, '2026-08-31T18:30:00Z');
+  assert.equal(calls[1][1].periodEnd, '2026-08-31T18:30:00Z');
+  assert.equal(calls[1][1].eventBasedOn, 'urn:uuid:permission-request-1');
+  assert.equal(calls[1][1].sourceReference, 'Communication?identifier=urn%3Auuid%3Apermission-request-1');
+});
+
 test('frontend actor facade exposes separate section and summary update methods', async () => {
   const calls = [];
   const facade = new IndividualControllerSdk({
