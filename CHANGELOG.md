@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.15] - 2026-08-05
+
+- Consume Common Utils 2.3.27 and SDK Core 2.3.17 so browser applications can
+  round-trip the complete structured IPS claims and hydrate clinical viewers
+  and editors from canonical `org.hl7.fhir.api` search-parameter claims.
+
 ## [2.3.14] - 2026-08-04
 
 - Add `periodEnd` to professional Consent grants and correlated access-request
