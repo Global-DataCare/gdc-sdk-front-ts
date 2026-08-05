@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.16] - 2026-08-05
+
+- Consume Common Utils 2.3.28 and SDK Core 2.3.18 so browser consumers use
+  only canonical `<ResourceType>.<concrete-param>` FHIR API claim names.
+
 ## [2.3.15] - 2026-08-05
 
 - Consume Common Utils 2.3.27 and SDK Core 2.3.17 so browser applications can
