@@ -2,6 +2,8 @@
 
 export * from 'gdc-sdk-core-ts';
 export * from './runtime-contracts.js';
+export * from './client-installation-id.js';
+export * from './portal-api-routes.js';
 export * from './consent-claim-helpers.js';
 export * from './actor-session.js';
 export * from './session-descriptor.js';
