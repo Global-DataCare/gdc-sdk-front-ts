@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { EXAMPLE_CLIENT_INSTANCE_UUID } from 'gdc-common-utils-ts/examples';
 import {
+  ClientInstallationErrors,
   ClientInstallationStorageKeys,
   getOrCreateClientInstallationId,
 } from '../dist/index.js';
@@ -23,4 +24,12 @@ test('client installation id is generated once and reused from the shared storag
   assert.equal(first, EXAMPLE_CLIENT_INSTANCE_UUID);
   assert.equal(second, EXAMPLE_CLIENT_INSTANCE_UUID);
   assert.equal(values.get(ClientInstallationStorageKeys.V1), EXAMPLE_CLIENT_INSTANCE_UUID);
+});
+
+test('client installation id exposes a typed stable error for an empty generator result', () => {
+  const storage = { getItem: () => null, setItem: () => {} };
+  assert.throws(
+    () => getOrCreateClientInstallationId({ storage, randomUuid: () => '' }),
+    new Error(ClientInstallationErrors.EmptyGeneratedId),
+  );
 });
