@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Add a stable, non-secret browser `client_instance_id` stored per installation
+  and focused employee-portal route exports so browser bundles do not import
+  the complete SDK barrel.
+
 ## [2.3.16] - 2026-08-05
 
 - Consume Common Utils 2.3.28 and SDK Core 2.3.18 so browser consumers use
