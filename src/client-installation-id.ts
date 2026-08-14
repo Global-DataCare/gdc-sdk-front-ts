@@ -5,6 +5,11 @@ export const ClientInstallationStorageKeys = Object.freeze({
   V1: 'gdc.client-installation-id.v1',
 } as const);
 
+/** Stable failures exposed by the client-installation identity helper. */
+export const ClientInstallationErrors = Object.freeze({
+  EmptyGeneratedId: 'client_installation_id_empty',
+} as const);
+
 /** Minimal storage port supported by browser localStorage and test doubles. */
 export type ClientInstallationStorage = Readonly<{
   getItem(key: string): string | null;
@@ -31,7 +36,7 @@ export function getOrCreateClientInstallationId(options: ClientInstallationIdOpt
   const current = storage.getItem(storageKey)?.trim();
   if (current) return current;
   const generated = (options.randomUuid || globalThis.crypto.randomUUID.bind(globalThis.crypto))().trim();
-  if (!generated) throw new Error('Client installation id generator returned an empty value.');
+  if (!generated) throw new Error(ClientInstallationErrors.EmptyGeneratedId);
   storage.setItem(storageKey, generated);
   return generated;
 }

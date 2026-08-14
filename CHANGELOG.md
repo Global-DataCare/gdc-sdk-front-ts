@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.17] - 2026-08-13
+
 - Add a stable, non-secret browser `client_instance_id` stored per installation
   and focused employee-portal route exports so browser bundles do not import
   the complete SDK barrel.
