@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.18] - 2026-08-23
+
+- Add the shared organization-license BFF route used by controller portals to
+  buy seats explicitly before creating or inviting employees.
+
 ## [2.3.17] - 2026-08-13
 
 - Add a stable, non-secret browser `client_instance_id` stored per installation
