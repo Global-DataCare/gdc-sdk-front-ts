@@ -222,7 +222,12 @@ type FrontClinicalUpdateRuntimeOptions = {
   pollOptions?: PollOptions;
 };
 
-/** Front runtime input for updating exactly one clinical section. */
+/**
+ * Front runtime input for updating exactly one clinical section. A typed FHIR
+ * batch may mix create, update and delete entries. Each delete targets
+ * `ResourceType/id`, has no resource body and may carry `ifMatch`; GW returns
+ * and authorizes every entry independently.
+ */
 export type FrontClinicalSectionUpdateInput =
   ClinicalSectionUpdateCommunicationInput & FrontClinicalUpdateRuntimeOptions;
 

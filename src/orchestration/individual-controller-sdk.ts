@@ -112,7 +112,11 @@ export class IndividualControllerSdk {
     return requireClientMethod(this.client, 'ingestCommunicationAndUpdateIndex')(ctx, input);
   }
 
-  /** @deprecated Browser UI submits its section command Bundle to its BFF. */
+  /**
+   * @deprecated Browser UI submits its typed section batch to its BFF. The
+   * batch may mix `.create()`, `.update()` and exact `.delete()` entries; the
+   * BFF sends it by Communication and preserves independent entry outcomes.
+   */
   public updateClinicalSection(ctx: FrontRouteContext, input: FrontClinicalSectionUpdateInput): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'updateClinicalSection')(ctx, input);
   }

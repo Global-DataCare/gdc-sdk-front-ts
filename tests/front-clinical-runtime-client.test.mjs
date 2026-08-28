@@ -1,3 +1,15 @@
+/**
+ * Flow contract:
+ * 1. Node, browser and Expo submit the same public Communication outbox job.
+ * 2. Firebase/login tokens never replace subject-scoped SMART authorization.
+ * 3. Rendering happens before the carrier boundary, so an offline database or
+ *    Bluetooth relay receives one opaque, replay-identifiable JWE.
+ * 4. Polling keeps the original `thid`; carrier changes must not create a new
+ *    clinical transaction.
+ * Authorization invariant: GW authorizes each clinical batch entry.
+ * Persistence invariant: mixed batch outcomes remain independent, with no
+ * transaction-wide rollback invented by the frontend runtime.
+ */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -13,16 +25,6 @@ import {
   createCommunicationOutboxJobFromCommMsgExtendedDraft,
   createCommMsgExtendedDraft,
 } from '../dist/index.js';
-
-/**
- * Flow contract:
- * 1. Node, browser and Expo submit the same public Communication outbox job.
- * 2. Firebase/login tokens never replace subject-scoped SMART authorization.
- * 3. Rendering happens before the carrier boundary, so an offline database or
- *    Bluetooth relay receives one opaque, replay-identifiable JWE.
- * 4. Polling keeps the original `thid`; carrier changes must not create a new
- *    clinical transaction.
- */
 
 function createJob() {
   const draft = attachFhirResourceAsAttachmentToCommMsgExtendedDraft(
@@ -101,6 +103,44 @@ test('direct Front runtime keeps section and summary updates as distinct contrac
     }),
     /Bundle\.type=document/i,
   );
+});
+
+test('direct Front runtime preserves independent success and failure results from one clinical batch', async () => {
+  const entryResults = [
+    { id: 'observation-created', response: { status: '201' } },
+    { id: 'allergy-forbidden', response: { status: '403' } },
+  ];
+  const client = new FrontClinicalRuntimeClient({
+    carrier: {
+      async send(request) {
+        return request.phase === 'submit'
+          ? { status: 202, body: { accepted: true } }
+          : { status: 200, body: { data: entryResults } };
+      },
+    },
+  });
+
+  const result = await client.updateClinicalSection(ctx, {
+    thid: 'front-mixed-section-batch-1',
+    subject: EXAMPLE_SUBJECT_DID,
+    section: HealthcareBasicSections.AllergiesAndIntolerances.attributeValue,
+    bundle: {
+      resourceType: 'Bundle',
+      type: 'batch',
+      data: [{
+        type: 'Observation-create-request-v1.0',
+        request: { method: 'POST', url: 'Observation' },
+        resource: { resourceType: 'Observation', id: 'observation-created' },
+      }, {
+        type: 'AllergyIntolerance-delete-request-v1.0',
+        request: { method: 'DELETE', url: 'AllergyIntolerance/allergy-forbidden' },
+      }],
+    },
+  });
+
+  assert.deepEqual(result.poll.body.data, entryResults);
+  assert.equal(result.poll.body.data[0].response.status, '201');
+  assert.equal(result.poll.body.data[1].response.status, '403');
 });
 
 test('offline or Bluetooth carrier receives the unchanged protected JWE form body', async () => {

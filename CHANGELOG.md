@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-08-28
+
+- Expose the shared typed mixed clinical `Bundle.type=batch` editor, including
+  `.delete()` and `.ifMatch()` with no DELETE resource body.
+- Preserve independent per-entry outcomes through the frontend clinical
+  runtime. Document browser-to-BFF section submission and the rule that the
+  clinical resource stores only the creator DID.
+
 ## [2.3.18] - 2026-08-23
 
 - Add the shared organization-license BFF route used by controller portals to
