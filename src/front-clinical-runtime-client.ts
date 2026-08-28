@@ -96,8 +96,9 @@ export class FrontClinicalRuntimeClient implements FrontRuntimeClient {
   }
 
   /**
-   * Updates exactly one clinical section from a batch/collection whose exact
-   * section is carried on the outer Communication.
+   * Updates exactly one clinical section from a batch whose exact section is
+   * carried on the outer Communication. Entries may independently create,
+   * update or delete resources; per-entry outcomes are returned unchanged.
    */
   public async updateClinicalSection(
     ctx: FrontRouteContext,

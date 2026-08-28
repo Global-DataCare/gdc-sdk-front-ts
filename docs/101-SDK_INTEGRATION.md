@@ -109,6 +109,31 @@ The browser stops there. The backend/BFF attaches the Bundle to a claims-first
 Communication, freezes the outbox job and calls
 `ingestCommunicationAndUpdateIndex(...)`.
 
+One clinical section uses `Bundle.type = batch`, not `transaction`. Its entries
+choose their operation independently, so a successful create is retained even
+when a different delete is rejected:
+
+```ts
+const commandBundle = new BundleEditor().setBundleType(BundleTypes.batch);
+
+commandBundle
+  .newEntryAs(BundleEditableResourceTypes.observation, 'observation-new')
+  .create()
+  .setSubject(subjectDid);
+
+commandBundle
+  .newEntryAs(BundleEditableResourceTypes.allergyIntolerance, allergyId)
+  .delete()
+  .ifMatch(versionId);
+
+await clinicalSectionBffTransport.submit(commandBundle.buildJsonApi());
+```
+
+The BFF forwards this command through `updateClinicalSection`. GW evaluates
+creator authorization and `ifMatch` for each entry and returns independent
+statuses such as `201`, `204`, `403`, `404` or `412`. The resource contains
+only its creator DID; verified email/phone linkage is checked outside it.
+
 Do not call `upsert*` route helpers from authoring components. Those methods
 are compatibility plumbing. A contact list, permission set, clinical section
 or complete history differs by Bundle contents and commit timing, not by a new

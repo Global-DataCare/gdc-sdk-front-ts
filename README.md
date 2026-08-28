@@ -115,6 +115,8 @@ Main references:
 
 Use:
 
+- `BundleEditor` for typed clinical `batch` commands whose entries may mix
+  `.create()`, `.update()` and exact `.delete().ifMatch(...)` operations
 - `BundleEditor` plus `EmployeeEntryEditor` for employee create/search/disable/purge payloads
 - `CommunicationAttachedBundleSession` for `Communication`-carried bundles
 - `createConsentAccessEditor(...)` for consent editing inside a communication bundle

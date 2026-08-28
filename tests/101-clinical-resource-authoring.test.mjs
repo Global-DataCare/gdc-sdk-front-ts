@@ -1,10 +1,35 @@
+// Flow contract:
+// 1. The browser builds one section-scoped FHIR batch through typed editors.
+// 2. One entry creates a fact while another deletes an exact ResourceType/id.
+// 3. DELETE has no body and may bind the current version independently.
+// Authorization invariant: GW decides creator and subject authority per entry.
+// Persistence invariant: partial batch success is preserved without rollback.
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   BundleEditor,
+  BundleEditableResourceTypes,
+  BundleTypes,
+  HttpRequestMethods,
   toClinicalResourceCardView,
   toClinicalSectionViews,
 } from '../dist/index.js';
+
+test('frontend SDK exposes mixed POST and DELETE clinical batch entries', () => {
+  const batch = new BundleEditor().setBundleType(BundleTypes.batch);
+  batch.newEntryAs(BundleEditableResourceTypes.observation, 'observation-create-001').create();
+  batch.newEntryAs(BundleEditableResourceTypes.allergyIntolerance, 'allergy-delete-001')
+    .delete()
+    .ifMatch('allergy-version-001');
+
+  const built = batch.build();
+  assert.equal(built.type, BundleTypes.batch);
+  assert.equal(built.entry[0].request.method, HttpRequestMethods.Post);
+  assert.equal(built.entry[1].request.method, HttpRequestMethods.Delete);
+  assert.equal(built.entry[1].request.url, 'AllergyIntolerance/allergy-delete-001');
+  assert.equal(built.entry[1].request.ifMatch, 'W/"allergy-version-001"');
+  assert.equal('resource' in built.entry[1], false);
+});
 
 test('frontend SDK exposes the canonical coded clinical authoring/display surface', () => {
   assert.equal(typeof BundleEditor, 'function');
