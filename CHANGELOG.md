@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.4.1] - 2026-09-02
+
+- Require lockfile-authoritative npm ci, effective internal dependency
+  verification with npm ls, and immediate E2E/Playwright termination after
+  the first failed project before expanding to sibling browsers or journeys.
+
 ## [2.4.0] - 2026-08-28
 
 - Expose the shared typed mixed clinical `Bundle.type=batch` editor, including
