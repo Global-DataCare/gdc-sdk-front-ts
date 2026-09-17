@@ -1,3 +1,4 @@
+// TDD contract: write this test red first; make it green only with the complete real behavior.
 /**
  * Teaching goal:
  * - sending a Bundle to GW and updating the screen copy are separate operations

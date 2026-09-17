@@ -1,3 +1,4 @@
+// TDD contract: write this test red first; make it green only with the complete real behavior.
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { EXAMPLE_CLIENT_INSTANCE_UUID } from 'gdc-common-utils-ts/examples';

@@ -1,3 +1,4 @@
+// TDD contract: write this test red first; make it green only with the complete real behavior.
 /**
  * Flow contract:
  * 1. Node, browser and Expo submit the same public Communication outbox job.

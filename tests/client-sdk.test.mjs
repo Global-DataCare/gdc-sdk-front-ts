@@ -1,3 +1,4 @@
+// TDD contract: write this test red first; make it green only with the complete real behavior.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { EXAMPLE_DEFAULT_ICA_DID, EXAMPLE_PROFILE_SESSION_INPUT, EXAMPLE_TENANT_IDENTIFIER } from 'gdc-common-utils-ts/examples';

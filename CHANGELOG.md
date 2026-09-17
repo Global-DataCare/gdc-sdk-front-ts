@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Add the repository-wide mandatory red-green-refactor contributor contract
+  and mark existing frontend SDK suites with an explicit TDD contract header.
+
 ## [2.4.1] - 2026-09-02
 
 - Require lockfile-authoritative npm ci, effective internal dependency

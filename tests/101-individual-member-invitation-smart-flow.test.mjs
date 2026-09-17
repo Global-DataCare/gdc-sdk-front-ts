@@ -1,3 +1,4 @@
+// TDD contract: write this test red first; make it green only with the complete real behavior.
 /**
  * Executable frontend 101:
  * 1. the individual controller reserves and issues one existing RelatedPerson
