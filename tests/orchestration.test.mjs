@@ -1,3 +1,4 @@
+// TDD contract: write this test red first; make it green only with the complete real behavior.
 /**
  * Flow contract: frontend actor facades preserve the same role-scoped public
  * operations as Node while leaving provider discovery, audience selection and

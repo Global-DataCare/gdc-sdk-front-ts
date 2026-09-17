@@ -1,3 +1,4 @@
+// TDD contract: write this test red first; make it green only with the complete real behavior.
 /**
  * Teaching goal:
  * - the frontend edits one or several semantic resources inside a Bundle

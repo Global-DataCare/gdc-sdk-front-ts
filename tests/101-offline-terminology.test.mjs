@@ -1,3 +1,4 @@
+// TDD contract: write this test red first; make it green only with the complete real behavior.
 /**
  * Teaching goal:
  * - load a small terminology fallback in an offline-capable frontend

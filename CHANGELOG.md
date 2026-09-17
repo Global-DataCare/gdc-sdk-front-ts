@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Add the repository-wide mandatory red-green-refactor contributor contract
+  and mark existing frontend SDK suites with an explicit TDD contract header.
+
 ## [2.3.18] - 2026-08-23
 
 - Add the shared organization-license BFF route used by controller portals to
