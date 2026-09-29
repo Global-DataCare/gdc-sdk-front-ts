@@ -20,6 +20,8 @@ All notable changes to this project will be documented in this file.
 - Require an isolated tarball consumer gate that installs Common, Core, Node
   and Front together without overrides, compiles their public types and checks
   runtime exports before publication.
+- Verify the family against `gdc-sdk-node-ts@2.9.27`, whose public declarations
+  no longer depend on an unpublished SDK Core module path.
 
 ## [2.4.2] - 2026-09-29
 

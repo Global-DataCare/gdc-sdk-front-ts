@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
-    "gdc-sdk-node-ts": "2.9.26",
+    "gdc-sdk-node-ts": "2.9.27",
     "typescript": "^5.5.4"
   }
 }
