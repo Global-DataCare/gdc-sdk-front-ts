@@ -80,13 +80,16 @@ First actor-scoped entrypoints after session bootstrap:
 - `session.asIndividualMember()`
 - `session.asPersonal()`
 - `session.asProfessional()`
+- `workspace.asDigitalTwin()` for a loaded professional research profile
 
 Research-access teaching rule:
 
 - for developer-facing 101 material, call the twin-search consumer surface
   `DigitalTwinSdk`
-- current frontend session/runtime entrypoint is still
-  `session.asProfessional()` and `ProfessionalSdk`
+- use `workspace.asDigitalTwin()` after `ProfileRuntime.loadProfile(...)`;
+  the injected frontend runtime adapter owns every BFF/network call
+- keep `session.asProfessional()` and `ProfessionalSdk` for clinical and
+  professional-access operations rather than research-subject search
 - do not teach `DigitalTwinControllerSdk`
 
 Teaching rule:
@@ -503,14 +506,14 @@ Use this product-facing split:
   - digital twin listing
   - IPS open/download flow
 
-Current implementation honesty:
+Current implementation boundary:
 
-- in frontend code today, the callable actor/session surface is still
-  `session.asProfessional()`
-- the 101 should nevertheless explain the business capability as
-  `DigitalTwinSdk`
-- this keeps the documentation understandable for product/frontend developers
-  while the public façade naming converges
+- `workspace.asDigitalTwin()` returns the browser-safe `DigitalTwinSdk`
+- the facade binds SMART requests and saved selections to the loaded
+  professional profile DID
+- the application-provided `FrontRuntimeClient` performs search, save and
+  materialization through its trusted BFF; the browser does not receive KMS
+  material or Node-only transports
 
 Canonical UI sequence for a junior developer:
 

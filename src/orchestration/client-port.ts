@@ -4,6 +4,11 @@ import type { DeviceAppType, DeviceUserClass } from 'gdc-common-utils-ts/constan
 import type { LicenseListSearchState } from 'gdc-common-utils-ts/utils/license-list-search';
 import type { LicenseOfferSearchState, LicenseOrderSearchState } from 'gdc-common-utils-ts/utils/license-commercial-search';
 import type { IndividualOrganizationLifecycleEditor } from 'gdc-common-utils-ts/utils/individual-organization-lifecycle';
+import type { FamilyOrganizationSummary } from 'gdc-common-utils-ts/utils/family-organization-summary';
+import type { OrganizationEmployeeLifecycleRecord } from 'gdc-common-utils-ts/models/organization-employee-lifecycle';
+import type { LegalOrganizationVerificationTransactionInput } from 'gdc-common-utils-ts/utils/legal-organization-verification-transaction';
+import { CommunicationCategoryCodes } from 'gdc-common-utils-ts/constants/communication';
+import { CommunicationClaim } from 'gdc-common-utils-ts/models/interoperable-claims/communication-claims';
 import type {
   IndividualOnboardingDraftInput,
   IndividualOnboardingDraftResult,
@@ -14,6 +19,7 @@ import type {
   CommunicationOutboxJob,
   CommunicationInput,
   ClinicalSectionUpdateCommunicationInput,
+  SubjectSectionUpdateCommunicationInput,
   ClinicalSummaryReadResult,
   ClinicalSummaryRequestInput,
   ClinicalUpdateCommunicationInput,
@@ -22,12 +28,17 @@ import type {
   HostRouteContext,
   HostedTenantLifecycleInput,
   OrganizationDidBindingInput,
+  PermissionRequestCommunicationInput,
   LegalOrganizationOrderInput,
   PollOptions,
   SmartTokenRequestContract,
   SubmitAndPollResult,
   SubmitPayload,
   TransportProfile,
+  IcaCredentialDownloadInput,
+  IcaControllerCredentialPairInput,
+  IcaRetrievedCredential,
+  IcaControllerCredentialPair,
 } from 'gdc-sdk-core-ts';
 
 export type FrontRouteContext = {
@@ -60,6 +71,7 @@ export type FrontOrganizationActivationInput = {
 };
 
 export type FrontOrganizationDidBindingInput = OrganizationDidBindingInput;
+export type FrontLegalOrganizationVerificationTransactionInput = LegalOrganizationVerificationTransactionInput;
 
 export type FrontLegalOrganizationOrderInput = {
   offerId: string;
@@ -81,6 +93,57 @@ export type FrontOrganizationEmployeeLifecycleInput = {
 
 export type FrontOrganizationEmployeeSearchInput = {
   employeeClaims?: Record<string, EmployeeSearchValue>;
+  requestThid?: string;
+  pollOptions?: PollOptions;
+};
+
+export type FrontOrganizationEmployeeLicenseOfferInput = {
+  issuerDid: string;
+  quantity: number;
+  requestThid?: string;
+  pollOptions?: PollOptions;
+};
+
+/** @deprecated Professional seats use an Offer followed by a confirmed Order. */
+export type FrontOrganizationEmployeeLicenseAddInput = FrontOrganizationEmployeeLicenseOfferInput;
+
+export type FrontOrganizationEmployeeLicenseInvitationInput = {
+  email: string;
+  role: string;
+  subjectDid: string;
+  subjectId?: string;
+  type?: DeviceAppType;
+  requestThid?: string;
+  pollOptions?: PollOptions;
+};
+
+export type FrontOrganizationLicenseOrderConfirmInput = Readonly<{
+  issuerDid: string;
+  offerId: string;
+  hostNetwork?: string;
+  dataType?: string;
+  additionalClaims?: Record<string, unknown>;
+  timeoutSeconds?: number;
+  intervalSeconds?: number;
+}>;
+
+export type FrontOrganizationEmployeeProvisioningInput = Readonly<{
+  creation: FrontOrganizationEmployeeCreationInput;
+  invitation: FrontOrganizationEmployeeLicenseInvitationInput;
+  licenseOrder?: Omit<FrontOrganizationLicenseOrderConfirmInput, 'offerId'>;
+}>;
+
+export type FrontOrganizationEmployeeProvisioningResult = Readonly<{
+  employee: SubmitAndPollResult;
+  license: SubmitAndPollResult;
+  licenseOrder?: SubmitAndPollResult;
+  activationCode: string;
+  maxDevices?: number;
+}>;
+
+export type FrontEmployeeDeviceRevocationInput = {
+  licenseId: string;
+  clientId: string;
   requestThid?: string;
   pollOptions?: PollOptions;
 };
@@ -117,7 +180,10 @@ export type FrontEmployeeDeviceActivationRequestInput = {
   dcrPayload?: Record<string, unknown>;
 };
 
-export type FrontSmartTokenRequestInput = SmartTokenRequestContract;
+export type FrontSmartTokenRequestInput = SmartTokenRequestContract & {
+  /** Consent purpose used by research and other purpose-bound SMART flows. */
+  purpose?: string;
+};
 
 export type FrontSmartTokenExchangeResult = {
   status: 'fetched' | 'failed';
@@ -137,6 +203,35 @@ export type FrontIndividualOrganizationStartResult = {
   registrationThid: string;
   confirmationThid?: string;
 };
+
+export type FrontIndividualOrganizationRegistrationInput = FrontIndividualOrganizationBootstrapInput;
+export type FrontIndividualOrganizationRegistrationResult = FrontIndividualOrganizationStartResult;
+
+/** Legacy phone-first lookup retained for compatibility with existing channel applications. */
+export type FrontFamilyOrganizationSearchInput = Readonly<{
+  controllerPhone: string;
+  usualname: string;
+  birthDate?: string;
+  timeoutSeconds?: number;
+  intervalSeconds?: number;
+}>;
+
+export type FrontEnsureFamilyOrganizationRegistrationInput =
+  FrontFamilyOrganizationSearchInput & Readonly<{
+    controllerEmail?: string;
+    controllerRole?: string;
+    serviceProviderDid?: string;
+    tenantId?: string;
+    jurisdiction?: string;
+    sector?: string;
+    additionalClaims?: Record<string, unknown>;
+  }>;
+
+export type FrontEnsureFamilyOrganizationRegistrationResult = Readonly<{
+  status: 'already_exists' | 'resume_required' | 'new_created';
+  summary?: FamilyOrganizationSummary;
+  started?: FrontIndividualOrganizationStartResult;
+}>;
 
 export type FrontIndividualOnboardingPdfDraftInput = IndividualOnboardingDraftInput;
 export type FrontIndividualOnboardingPdfDraftResult = IndividualOnboardingDraftResult;
@@ -235,6 +330,57 @@ export type FrontClinicalSectionUpdateInput =
 export type FrontClinicalSummaryUpdateInput =
   ClinicalUpdateCommunicationInput & FrontClinicalUpdateRuntimeOptions;
 
+/** Frontend/BFF input for one subject-owned section update. */
+export type FrontSubjectSectionUpdateInput =
+  SubjectSectionUpdateCommunicationInput & FrontClinicalUpdateRuntimeOptions;
+
+/** Registers one clinical resource or raw artifact through the configured BFF. */
+export type FrontBlockchainArtifactRegistrationInput = {
+  subject: string;
+  resource?: Record<string, unknown>;
+  contentDataBase64?: string;
+  contentType?: string;
+  identifier?: string;
+  title?: string;
+  description?: string;
+  date?: string;
+  location?: string;
+  language?: string;
+  requestThid?: string;
+  pollOptions?: PollOptions;
+};
+
+/** Communication participant filters accepted by the frontend BFF adapter. */
+export type FrontCommunicationParticipantSearchInput = {
+  searchParams?: Record<string, string | number | boolean | Array<string | number | boolean> | undefined>;
+  subject?: string | string[];
+  actorId?: string | string[];
+  senderActorId?: string | string[];
+  recipientActorId?: string | string[];
+  userActorId?: string | string[];
+  targetActorId?: string | string[];
+  periodStart?: string;
+  periodEnd?: string;
+  requestThid?: string;
+  pollOptions?: PollOptions;
+  page?: number;
+  count?: number;
+};
+
+/** Vital-sign resources selected from one search response for Communication submission. */
+export type FrontVitalSignBatchCommunicationInput = Readonly<{
+  subject: string;
+  searchResponse: unknown;
+  selectedResourceIds?: readonly string[];
+  sender?: string;
+  recipient?: string | string[];
+  sent?: string;
+  status?: string;
+  noteText?: string;
+  requestThid?: string;
+  pollOptions?: PollOptions;
+}>;
+
 export type FrontClinicalBundleSearchInput = Omit<BundleSearchQuery, 'section' | 'searchParams'> & {
   section?: string | string[];
   extraSearchParams?: BundleSearchQuery['searchParams'];
@@ -298,6 +444,53 @@ export type FrontProfessionalAccessRequestDecisionInput = Readonly<FrontGrantPro
   requestCommunicationIdentifier?: string;
 }>;
 
+export type FrontProfessionalAccessRequestInput =
+  Omit<PermissionRequestCommunicationInput, 'missing'> & Readonly<{
+    missing: Readonly<{
+      sections: string[];
+      resourceTypes: string[];
+      pairs?: PermissionRequestCommunicationInput['missing']['pairs'];
+    }>;
+    transportProfile?: TransportProfile;
+    pollOptions?: PollOptions;
+  }>;
+
+export type FrontProfessionalAccessRequestResult = Readonly<{
+  thid: string;
+  communicationIdentifier: string;
+  consentIdentifier: string;
+  communication: CommunicationInput;
+  delivery: SubmitAndPollResult;
+}>;
+
+export type FrontProfessionalAccessRequestSearchInput = FrontCommunicationParticipantSearchInput;
+
+/** Restricts participant searches to canonical professional access requests. */
+export function buildFrontProfessionalAccessRequestSearchInput(
+  input: FrontProfessionalAccessRequestSearchInput,
+): FrontCommunicationParticipantSearchInput {
+  return {
+    ...input,
+    searchParams: {
+      ...input.searchParams,
+      [CommunicationClaim.Category]: CommunicationCategoryCodes.Notification.attributeValue,
+    },
+  };
+}
+
+export type FrontRevokeProfessionalAccessInput = {
+  consentClaims: Record<string, unknown>;
+  periodEnd?: string;
+  dataType?: string;
+  pollOptions?: PollOptions;
+};
+
+export type FrontRevokeProfessionalAccessResult = {
+  thid: string;
+  consent: SubmitAndPollResult;
+  consentClaims: Record<string, unknown>;
+};
+
 /** Converts a frontend request decision into the canonical correlated grant. */
 export function buildFrontProfessionalAccessRequestDecisionGrant(
   input: FrontProfessionalAccessRequestDecisionInput,
@@ -320,7 +513,110 @@ export type FrontDigitalTwinGenerationInput = {
   format?: 'org.hl7.fhir.r4' | 'org.hl7.fhir.api';
 };
 
+export type FrontDigitalTwinFhirFormat = 'org.hl7.fhir.r4' | 'org.hl7.fhir.api';
+
+export type FrontDigitalTwinSearchInput = {
+  accessToken?: string;
+  thid?: string;
+  format?: FrontDigitalTwinFhirFormat;
+  resourceType?: 'ResearchSubject';
+  sections?: readonly string[];
+  dateFrom?: string;
+  dateTo?: string;
+  text?: string;
+  filters?: Readonly<Record<string, string | readonly string[] | undefined>>;
+  pollOptions?: PollOptions;
+};
+
+export type FrontDigitalTwinSearchMatch = Record<string, unknown> & {
+  resourceType?: 'ResearchSubject';
+  id?: string;
+  composition?: Record<string, unknown>;
+  meta?: { tag?: FrontDigitalTwinResearchTag[] };
+};
+
+export type FrontDigitalTwinSearchResult = {
+  total: number;
+  matches: FrontDigitalTwinSearchMatch[];
+  operation: SubmitAndPollResult;
+};
+
+export type FrontDigitalTwinResearchTag = {
+  id?: string;
+  system: string;
+  code: string;
+  version?: string;
+  userSelected: true;
+};
+
+export type FrontDigitalTwinWorksetTagInput = Omit<FrontDigitalTwinResearchTag, 'userSelected'>;
+
+export type FrontDigitalTwinSelectionInput = {
+  accessToken?: string;
+  twinSubjectId: string;
+  section: string;
+  tags: readonly FrontDigitalTwinWorksetTagInput[];
+  authorDid?: string;
+  selectionId?: string;
+  /** @deprecated Use `selectionId`. */
+  compositionId?: string;
+  documentType?: string;
+  date?: string;
+  thid?: string;
+  format?: FrontDigitalTwinFhirFormat;
+  pollOptions?: PollOptions;
+};
+
+export type FrontDigitalTwinMaterializationInput = {
+  accessToken?: string;
+  twinSubjectId: string;
+  thid?: string;
+  format?: FrontDigitalTwinFhirFormat;
+  sections?: readonly string[];
+  sent?: string;
+  pollOptions?: PollOptions;
+};
+
+export type FrontDigitalTwinSecondaryUseConsentInput = {
+  subjectDid: string;
+  indexProviderOrganizationDid: string;
+  decision: 'permit' | 'deny';
+  researchUseReference: string;
+  consentDate?: string;
+  dataType?: string;
+  pollOptions?: PollOptions;
+};
+
+export type FrontDigitalTwinSubjectLinkPurgeInput = {
+  subjectDid: string;
+  pollOptions?: PollOptions;
+};
+
 export type FrontRuntimeClient = {
+  submitLegalOrganizationVerificationTransaction?: (
+    hostCtx: HostRouteContext,
+    input: FrontLegalOrganizationVerificationTransactionInput,
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  submitLegalOrganizationCredentialReissuance?: (
+    hostCtx: HostRouteContext,
+    input: FrontLegalOrganizationVerificationTransactionInput,
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  submitLegalOrganizationIssue?: (
+    hostCtx: HostRouteContext,
+    input: FrontLegalOrganizationVerificationTransactionInput,
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  retrieveOrganizationCredentialFromIca?: (
+    input: IcaCredentialDownloadInput,
+  ) => Promise<IcaRetrievedCredential>;
+  retrieveLegalRepresentativeCredentialFromIca?: (
+    input: IcaCredentialDownloadInput,
+  ) => Promise<IcaRetrievedCredential>;
+  retrieveControllerCredentialsFromIca?: (
+    input: IcaControllerCredentialPairInput,
+  ) => Promise<IcaControllerCredentialPair>;
   activateOrganizationInGatewayFromIcaProof?: (
     hostCtx: HostRouteContext,
     input: FrontOrganizationActivationInput,
@@ -344,6 +640,40 @@ export type FrontRuntimeClient = {
   createOrganizationEmployee?: (
     ctx: FrontRouteContext,
     input: FrontOrganizationEmployeeCreationInput,
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  provisionOrganizationEmployee?: (
+    ctx: FrontRouteContext,
+    input: FrontOrganizationEmployeeProvisioningInput,
+  ) => Promise<FrontOrganizationEmployeeProvisioningResult>;
+  issueOrganizationEmployeeLicense?: (
+    ctx: FrontRouteContext,
+    input: FrontOrganizationEmployeeLicenseInvitationInput,
+  ) => Promise<SubmitAndPollResult>;
+  disableOrganizationEmployee?: (
+    ctx: FrontRouteContext,
+    input: FrontOrganizationEmployeeLifecycleInput,
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  listOrganizationEmployeeLifecycle?: (
+    ctx: FrontRouteContext,
+  ) => Promise<OrganizationEmployeeLifecycleRecord[]>;
+  addFreeOrganizationEmployeeLicenses?: (
+    ctx: FrontRouteContext,
+    input: FrontOrganizationEmployeeLicenseAddInput,
+  ) => Promise<SubmitAndPollResult>;
+  requestOrganizationEmployeeLicenseOffer?: (
+    ctx: FrontRouteContext,
+    input: FrontOrganizationEmployeeLicenseOfferInput,
+  ) => Promise<SubmitAndPollResult>;
+  confirmOrganizationLicenseOrder?: (
+    ctx: FrontRouteContext,
+    input: FrontOrganizationLicenseOrderConfirmInput,
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  purgeOrganizationEmployee?: (
+    ctx: FrontRouteContext,
+    input: FrontOrganizationEmployeeLifecycleInput,
     pollOptions?: PollOptions,
   ) => Promise<SubmitAndPollResult>;
   submitOrganizationDidBinding?: (
@@ -394,6 +724,26 @@ export type FrontRuntimeClient = {
     input: HostedTenantLifecycleInput,
     pollOptions?: PollOptions,
   ) => Promise<SubmitAndPollResult>;
+  enableTenant?: (
+    hostCtx: HostRouteContext,
+    input: HostedTenantLifecycleInput,
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  getTenantLifecycleStatus?: (
+    hostCtx: HostRouteContext,
+    input: HostedTenantLifecycleInput,
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  disableTenantDescendants?: (
+    hostCtx: HostRouteContext,
+    input: HostedTenantLifecycleInput & { descendantKind: 'individuals' },
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
+  purgeTenantDescendants?: (
+    hostCtx: HostRouteContext,
+    input: HostedTenantLifecycleInput & { descendantKind: 'individuals' },
+    pollOptions?: PollOptions,
+  ) => Promise<SubmitAndPollResult>;
   purgeTenant?: (
     hostCtx: HostRouteContext,
     input: HostedTenantLifecycleInput,
@@ -403,6 +753,10 @@ export type FrontRuntimeClient = {
     ctx: FrontRouteContext,
     input: FrontEmployeeDeviceActivationRequestInput,
   ) => Promise<SubmitAndPollResult>;
+  revokeEmployeeDevice?: (
+    ctx: FrontRouteContext,
+    input: FrontEmployeeDeviceRevocationInput,
+  ) => Promise<SubmitAndPollResult>;
   requestSmartToken?: (
     input: FrontSmartTokenRequestInput,
   ) => Promise<FrontSmartTokenExchangeResult>;
@@ -410,6 +764,18 @@ export type FrontRuntimeClient = {
     ctx: FrontRouteContext,
     input: FrontIndividualOrganizationBootstrapInput,
   ) => Promise<FrontIndividualOrganizationStartResult>;
+  registerIndividualOrganization?: (
+    ctx: FrontRouteContext,
+    input: FrontIndividualOrganizationRegistrationInput,
+  ) => Promise<FrontIndividualOrganizationRegistrationResult>;
+  searchFamilyOrganization?: (
+    ctx: FrontRouteContext,
+    input: FrontFamilyOrganizationSearchInput,
+  ) => Promise<FamilyOrganizationSummary | null>;
+  ensureFamilyOrganizationRegistration?: (
+    ctx: FrontRouteContext,
+    input: FrontEnsureFamilyOrganizationRegistrationInput,
+  ) => Promise<FrontEnsureFamilyOrganizationRegistrationResult>;
   prepareIndividualOnboardingPdfDraft?: (
     ctx: FrontRouteContext,
     input: FrontIndividualOnboardingPdfDraftInput,
@@ -479,6 +845,14 @@ export type FrontRuntimeClient = {
     ctx: FrontRouteContext,
     input: FrontGrantProfessionalAccessInput,
   ) => Promise<FrontGrantProfessionalAccessResult>;
+  requestProfessionalAccess?: (
+    ctx: FrontRouteContext,
+    input: FrontProfessionalAccessRequestInput,
+  ) => Promise<FrontProfessionalAccessRequestResult>;
+  revokeProfessionalAccess?: (
+    ctx: FrontRouteContext,
+    input: FrontRevokeProfessionalAccessInput,
+  ) => Promise<FrontRevokeProfessionalAccessResult>;
   importIpsOrFhirAndUpdateIndex?: (
     ctx: FrontRouteContext,
     input: FrontIpsOrFhirImportInput,
@@ -495,6 +869,10 @@ export type FrontRuntimeClient = {
     ctx: FrontRouteContext,
     input: FrontClinicalSectionUpdateInput,
   ) => Promise<SubmitAndPollResult>;
+  updateSubjectSection?: (
+    ctx: FrontRouteContext,
+    input: FrontSubjectSectionUpdateInput,
+  ) => Promise<SubmitAndPollResult>;
   updateClinicalSummary?: (
     ctx: FrontRouteContext,
     input: FrontClinicalSummaryUpdateInput,
@@ -506,6 +884,46 @@ export type FrontRuntimeClient = {
   generateDigitalTwinFromSubjectData?: (
     ctx: FrontRouteContext,
     input: FrontDigitalTwinGenerationInput,
+  ) => Promise<SubmitAndPollResult>;
+  setDigitalTwinSecondaryUseConsent?: (
+    ctx: FrontRouteContext,
+    input: FrontDigitalTwinSecondaryUseConsentInput,
+  ) => Promise<FrontGrantProfessionalAccessResult>;
+  purgeDigitalTwinSubjectLink?: (
+    ctx: FrontRouteContext,
+    input: FrontDigitalTwinSubjectLinkPurgeInput,
+  ) => Promise<SubmitAndPollResult>;
+  getDigitalTwinSecondaryUseConsentStatus?: (
+    ctx: FrontRouteContext,
+    input: Readonly<{
+      subjectDid: string;
+      indexProviderOrganizationDid: string;
+      researchUseReference: string;
+    }>,
+  ) => Promise<Readonly<{ exists: boolean; enabled: boolean }>>;
+  searchDigitalTwins?: (
+    ctx: FrontRouteContext,
+    input: FrontDigitalTwinSearchInput,
+  ) => Promise<FrontDigitalTwinSearchResult>;
+  saveDigitalTwinSelection?: (
+    ctx: FrontRouteContext,
+    input: FrontDigitalTwinSelectionInput,
+  ) => Promise<SubmitAndPollResult>;
+  materializeDigitalTwin?: (
+    ctx: FrontRouteContext,
+    input: FrontDigitalTwinMaterializationInput,
+  ) => Promise<SubmitAndPollResult>;
+  registerBlockchainArtifactAndUpdateIndex?: (
+    ctx: FrontRouteContext,
+    input: FrontBlockchainArtifactRegistrationInput,
+  ) => Promise<SubmitAndPollResult>;
+  submitVitalSignBatchCommunicationFromSearchResponse?: (
+    ctx: FrontRouteContext,
+    input: FrontVitalSignBatchCommunicationInput,
+  ) => Promise<SubmitAndPollResult>;
+  searchCommunicationParticipants?: (
+    ctx: FrontRouteContext,
+    input: FrontCommunicationParticipantSearchInput,
   ) => Promise<SubmitAndPollResult>;
   searchClinicalBundle?: (
     ctx: FrontRouteContext,

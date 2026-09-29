@@ -83,7 +83,12 @@ If you need the shortest path:
   `new ProfileRuntime(...).loadProfile(...)`
 - first public actor entrypoints:
   `session.asHostOnboarding()`, `session.asOrganizationController()`,
-  `session.asIndividualController()`, `session.asProfessional()`
+  `session.asIndividualController()`, `session.asProfessional()`,
+  and `workspace.asDigitalTwin()` for a loaded professional research profile
+
+The 2.9 frontend line mirrors the browser-safe Node actor operations through
+an injected `FrontRuntimeClient`. UI code receives typed methods; authentication,
+KMS keys, DIDComm and direct GW transport remain in the BFF/runtime adapter.
 
 ## Frontend Runtime Modes
 

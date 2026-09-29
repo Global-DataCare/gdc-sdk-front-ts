@@ -1,11 +1,20 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
+import {
+  buildIndividualMemberIdentityVpPayload,
+  buildUnsignedIndividualMemberIdentityVpJwt,
+  getIndividualMemberIdentitySameAs,
+  getIndividualMemberIdentityVC,
+  type IndividualMemberCredentialInput,
+  type IndividualMemberVpPayloadInput,
+} from 'gdc-common-utils-ts';
+
 import type {
   ClinicalSummaryReadResult,
   ClinicalSummaryRequestInput,
   SubmitAndPollResult,
 } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontIndividualMemberLicenseTransitionInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontIndividualMemberLicenseTransitionInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput, type FrontSubjectSectionUpdateInput } from './client-port.js';
 
 export class IndividualMemberSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
@@ -54,6 +63,11 @@ export class IndividualMemberSdk {
     return requireClientMethod(this.client, 'updateClinicalSection')(ctx, input);
   }
 
+  /** Submits one authorized subject-owned section through the configured BFF. */
+  public updateSubjectSection(ctx: FrontRouteContext, input: FrontSubjectSectionUpdateInput): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'updateSubjectSection')(ctx, input);
+  }
+
   /** @deprecated Browser UI submits its Composition-first Bundle to its BFF. */
   public updateClinicalSummary(ctx: FrontRouteContext, input: FrontClinicalSummaryUpdateInput): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'updateClinicalSummary')(ctx, input);
@@ -78,5 +92,24 @@ export class IndividualMemberSdk {
   /** Reads the latest IPS permitted for this member and subject. */
   public getLatestIps(ctx: FrontRouteContext, subject: string): Promise<{ thid: string }> {
     return requireClientMethod(this.client, 'getLatestIps')(ctx, subject);
+  }
+
+  public getIdentitySameAs(input: IndividualMemberCredentialInput): string[] {
+    return getIndividualMemberIdentitySameAs(input);
+  }
+
+  public getIdentityVC(input: IndividualMemberCredentialInput): Record<string, unknown> {
+    return getIndividualMemberIdentityVC(input);
+  }
+
+  public buildIdentityVpPayload(input: IndividualMemberVpPayloadInput): Record<string, unknown> {
+    return buildIndividualMemberIdentityVpPayload(input);
+  }
+
+  public buildUnsignedIdentityVpJwt(
+    input: IndividualMemberVpPayloadInput,
+    options: Readonly<{ nowSeconds?: number; ttlSeconds?: number; nonce?: string }> = {},
+  ): string {
+    return buildUnsignedIndividualMemberIdentityVpJwt(input, options);
   }
 }

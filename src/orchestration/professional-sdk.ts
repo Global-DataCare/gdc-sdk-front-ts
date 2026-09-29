@@ -15,7 +15,27 @@ import type {
   SubmitAndPollResult,
   SubmitPayload,
 } from 'gdc-sdk-core-ts';
-import { requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import {
+  buildFrontProfessionalAccessRequestSearchInput,
+  requireClientMethod,
+  type FrontBlockchainArtifactRegistrationInput,
+  type FrontClinicalBundleSearchInput,
+  type FrontClinicalSectionUpdateInput,
+  type FrontClinicalSummaryUpdateInput,
+  type FrontCommunicationIngestionInput,
+  type FrontCommunicationParticipantSearchInput,
+  type FrontGrantProfessionalAccessInput,
+  type FrontGrantProfessionalAccessResult,
+  type FrontProfessionalAccessRequestInput,
+  type FrontProfessionalAccessRequestResult,
+  type FrontProfessionalAccessRequestSearchInput,
+  type FrontRouteContext,
+  type FrontRuntimeClient,
+  type FrontSmartTokenExchangeResult,
+  type FrontSmartTokenRequestInput,
+  type FrontSubjectSectionUpdateInput,
+  type FrontVitalSignBatchCommunicationInput,
+} from './client-port.js';
 
 export class ProfessionalSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
@@ -74,9 +94,31 @@ export class ProfessionalSdk {
     return requireClientMethod(this.client, 'ingestCommunicationAndUpdateIndex')(ctx, input);
   }
 
+  public requestProfessionalAccess(
+    ctx: FrontRouteContext,
+    input: FrontProfessionalAccessRequestInput,
+  ): Promise<FrontProfessionalAccessRequestResult> {
+    return requireClientMethod(this.client, 'requestProfessionalAccess')(ctx, input);
+  }
+
+  public listProfessionalAccessRequests(
+    ctx: FrontRouteContext,
+    input: FrontProfessionalAccessRequestSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'searchCommunicationParticipants')(
+      ctx,
+      buildFrontProfessionalAccessRequestSearchInput(input),
+    );
+  }
+
   /** @deprecated Browser UI submits its section command Bundle to its BFF. */
   public updateClinicalSection(ctx: FrontRouteContext, input: FrontClinicalSectionUpdateInput): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'updateClinicalSection')(ctx, input);
+  }
+
+  /** Submits one consent-authorized subject section through the configured BFF. */
+  public updateSubjectSection(ctx: FrontRouteContext, input: FrontSubjectSectionUpdateInput): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'updateSubjectSection')(ctx, input);
   }
 
   /** @deprecated Browser UI submits its Composition-first Bundle to its BFF. */
@@ -90,6 +132,30 @@ export class ProfessionalSdk {
     input: ClinicalSummaryRequestInput,
   ): Promise<ClinicalSummaryReadResult> {
     return requireClientMethod(this.client, 'requestClinicalSummary')(ctx, input);
+  }
+
+  /** Registers one resource or raw artifact before Communication attachment. */
+  public registerBlockchainArtifactAndUpdateIndex(
+    ctx: FrontRouteContext,
+    input: FrontBlockchainArtifactRegistrationInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'registerBlockchainArtifactAndUpdateIndex')(ctx, input);
+  }
+
+  /** Submits selected vital-sign results as one Communication batch. */
+  public submitVitalSignBatchCommunicationFromSearchResponse(
+    ctx: FrontRouteContext,
+    input: FrontVitalSignBatchCommunicationInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'submitVitalSignBatchCommunicationFromSearchResponse')(ctx, input);
+  }
+
+  /** Searches indexed Communications by governed participant filters. */
+  public searchCommunicationParticipants(
+    ctx: FrontRouteContext,
+    input: FrontCommunicationParticipantSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'searchCommunicationParticipants')(ctx, input);
   }
 
   public grantProfessionalAccess(

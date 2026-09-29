@@ -32,6 +32,7 @@ import { OrganizationControllerSdk } from './orchestration/organization-controll
 import { OrganizationEmployeeSdk } from './orchestration/organization-employee-sdk.js';
 import { PersonalSdk } from './orchestration/personal-sdk.js';
 import { ProfessionalSdk } from './orchestration/professional-sdk.js';
+import { DigitalTwinSdk } from './orchestration/digital-twin-sdk.js';
 import type { FrontRuntimeClient } from './orchestration/client-port.js';
 import type { Profile } from './types.js';
 
@@ -155,6 +156,15 @@ export class LoadedProfileWorkspace {
   public asProfessional(): ProfessionalSdk {
     requireActorKind(this.profile, ActorKinds.Professional);
     return new ProfessionalSdk(this.requireFacadeClient('ProfessionalSdk'));
+  }
+
+  /** Opens the research facade bound to the loaded professional profile DID. */
+  public asDigitalTwin(): DigitalTwinSdk {
+    requireActorKind(this.profile, ActorKinds.Professional);
+    return new DigitalTwinSdk(
+      this.requireFacadeClient('DigitalTwinSdk'),
+      this.profile.descriptor.profileDid,
+    );
   }
 
   private requireFacadeClient(name: string): FrontRuntimeClient {

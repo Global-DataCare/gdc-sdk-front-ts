@@ -7,6 +7,22 @@ All notable changes to this project will be documented in this file.
 - Add the repository-wide mandatory red-green-refactor contributor contract
   and mark existing frontend SDK suites with an explicit TDD contract header.
 
+## [2.9.0] - 2026-09-29
+
+- Align the frontend release line with Common, Core and Node 2.9 while keeping
+  one deduplicated `gdc-common-utils-ts@2.9.25` and
+  `gdc-sdk-core-ts@2.9.11` dependency graph.
+- Add browser/BFF actor-facade parity for organization lifecycle, individual
+  controller, professional-access, subject-section, artifact and communication
+  operations without importing Node-only transports or key custody.
+- Add the browser-safe digital-twin research facade and loaded-profile entry
+  point, with actor-bound SMART requests and adapter-owned network access.
+- Require an isolated tarball consumer gate that installs Common, Core, Node
+  and Front together without overrides, compiles their public types and checks
+  runtime exports before publication.
+- Verify the family against `gdc-sdk-node-ts@2.9.27`, whose public declarations
+  no longer depend on an unpublished SDK Core module path.
+
 ## [2.4.2] - 2026-09-29
 
 - Align the browser dependency chain with `gdc-common-utils-ts@2.9.25` and
