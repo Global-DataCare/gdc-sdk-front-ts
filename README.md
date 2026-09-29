@@ -739,6 +739,24 @@ Unknown codes return `undefined`, so the existing FHIR
 This package exports the full `gdc-sdk-core-ts` surface plus the frontend
 runtime modules below.
 
+Clinical forms can import the shared typed editors directly from this package;
+they do not need internal `gdc-common-utils-ts` paths:
+
+```ts
+import {
+  AllergyIntoleranceEntryEditor,
+  ImmunizationEntryEditor,
+  MedicationStatementEntryEditor,
+  ObservationEntryEditor,
+} from 'gdc-sdk-front-ts';
+```
+
+These expose the matching `get...` / `set...` pairs, including
+`getReactionSeverity` / `setReactionSeverity`,
+`getEffectivePeriodEnd` / `setEffectivePeriodEnd`, `getRoute` / `setRoute`,
+`getSite` / `setSite`, and
+`getReferenceRangeText` / `setReferenceRangeText`.
+
 - [`src/runtime-contracts.ts`](src/runtime-contracts.ts)
   - types/constants: `LegacyFrontSourcePackage`, `FrontRuntimeKind`, `FrontFetchLike`, `FrontRuntimeConfig`, `FrontPackageStatus`, `GDC_SDK_FRONT_STATUS`
 - [`src/actor-session.ts`](src/actor-session.ts)

@@ -1,6 +1,10 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
 export * from 'gdc-sdk-core-ts';
+export { AllergyIntoleranceEntryEditor } from 'gdc-common-utils-ts/utils/allergy-intolerance-entry-editor';
+export { ImmunizationEntryEditor } from 'gdc-common-utils-ts/utils/immunization-entry-editor';
+export { MedicationStatementEntryEditor } from 'gdc-common-utils-ts/utils/medication-statement-entry-editor';
+export { ObservationEntryEditor } from 'gdc-common-utils-ts/utils/observation-entry-editor';
 export * from './runtime-contracts.js';
 export * from './client-installation-id.js';
 export * from './portal-api-routes.js';
