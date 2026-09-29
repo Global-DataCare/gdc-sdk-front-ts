@@ -7,6 +7,15 @@ All notable changes to this project will be documented in this file.
 - Add the repository-wide mandatory red-green-refactor contributor contract
   and mark existing frontend SDK suites with an explicit TDD contract header.
 
+## [2.4.2] - 2026-09-29
+
+- Align the browser dependency chain with `gdc-common-utils-ts@2.9.25` and
+  `gdc-sdk-core-ts@2.9.11`, preventing npm from installing incompatible copies
+  of the shared clinical contracts.
+- Export the typed allergy, medication, immunization and observation editors
+  from the frontend package root, including reaction severity, treatment end,
+  route, site and reference-range getters and setters.
+
 ## [2.4.1] - 2026-09-02
 
 - Require lockfile-authoritative npm ci, effective internal dependency

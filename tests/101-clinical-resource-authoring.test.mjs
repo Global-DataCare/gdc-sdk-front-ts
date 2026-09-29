@@ -1,5 +1,5 @@
+// Flow contract: reuse shared test fixtures and canonical types; do not introduce duplicated literals.
 // TDD contract: write this test red first; make it green only with the complete real behavior.
-// Flow contract:
 // 1. The browser builds one section-scoped FHIR batch through typed editors.
 // 2. One entry creates a fact while another deletes an exact ResourceType/id.
 // 3. DELETE has no body and may bind the current version independently.
@@ -8,10 +8,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  AllergyIntoleranceEntryEditor,
   BundleEditor,
   BundleEditableResourceTypes,
   BundleTypes,
   HttpRequestMethods,
+  ImmunizationEntryEditor,
+  MedicationStatementEntryEditor,
+  ObservationEntryEditor,
   toClinicalResourceCardView,
   toClinicalSectionViews,
 } from '../dist/index.js';
@@ -34,6 +38,16 @@ test('frontend SDK exposes mixed POST and DELETE clinical batch entries', () => 
 
 test('frontend SDK exposes the canonical coded clinical authoring/display surface', () => {
   assert.equal(typeof BundleEditor, 'function');
+  assert.equal(typeof AllergyIntoleranceEntryEditor.prototype.setReactionSeverity, 'function');
+  assert.equal(typeof AllergyIntoleranceEntryEditor.prototype.getReactionSeverity, 'function');
+  assert.equal(typeof MedicationStatementEntryEditor.prototype.setEffectivePeriodEnd, 'function');
+  assert.equal(typeof MedicationStatementEntryEditor.prototype.getEffectivePeriodEnd, 'function');
+  assert.equal(typeof ImmunizationEntryEditor.prototype.setRoute, 'function');
+  assert.equal(typeof ImmunizationEntryEditor.prototype.getRoute, 'function');
+  assert.equal(typeof ImmunizationEntryEditor.prototype.setSite, 'function');
+  assert.equal(typeof ImmunizationEntryEditor.prototype.getSite, 'function');
+  assert.equal(typeof ObservationEntryEditor.prototype.setReferenceRangeText, 'function');
+  assert.equal(typeof ObservationEntryEditor.prototype.getReferenceRangeText, 'function');
   assert.equal(typeof toClinicalResourceCardView, 'function');
   assert.equal(typeof toClinicalSectionViews, 'function');
 });
