@@ -7,16 +7,54 @@ import type {
   SubmitAndPollResult,
   SubmitPayload,
 } from 'gdc-sdk-core-ts';
-import { buildFrontProfessionalAccessRequestDecisionGrant, requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontProfessionalAccessRequestDecisionInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import {
+  buildFrontProfessionalAccessRequestDecisionGrant,
+  buildFrontProfessionalAccessRequestSearchInput,
+  requireClientMethod,
+  type FrontBlockchainArtifactRegistrationInput,
+  type FrontClinicalBundleSearchInput,
+  type FrontClinicalSectionUpdateInput,
+  type FrontClinicalSummaryUpdateInput,
+  type FrontCommunicationIngestionInput,
+  type FrontCommunicationParticipantSearchInput,
+  type FrontDigitalTwinGenerationInput,
+  type FrontGrantProfessionalAccessInput,
+  type FrontGrantProfessionalAccessResult,
+  type FrontIndividualOrganizationBootstrapInput,
+  type FrontIndividualOrganizationRegistrationInput,
+  type FrontIndividualOrganizationRegistrationResult,
+  type FrontIndividualOrganizationStartResult,
+  type FrontIpsOrFhirImportInput,
+  type FrontLicenseListSearchInput,
+  type FrontLicenseOfferSearchInput,
+  type FrontLicenseOrderSearchInput,
+  type FrontProfessionalAccessRequestDecisionInput,
+  type FrontProfessionalAccessRequestSearchInput,
+  type FrontRouteContext,
+  type FrontRuntimeClient,
+  type FrontSmartTokenExchangeResult,
+  type FrontSmartTokenRequestInput,
+  type FrontSubjectSectionUpdateInput,
+} from './client-port.js';
 
 export class PersonalSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
+
+  public registerIndividualOrganization(
+    ctx: FrontRouteContext,
+    input: FrontIndividualOrganizationRegistrationInput,
+  ): Promise<FrontIndividualOrganizationRegistrationResult> {
+    if (this.client.registerIndividualOrganization) {
+      return requireClientMethod(this.client, 'registerIndividualOrganization')(ctx, input);
+    }
+    return requireClientMethod(this.client, 'startIndividualOrganization')(ctx, input);
+  }
 
   public startIndividualOrganization(
     ctx: FrontRouteContext,
     input: FrontIndividualOrganizationBootstrapInput,
   ): Promise<FrontIndividualOrganizationStartResult> {
-    return requireClientMethod(this.client, 'startIndividualOrganization')(ctx, input);
+    return this.registerIndividualOrganization(ctx, input);
   }
 
   public grantProfessionalAccess(
@@ -34,6 +72,16 @@ export class PersonalSdk {
     return requireClientMethod(this.client, 'grantProfessionalAccess')(
       ctx,
       buildFrontProfessionalAccessRequestDecisionGrant(input),
+    );
+  }
+
+  public listProfessionalAccessRequests(
+    ctx: FrontRouteContext,
+    input: FrontProfessionalAccessRequestSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'searchCommunicationParticipants')(
+      ctx,
+      buildFrontProfessionalAccessRequestSearchInput(input),
     );
   }
 
@@ -58,6 +106,13 @@ export class PersonalSdk {
     return requireClientMethod(this.client, 'updateClinicalSection')(ctx, input);
   }
 
+  public updateSubjectSection(
+    ctx: FrontRouteContext,
+    input: FrontSubjectSectionUpdateInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'updateSubjectSection')(ctx, input);
+  }
+
   /** @deprecated Browser UI submits its Composition-first Bundle to its BFF. */
   public updateClinicalSummary(ctx: FrontRouteContext, input: FrontClinicalSummaryUpdateInput): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'updateClinicalSummary')(ctx, input);
@@ -69,6 +124,20 @@ export class PersonalSdk {
     input: ClinicalSummaryRequestInput,
   ): Promise<ClinicalSummaryReadResult> {
     return requireClientMethod(this.client, 'requestClinicalSummary')(ctx, input);
+  }
+
+  public registerBlockchainArtifactAndUpdateIndex(
+    ctx: FrontRouteContext,
+    input: FrontBlockchainArtifactRegistrationInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'registerBlockchainArtifactAndUpdateIndex')(ctx, input);
+  }
+
+  public searchCommunicationParticipants(
+    ctx: FrontRouteContext,
+    input: FrontCommunicationParticipantSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'searchCommunicationParticipants')(ctx, input);
   }
 
   public generateDigitalTwinFromSubjectData(

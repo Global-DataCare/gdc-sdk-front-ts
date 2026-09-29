@@ -1,21 +1,105 @@
 // Copyright 2026 Antifraud Services Inc. under the Apache License, Version 2.0.
 
+import {
+  buildIndividualControllerIdentityVpPayload,
+  buildUnsignedIndividualControllerIdentityVpJwt,
+  getIndividualControllerIdentitySameAs,
+  getIndividualControllerIdentityVC,
+  getIndividualSubjectVC,
+  type IndividualControllerCredentialInput,
+  type IndividualControllerVpPayloadInput,
+  type IndividualSubjectCredentialInput,
+} from 'gdc-common-utils-ts';
+
 import type {
   ClinicalSummaryReadResult,
   ClinicalSummaryRequestInput,
   PollOptions,
   SubmitAndPollResult,
+  SubmitPayload,
 } from 'gdc-sdk-core-ts';
-import { buildFrontProfessionalAccessRequestDecisionGrant, requireClientMethod, type FrontClinicalBundleSearchInput, type FrontClinicalSectionUpdateInput, type FrontClinicalSummaryUpdateInput, type FrontCommunicationIngestionInput, type FrontDigitalTwinGenerationInput, type FrontGrantProfessionalAccessInput, type FrontGrantProfessionalAccessResult, type FrontIndividualMemberLifecycleInput, type FrontIndividualMemberLicenseAddInput, type FrontIndividualMemberLicenseInvitationInput, type FrontIndividualMemberLicenseTransitionInput, type FrontIndividualOnboardingPdfDraftInput, type FrontIndividualOnboardingPdfDraftResult, type FrontIndividualOrganizationBootstrapInput, type FrontIndividualOrganizationConfirmOrderInput, type FrontIndividualOrganizationLifecycleInput, type FrontIndividualOrganizationStartResult, type FrontIpsOrFhirImportInput, type FrontLicenseListSearchInput, type FrontLicenseOfferSearchInput, type FrontLicenseOrderSearchInput, type FrontProfessionalAccessRequestDecisionInput, type FrontRelatedPersonUpsertInput, type FrontRouteContext, type FrontRuntimeClient, type FrontSmartTokenExchangeResult, type FrontSmartTokenRequestInput } from './client-port.js';
+import {
+  buildFrontProfessionalAccessRequestDecisionGrant,
+  buildFrontProfessionalAccessRequestSearchInput,
+  requireClientMethod,
+  type FrontBlockchainArtifactRegistrationInput,
+  type FrontClinicalBundleSearchInput,
+  type FrontClinicalSectionUpdateInput,
+  type FrontClinicalSummaryUpdateInput,
+  type FrontCommunicationIngestionInput,
+  type FrontCommunicationParticipantSearchInput,
+  type FrontDigitalTwinGenerationInput,
+  type FrontDigitalTwinSecondaryUseConsentInput,
+  type FrontDigitalTwinSubjectLinkPurgeInput,
+  type FrontEnsureFamilyOrganizationRegistrationInput,
+  type FrontEnsureFamilyOrganizationRegistrationResult,
+  type FrontFamilyOrganizationSearchInput,
+  type FrontGrantProfessionalAccessInput,
+  type FrontGrantProfessionalAccessResult,
+  type FrontIndividualMemberLifecycleInput,
+  type FrontIndividualMemberLicenseAddInput,
+  type FrontIndividualMemberLicenseInvitationInput,
+  type FrontIndividualMemberLicenseTransitionInput,
+  type FrontIndividualOnboardingPdfDraftInput,
+  type FrontIndividualOnboardingPdfDraftResult,
+  type FrontIndividualOrganizationBootstrapInput,
+  type FrontIndividualOrganizationConfirmOrderInput,
+  type FrontIndividualOrganizationLifecycleInput,
+  type FrontIndividualOrganizationRegistrationInput,
+  type FrontIndividualOrganizationRegistrationResult,
+  type FrontIndividualOrganizationStartResult,
+  type FrontIpsOrFhirImportInput,
+  type FrontLicenseListSearchInput,
+  type FrontLicenseOfferSearchInput,
+  type FrontLicenseOrderSearchInput,
+  type FrontProfessionalAccessRequestDecisionInput,
+  type FrontProfessionalAccessRequestSearchInput,
+  type FrontRelatedPersonUpsertInput,
+  type FrontRevokeProfessionalAccessInput,
+  type FrontRevokeProfessionalAccessResult,
+  type FrontRouteContext,
+  type FrontRuntimeClient,
+  type FrontSmartTokenExchangeResult,
+  type FrontSmartTokenRequestInput,
+  type FrontSubjectSectionUpdateInput,
+  type FrontVitalSignBatchCommunicationInput,
+} from './client-port.js';
+import type { FamilyOrganizationSummary } from 'gdc-common-utils-ts/utils/family-organization-summary';
 
 export class IndividualControllerSdk {
   constructor(private readonly client: FrontRuntimeClient) {}
+
+  public registerIndividualOrganization(
+    ctx: FrontRouteContext,
+    input: FrontIndividualOrganizationRegistrationInput,
+  ): Promise<FrontIndividualOrganizationRegistrationResult> {
+    if (this.client.registerIndividualOrganization) {
+      return requireClientMethod(this.client, 'registerIndividualOrganization')(ctx, input);
+    }
+    return requireClientMethod(this.client, 'startIndividualOrganization')(ctx, input);
+  }
 
   public startIndividualOrganization(
     ctx: FrontRouteContext,
     input: FrontIndividualOrganizationBootstrapInput,
   ): Promise<FrontIndividualOrganizationStartResult> {
-    return requireClientMethod(this.client, 'startIndividualOrganization')(ctx, input);
+    return this.registerIndividualOrganization(ctx, input);
+  }
+
+  /** Legacy phone-first lookup retained for existing channel applications. */
+  public searchFamilyOrganization(
+    ctx: FrontRouteContext,
+    input: FrontFamilyOrganizationSearchInput,
+  ): Promise<FamilyOrganizationSummary | null> {
+    return requireClientMethod(this.client, 'searchFamilyOrganization')(ctx, input);
+  }
+
+  /** Legacy phone-first bootstrap retained for existing channel applications. */
+  public ensureFamilyOrganizationRegistration(
+    ctx: FrontRouteContext,
+    input: FrontEnsureFamilyOrganizationRegistrationInput,
+  ): Promise<FrontEnsureFamilyOrganizationRegistrationResult> {
+    return requireClientMethod(this.client, 'ensureFamilyOrganizationRegistration')(ctx, input);
   }
 
   public prepareIndividualOnboardingPdfDraft(
@@ -40,12 +124,30 @@ export class IndividualControllerSdk {
     return requireClientMethod(this.client, 'disableIndividual')(ctx, input, pollOptions);
   }
 
+  /** Explicit lifecycle name matching the hosted individual organization. */
+  public disableIndividualOrganization(
+    ctx: FrontRouteContext,
+    input: FrontIndividualOrganizationLifecycleInput,
+    pollOptions?: PollOptions,
+  ): Promise<SubmitAndPollResult> {
+    return this.disableIndividual(ctx, input, pollOptions);
+  }
+
   public purgeIndividual(
     ctx: FrontRouteContext,
     input: FrontIndividualOrganizationLifecycleInput,
     pollOptions?: PollOptions,
   ): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'purgeIndividual')(ctx, input, pollOptions);
+  }
+
+  /** Explicit lifecycle name matching the hosted individual organization. */
+  public purgeIndividualOrganization(
+    ctx: FrontRouteContext,
+    input: FrontIndividualOrganizationLifecycleInput,
+    pollOptions?: PollOptions,
+  ): Promise<SubmitAndPollResult> {
+    return this.purgeIndividual(ctx, input, pollOptions);
   }
 
   public disableIndividualMember(
@@ -80,6 +182,23 @@ export class IndividualControllerSdk {
       ctx,
       buildFrontProfessionalAccessRequestDecisionGrant(input),
     );
+  }
+
+  public listProfessionalAccessRequests(
+    ctx: FrontRouteContext,
+    input: FrontProfessionalAccessRequestSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'searchCommunicationParticipants')(
+      ctx,
+      buildFrontProfessionalAccessRequestSearchInput(input),
+    );
+  }
+
+  public revokeProfessionalAccess(
+    ctx: FrontRouteContext,
+    input: FrontRevokeProfessionalAccessInput,
+  ): Promise<FrontRevokeProfessionalAccessResult> {
+    return requireClientMethod(this.client, 'revokeProfessionalAccess')(ctx, input);
   }
 
   /** @deprecated Browser UI submits the IPS Bundle to its authenticated BFF. */
@@ -121,6 +240,11 @@ export class IndividualControllerSdk {
     return requireClientMethod(this.client, 'updateClinicalSection')(ctx, input);
   }
 
+  /** Submits one typed subject-owned section through the configured BFF. */
+  public updateSubjectSection(ctx: FrontRouteContext, input: FrontSubjectSectionUpdateInput): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'updateSubjectSection')(ctx, input);
+  }
+
   /** @deprecated Browser UI submits its Composition-first Bundle to its BFF. */
   public updateClinicalSummary(ctx: FrontRouteContext, input: FrontClinicalSummaryUpdateInput): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'updateClinicalSummary')(ctx, input);
@@ -134,11 +258,60 @@ export class IndividualControllerSdk {
     return requireClientMethod(this.client, 'requestClinicalSummary')(ctx, input);
   }
 
+  /** Registers one resource or raw artifact before Communication attachment. */
+  public registerBlockchainArtifactAndUpdateIndex(
+    ctx: FrontRouteContext,
+    input: FrontBlockchainArtifactRegistrationInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'registerBlockchainArtifactAndUpdateIndex')(ctx, input);
+  }
+
+  /** Submits selected vital-sign results as one Communication batch. */
+  public submitVitalSignBatchCommunicationFromSearchResponse(
+    ctx: FrontRouteContext,
+    input: FrontVitalSignBatchCommunicationInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'submitVitalSignBatchCommunicationFromSearchResponse')(ctx, input);
+  }
+
+  /** Searches indexed Communications by their governed participant filters. */
+  public searchCommunicationParticipants(
+    ctx: FrontRouteContext,
+    input: FrontCommunicationParticipantSearchInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'searchCommunicationParticipants')(ctx, input);
+  }
+
   public generateDigitalTwinFromSubjectData(
     ctx: FrontRouteContext,
     input: FrontDigitalTwinGenerationInput,
   ): Promise<SubmitAndPollResult> {
     return requireClientMethod(this.client, 'generateDigitalTwinFromSubjectData')(ctx, input);
+  }
+
+  public setDigitalTwinSecondaryUseConsent(
+    ctx: FrontRouteContext,
+    input: FrontDigitalTwinSecondaryUseConsentInput,
+  ): Promise<FrontGrantProfessionalAccessResult> {
+    return requireClientMethod(this.client, 'setDigitalTwinSecondaryUseConsent')(ctx, input);
+  }
+
+  public purgeDigitalTwinSubjectLink(
+    ctx: FrontRouteContext,
+    input: FrontDigitalTwinSubjectLinkPurgeInput,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'purgeDigitalTwinSubjectLink')(ctx, input);
+  }
+
+  public getDigitalTwinSecondaryUseConsentStatus(
+    ctx: FrontRouteContext,
+    input: Readonly<{
+      subjectDid: string;
+      indexProviderOrganizationDid: string;
+      researchUseReference: string;
+    }>,
+  ): Promise<Readonly<{ exists: boolean; enabled: boolean }>> {
+    return requireClientMethod(this.client, 'getDigitalTwinSecondaryUseConsentStatus')(ctx, input);
   }
 
   public searchClinicalBundle(
@@ -229,5 +402,37 @@ export class IndividualControllerSdk {
 
   public requestSmartToken(input: FrontSmartTokenRequestInput): Promise<FrontSmartTokenExchangeResult> {
     return requireClientMethod(this.client, 'requestSmartToken')(input);
+  }
+
+  public getIdentitySameAs(input: IndividualControllerCredentialInput): string[] {
+    return getIndividualControllerIdentitySameAs(input);
+  }
+
+  public getIdentityVC(input: IndividualControllerCredentialInput): Record<string, unknown> {
+    return getIndividualControllerIdentityVC(input);
+  }
+
+  public getSubjectVC(input: IndividualSubjectCredentialInput): Record<string, unknown> {
+    return getIndividualSubjectVC(input);
+  }
+
+  public buildIdentityVpPayload(input: IndividualControllerVpPayloadInput): Record<string, unknown> {
+    return buildIndividualControllerIdentityVpPayload(input);
+  }
+
+  public buildUnsignedIdentityVpJwt(
+    input: IndividualControllerVpPayloadInput,
+    options: Readonly<{ nowSeconds?: number; ttlSeconds?: number; nonce?: string }> = {},
+  ): string {
+    return buildUnsignedIndividualControllerIdentityVpJwt(input, options);
+  }
+
+  public submitAndPoll(
+    submitPath: string,
+    pollPath: string,
+    payload: SubmitPayload,
+    pollOptions?: PollOptions,
+  ): Promise<SubmitAndPollResult> {
+    return requireClientMethod(this.client, 'submitAndPoll')(submitPath, pollPath, payload, pollOptions);
   }
 }
