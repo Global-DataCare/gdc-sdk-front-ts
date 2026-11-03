@@ -10,3 +10,7 @@ modified test suite with a flow-contract comment. Begin every Playwright or
 other E2E file with the complete numbered journey and its authorization and
 persistence invariants. Mocks may isolate units but never replace real boundary
 proof. Never make a test green by accepting an incomplete terminal state.
+
+All Node/npm gates follow the repository
+[`preserve-workspace-node-runtime` skill](.codex/skills/preserve-workspace-node-runtime/SKILL.md),
+which is compatible with the canonical workspace Node.js 26.13.0 contract.
