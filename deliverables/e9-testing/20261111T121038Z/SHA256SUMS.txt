@@ -1,0 +1,12 @@
+3a47a00750950661c34ddc2a9ef08c07ef22db96f9539b51533b7ed9a9247c4d  README.md
+a25dd3c443f0a498fe3460a0d235d8e5e349060e646a601ec72c6f8ebcf7f1d2  checks/gdc-sdk-front-ts-01-install.json
+31fbbfb028d68472f0ca652087937cebbf23fa970f60b0b0acac6fb86273faa6  checks/gdc-sdk-front-ts-01-install.log
+96d075124013ca11b62e9113829ace6776f28272dd857202f98ff6bfc4ebb367  checks/gdc-sdk-front-ts-03-typecheck.json
+c6c3ea8b4bdd4050dff3b3cd674efcf5af3bff0a5b36bfe4a97a5c58fbbb4a1f  checks/gdc-sdk-front-ts-03-typecheck.log
+97eb413ac41e43564b027247f645cf97105b105d619e5cb13c028b474ffc649c  checks/gdc-sdk-front-ts-04-package-chain.json
+a4089df15fdfd8139da5d3fd375598ee5c0c520c7e1becda57e6d050d8780d51  checks/gdc-sdk-front-ts-04-package-chain.log
+6ba3d658eaab6d0dd375f82ce5f63e8b73230e3a5cea544ee297f22d4a8c23b7  checks/gdc-sdk-front-ts-final-dependencies.json
+c46db66a93fbb2f5a5322d65a6fdb8e28c7d2be9f63b7471dcb59e5bf8856658  checks/gdc-sdk-front-ts-final-dependencies.log
+21a88dd4c0f7535750f4d413293cc2d545a22ffe550ab7eaca2b05831a5f145f  logs/sdk-front.log
+416b3890c5d5777daec23550c08928776710675fda99fbc51d81087204f37be9  manifest.json
+2b5a64dc766ec519915ca578b20f6bc80a795a23954bf994379314a7a0dd8bf4  provenance/sdk-front.json

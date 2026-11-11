@@ -826,3 +826,7 @@ The runtime-facing meaning of these exports is:
 - README should explain app flows first.
 - Shared contract definitions should stay in `gdc-sdk-core-ts`.
 - Frontend consumers should not need product runtime knowledge to understand this package.
+
+## Entregable E9 — pruebas unitarias y testeo
+
+La [validación local completa del 11 de noviembre](deliverables/e9-testing/20261111T121038Z/README.md) contiene la matriz superada y sus registros.

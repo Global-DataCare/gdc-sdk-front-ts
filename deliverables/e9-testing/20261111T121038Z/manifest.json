@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "gdc.e9.testing/v1",
+  "expediente": "E9-20261111T121038Z",
+  "scope": "component subset",
+  "status": "SUPERADO_COMPONENTE",
+  "executionDate": "2026-11-11",
+  "platform": "macOS (Darwin)",
+  "node": "v26.13.0",
+  "npm": "11.20.0",
+  "sources": {
+    "gdc-sdk-front-ts": {
+      "repository": "gdc-sdk-front-ts",
+      "version": "2.9.0",
+      "commit": "7fe121d21490be5d8cd882cfcac6bc4435868863"
+    }
+  },
+  "suites": [
+    {
+      "id": "sdk-front",
+      "source": {
+        "repository": "gdc-sdk-front-ts",
+        "version": "2.9.0",
+        "commit": "7fe121d21490be5d8cd882cfcac6bc4435868863"
+      },
+      "node": "v26.13.0",
+      "npm": "11.20.0",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-11T12:19:58.054626+00:00",
+      "finishedAt": "2026-11-11T12:20:05.078919+00:00",
+      "elapsedSeconds": 6.722,
+      "tests": {
+        "total": 69,
+        "passed": 69,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "pending": 0
+      },
+      "log": {
+        "path": "logs/sdk-front.log",
+        "originalSha256": "21a88dd4c0f7535750f4d413293cc2d545a22ffe550ab7eaca2b05831a5f145f",
+        "sha256": "21a88dd4c0f7535750f4d413293cc2d545a22ffe550ab7eaca2b05831a5f145f"
+      },
+      "provenance": "provenance/sdk-front.json"
+    }
+  ],
+  "checks": [
+    {
+      "repository": "gdc-sdk-front-ts",
+      "label": "01-install",
+      "exitCode": 0,
+      "log": {
+        "path": "checks/gdc-sdk-front-ts-01-install.log",
+        "sha256": "31fbbfb028d68472f0ca652087937cebbf23fa970f60b0b0acac6fb86273faa6"
+      }
+    },
+    {
+      "repository": "gdc-sdk-front-ts",
+      "label": "03-typecheck",
+      "exitCode": 0,
+      "log": {
+        "path": "checks/gdc-sdk-front-ts-03-typecheck.log",
+        "sha256": "c6c3ea8b4bdd4050dff3b3cd674efcf5af3bff0a5b36bfe4a97a5c58fbbb4a1f"
+      }
+    },
+    {
+      "repository": "gdc-sdk-front-ts",
+      "label": "04-package-chain",
+      "exitCode": 0,
+      "log": {
+        "path": "checks/gdc-sdk-front-ts-04-package-chain.log",
+        "sha256": "a4089df15fdfd8139da5d3fd375598ee5c0c520c7e1becda57e6d050d8780d51"
+      }
+    },
+    {
+      "repository": "gdc-sdk-front-ts",
+      "label": "final-dependencies",
+      "exitCode": 0,
+      "log": {
+        "path": "checks/gdc-sdk-front-ts-final-dependencies.log",
+        "sha256": "c46db66a93fbb2f5a5322d65a6fdb8e28c7d2be9f63b7471dcb59e5bf8856658"
+      }
+    }
+  ],
+  "privateInputSha256": {},
+  "sanitization": [
+    "local workspace and home paths normalized",
+    "private signed PDF paths replaced by content hashes",
+    "private organization identifiers replaced by hashes",
+    "compact local tokens and private PEMs redacted if present",
+    "test names, outcomes, counters and commands otherwise preserved",
+    "console line endings normalized to LF"
+  ],
+  "publication": {
+    "gitBranch": "main",
+    "npmPublish": "not performed",
+    "imagesOrDeployment": "not performed"
+  }
+}
